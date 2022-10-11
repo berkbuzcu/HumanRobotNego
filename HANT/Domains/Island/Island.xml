@@ -1,0 +1,22 @@
+<negotiation_domain>
+	<utility_space domain_type = "Resource Allocation" number_of_issues="8">
+
+		<issue index="1" name="medicine" max_count="1">
+		</issue>
+		<issue index="2" name="food" max_count="1">
+		</issue>
+		<issue index="3" name="compass" max_count="1">
+		</issue>
+		<issue index="4" name="hammer" max_count="1">
+		</issue>
+		<issue index="5" name="knife" max_count="1">
+		</issue>
+		<issue index="6" name="container" max_count="1">
+		</issue>
+		<issue index="7" name="rope" max_count="1">
+		</issue>
+		<issue index="8" name="match" max_count="1">
+		</issue>
+
+	</utility_space>
+</negotiation_domain>

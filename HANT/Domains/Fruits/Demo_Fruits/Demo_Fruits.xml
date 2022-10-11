@@ -1,0 +1,14 @@
+<negotiation_domain>
+	<utility_space domain_name = "demo_fruits" domain_type = "Resource Allocation" number_of_issues="4">
+
+		<issue index="1" name="watermelon" max_count="4">
+		</issue>
+		<issue index="2" name="banana" max_count="4">
+		</issue>
+		<issue index="3" name="orange" max_count="4">
+		</issue>
+		<issue index="4" name="apple" max_count="4">
+		</issue>
+
+	</utility_space>
+</negotiation_domain>

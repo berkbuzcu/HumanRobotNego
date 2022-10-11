@@ -1,0 +1,23 @@
+<utility_space number_of_issues="3">
+
+	<issue index="1" name="apple">
+		<item index="1" value="0" evaluation="0"></item>
+		<item index="2" value="1" evaluation="1"></item>
+	</issue>
+	<issue index="2" name="orange">
+		<item index="1" value="0" evaluation="0"></item>
+		<item index="2" value="1" evaluation="1"></item>
+	</issue>
+	<issue index="3" name="banana">
+		<item index="1" value="0" evaluation="0"></item>
+		<item index="2" value="1" evaluation="1"></item>
+	</issue>
+
+	<weight index="1" value="0.25">
+	</weight>
+	<weight index="2" value="0.42">
+	</weight>
+	<weight index="3" value="0.33">
+	</weight>
+
+</utility_space>
