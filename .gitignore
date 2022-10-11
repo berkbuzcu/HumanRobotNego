@@ -1,0 +1,27 @@
+*.wav
+*.pyc
+speech_v1p1beta1
+
+# Ignore session logs and checkpoint.
+FaceChannel/sessions
+EmotionCapturing/FaceChannel/CLModel/checkpoint/*
+
+# Ignore logs.
+*Logs/
+
+# Ignore .idea and env .json
+*.idea
+.vscode/
+.venv/
+
+sessions/
+
+speech.json
+studied-brace-312613-cb1e95b0f294.json
+spry-water-357912-42ef44b257e5.json
+
+*pynaoqi-python2.7-2.5.7.1-linux64*
+
+solver_logs*
+
+HANT/Domains/
