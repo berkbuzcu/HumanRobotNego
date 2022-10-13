@@ -78,43 +78,18 @@ class SpeechStreamingRecognizerBeta:
         self.finished = False
 
     def listen_print_loop(self, responses):
-        """Iterates through server responses and prints them.
-
-        The responses passed is a generator that will block until a response
-        is provided by the server.
-
-        Each response may contain multiple results, and each result may contain
-        multiple alternatives.  Here we
-        print only the transcription for the top alternative of the top result.
-
-        In this case, responses are provided for interim results as well. If the
-        response is an interim one, print a line feed at the end of it, to allow
-        the next result to overwrite it, until the response is a final one. For the
-        final one, print a newline to preserve the finalized transcription.
-        """
         num_chars_printed = 0
         for response in responses:
             if not response.results:
                 continue
 
-            # The `results` list is consecutive. For streaming, we only care about
-            # the first result being considered, since once it's `is_final`, it
-            # moves on to considering the next utterance.
             result = response.results[0]
             if not result.alternatives:
                 continue
 
             # Display the transcription of the top alternative.
             transcript = result.alternatives[0].transcript
-            transcript = transcript.replace("for", "four")
-            transcript = transcript.replace("For", "four")
-            transcript = transcript.replace("tree", "three")
 
-            # Display interim results, but with a carriage return at the end of the
-            # line, so subsequent lines will overwrite them.
-            #
-            # If the previous result was longer than this one, we need to print
-            # some extra spaces to overwrite the previous result
             overwrite_chars = " " * (num_chars_printed - len(transcript))
 
             if not result.is_final:
@@ -127,11 +102,8 @@ class SpeechStreamingRecognizerBeta:
                 return transcript + overwrite_chars
 
     def set_stream_config(self):
-        # See http://g.co/cloud/speech/docs/languages
-        # for a list of supported languages.
-        language_code = "en-US"  # a BCP-47 language tag
-
-        # Prepare context for domain keywords and numbers.
+        language_code = "en-US"
+        
         list_of_numbers = ["one", "two", "three", "four", "zero", "Four", "Zero", "Two", "Three"]
         domain_contexts_element = {"phrases": self.domain_keywords + list_of_numbers + ["boat"], "boost": 5.0} # , "boost": 45.0
 

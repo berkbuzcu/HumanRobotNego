@@ -25,6 +25,7 @@ class SpeechController:
         user_input = (
             self.recognizer.listen_and_convert_to_text()
         )
+        
         # If there is no timeout.
         if str(user_input) != "timeouterror":
             total_user_input += str(user_input).strip() + " "

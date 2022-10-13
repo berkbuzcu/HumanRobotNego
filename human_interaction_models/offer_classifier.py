@@ -58,6 +58,11 @@ class OfferClassifier:
 
 	def preprocess_input(self, input):
 		input = input.lower()
+
+		input = input.replace("for", "four")
+		input = input.replace("For", "four")
+		input = input.replace("tree", "three")
+
 		# Fix would like to 'verb' part in input.
 		for offer_verb in ["have", "take", "get", "want", "like"]:
 			# TODO FIX REGEX DUDE.
