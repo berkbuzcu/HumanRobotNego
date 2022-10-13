@@ -3,7 +3,7 @@ from robot_action import RobotAction
 
 class RobotMobileAction(RobotAction):
     def init_robot(self):
-        self.folder_path = "naobehaviorsprojectfolder-choregraphe-28-d4aa29/"
+        self.folder_path = "untitled-2616da/ExperimentVersion - NaoBehaviorsProjectFolder-Choregraphe-2.8/"
         super(RobotMobileAction, self).init_robot(self.folder_path)
 
     def greet(self):

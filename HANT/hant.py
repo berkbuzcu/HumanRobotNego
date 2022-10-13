@@ -195,7 +195,7 @@ class HANT:
         self.negotiation_gui.update_agent_message(agent_sentence)
 
     def update_nego_history(self):
-        self.nego_history.set_sensitivity_predictions(self.agent.sensitivity_class_list)
+        self.nego_history.set_sensitivity_predictions(self.agent.sensitivity_class_list) # TODO: Remove sensitivity class list
         self.nego_history.set_sentences(self.human_interaction_controller.human_sentences)
         offer_df_list = self.nego_history.extract_history_to_df()
         self.logger.log_offer_history(self.session_number, offer_df_list)
@@ -284,7 +284,9 @@ class HANT:
                 self.update_grid_by_offer(human_action.get_bid("Human"), "blue")
                 self.negotiation_gui.update_human_message(total_user_input)
                 self.negotiation_gui.update_offer_utility(
-                    str(int(self.human_utility_space.get_offer_utility(human_action) * 100)))
+                    str(int(self.human_utility_space.get_offer_utility(human_action.get_bid("Human")) * 100)))
+
+                print("HUMAN OFFER UTILITY: ", str(int(self.human_utility_space.get_offer_utility(human_action.get_bid("Human")) * 100)))
 
                 if offer_done:
                     break

@@ -111,6 +111,11 @@ class NegotiationHistory:
                 offer_df_list.append(df1)
             # If bidder is human.
             else:
+                sensitivity_prediction = ""
+                
+                if self.sensitivity_predictions != []:
+                    sensitivity_prediction = self.sensitivity_predictions[offer_index // 2]
+
                 d1 = {
                     "Bidder": offer_hist[0],
                     "Agent Utility": offer_hist[2],
@@ -125,7 +130,7 @@ class NegotiationHistory:
                     "Max A": offer_hist[9],
                     "Min A": offer_hist[10],
                     "Arousal": offer_hist[11],
-                    "Sensitivity Class": self.sensitivity_predictions[offer_index // 2],
+                    "Sensitivity Class": sensitivity_prediction,
                     "Sentences": self.sentences[offer_index // 2],
                 }
                 df1 = pd.DataFrame(data=d1, index=[offer_index])

@@ -119,7 +119,7 @@ class OfferClassifier:
 			if word.lower() in ["a", "an"]:
 				tagged_words_list[word_index][0] = "1"
 				tagged_words_list[word_index][1] = "NUM"
-			if word.lower() in ["one", "two", "three", "four"]:
+			if word.lower() in ["zero", "one", "two", "three", "four"]:
 				if word.lower() == "zero":
 					tagged_words_list[word_index][0] = "0"
 					tagged_words_list[word_index][1] = "NUM"
@@ -247,8 +247,6 @@ class OfferClassifier:
 					else:
 						try:
 							if len(keyword_match) > 0 and (sentence[index-1][1] == 'NUM' and sentence[index-1][0] in ['0', '1', '2', '3', '4']):
-								print("im here: ", keyword_match[0], int(sentence[index-1][0]))
-								print(self.human_utility_space.issue_max_counts)
 								self.OFFER_SENTENCES[keyword_match[0]] = int(sentence[index-1][0])
 
 						except:

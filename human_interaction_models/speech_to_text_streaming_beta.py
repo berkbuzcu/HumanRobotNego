@@ -106,6 +106,9 @@ class SpeechStreamingRecognizerBeta:
 
             # Display the transcription of the top alternative.
             transcript = result.alternatives[0].transcript
+            transcript = transcript.replace("for", "four")
+            transcript = transcript.replace("For", "four")
+            transcript = transcript.replace("tree", "three")
 
             # Display interim results, but with a carriage return at the end of the
             # line, so subsequent lines will overwrite them.
@@ -161,8 +164,6 @@ class SpeechStreamingRecognizerBeta:
             "everything",
             "you can",
             "I can give",
-            "for",
-            "For",
         ]
 
         negotiation_contexts_element = {

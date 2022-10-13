@@ -37,6 +37,8 @@ class DemoHybridAgent:
         self.last_received_bids = []
         self.logs = []
 
+        self.sensitivity_class_list = []
+
         self.mood_controller = MoodController(self.utility_space, self.time_controller)
 
     def time_based(self):
@@ -44,6 +46,8 @@ class DemoHybridAgent:
         return (1 - t) * (1 - t) * self.p0 + 2 * (1 - t) * t * self.p1 + t * t * self.p2
 
     def behaviour_based(self):
+        t = self.time_controller.get_current_time()
+
         diff = [self.utility_space.get_offer_utility(self.last_received_bids[i + 1]) - \
                 self.utility_space.get_offer_utility(self.last_received_bids[i])
                 for i in range(len(self.last_received_bids) - 1)]
@@ -53,7 +57,7 @@ class DemoHybridAgent:
 
         delta = sum([u * w for u, w in zip(diff, self.W[len(diff)])])
 
-        target_utility = self.utility_space.get_utility(self.my_last_bids[-1]) - (self.p3 + self.p3 * t) * delta
+        target_utility = self.utility_space.get_offer_utility(self.my_last_bids[-1]) - (self.p3 + self.p3 * t) * delta
 
         return target_utility
     
@@ -76,7 +80,7 @@ class DemoHybridAgent:
 
         behaviour_based_utility = None
         if len(self.last_received_bids) > 2:
-            behaviour_based_utility = self.behaviour_based(t)
+            behaviour_based_utility = self.behaviour_based()
 
             target_utility = (1. - t * t) * behaviour_based_utility + t * t * target_utility
 

@@ -10,7 +10,7 @@ class RobotAction(IRobot):
     __metaclass__ = ABCMeta
 
     def init_robot(self, robot_folder):
-        self.robotIP = "169.254.186.182"
+        self.robotIP = "nao.local"
         self.robot_gestures = NaoGestures()
         self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
         self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
@@ -111,8 +111,11 @@ class RobotAction(IRobot):
                     non_zero_count += 1
                     speak_string += " " + str(value) + " " + key + "s "
             
-            if non_zero_count < len(offer):
-                speak_string += " and the rest is yours."
+            if non_zero_count == 0:
+                speak_string = "I want all of them"
+
+            #if non_zero_count < len(offer):
+            #    speak_string += " and the rest is yours."
 
             speak_strings = [speak_string]
 
