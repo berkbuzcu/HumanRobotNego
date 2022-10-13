@@ -207,12 +207,16 @@ class PreferenceElicitation(QMainWindow):
 
         weight_sum = 0.
 
+        issue_order_human = [i for i in range(len(issues_ordered))]
+        issue_order_agent = issue_order_human.copy()
+
+        for i in range(0, len(issue_order_human), 2):
+            issue_order_agent[i], issue_order_agent[i + 1] = issue_order_agent[i + 1], issue_order_agent[i]
+
         for i in range(len(issues_ordered)):
             preference_dict[issues_ordered[i]] = {'weight': len(issues_ordered) - i}
-            if i not in [1, 2]:
-                reversed_pref_dict[issues_ordered[i]] = {'weight': i + 1}
-            else:
-                reversed_pref_dict[issues_ordered[i]] = {'weight': len(issues_ordered) - i}
+            reversed_pref_dict[issues_ordered[i]] = {'weight': len(issues_ordered) - issue_order_agent[i]}
+
             weight_sum += i + 1
 
         for issue_name in issues_ordered:
@@ -220,32 +224,22 @@ class PreferenceElicitation(QMainWindow):
             reversed_pref_dict[issue_name]["weight"] = np.round(reversed_pref_dict[issue_name]["weight"] / weight_sum * 100.) / 100.
 
         for i, issue_name in enumerate(issues_ordered):
+            value_order_human = [j for j in range(len(issue_values_ordered[issue_name]))]
+            value_order_agent = value_order_human.copy()
+            value_order_agent[:len(value_order_human) // 2] = value_order_human[len(value_order_human) // 2:]
+            if len(value_order_human) % 2 == 1:
+                value_order_agent[len(value_order_human) // 2 + 1:] = value_order_human[:len(value_order_human) // 2]
+            else:
+                value_order_agent[len(value_order_human) // 2:] = value_order_human[:len(value_order_human) // 2]
+
             for j, value_name in enumerate(issue_values_ordered[issue_name]):
                 preference_dict[issue_name][value_name] = len(issue_values_ordered[issue_name]) - j
-            if i == 0:
-                for j, value_name in enumerate(issue_values_ordered[issue_name]):
-                    reversed_pref_dict[issue_name][value_name] = preference_dict[issue_name][value_name]
-                reversed_pref_dict[issue_name][issue_values_ordered[issue_name][0]], reversed_pref_dict[issue_name][issue_values_ordered[issue_name][-1]] = \
-                    reversed_pref_dict[issue_name][issue_values_ordered[issue_name][-1]], reversed_pref_dict[issue_name][issue_values_ordered[issue_name][0]]
-            elif i == 1:
-                for j in range(len(issue_values_ordered[issue_name]) - 1):
-                    reversed_pref_dict[issue_name][issue_values_ordered[issue_name][j]] = j + 2
-                reversed_pref_dict[issue_name][issue_values_ordered[issue_name][-1]] = 1
-            elif i == 2:
-                reversed_pref_dict[issue_name][issue_values_ordered[issue_name][0]] = len(issue_values_ordered[issue_name])
-                for j in range(1, len(issue_values_ordered[issue_name])):
-                    reversed_pref_dict[issue_name][issue_values_ordered[issue_name][j]] = j
-            else:
-                for j, value_name in enumerate(issue_values_ordered[issue_name]):
-                    reversed_pref_dict[issue_name][value_name] = j + 1
+                reversed_pref_dict[issue_name][value_name] = len(issue_values_ordered[issue_name]) - value_order_agent[j]
+
             for value_name in issue_values_ordered[issue_name]:
                 preference_dict[issue_name][value_name] = np.round(preference_dict[issue_name][value_name] / len(issue_values_ordered[issue_name]) * 100.) / 100.
                 reversed_pref_dict[issue_name][value_name] = np.round(reversed_pref_dict[issue_name][value_name] / len(issue_values_ordered[issue_name]) * 100.) / 100.
-            
-            for issueName, values in preference_dict.items():
-                for valueName, weight in values.items():
-                    if valueName == "weight":
-                        continue
+
 
         self.create_xml("Human", preference_dict)
         self.create_xml("Agent", reversed_pref_dict)
