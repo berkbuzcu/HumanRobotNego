@@ -297,6 +297,6 @@ class SolverAgent:
         """
         num_of_moods = self.mood_controller.get_num_of_moods()
         df = pd.DataFrame(self.logs)
-        df.to_csv(f"./Logs/solver_logs_{participant_name}_{session_number}.csv")
+        df.to_excel(f"./Logs/solver_logs_{participant_name}_{session_number}.csv")
 
         return num_of_moods
