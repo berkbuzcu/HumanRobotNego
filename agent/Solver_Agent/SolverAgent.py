@@ -139,7 +139,6 @@ class SolverAgent:
         # TODO: Fix all moods fields with valance arousal.
 
         human_offer_utility = self.utility_space.get_offer_utility(human_offer)
-        emotion_value_squared = 0
         emotion_value = 0
 
         self.opponent_history.append(human_offer)
@@ -152,6 +151,7 @@ class SolverAgent:
 
         time_based_target_utility = self.time_based()
         behavior_based_target_utility = 0
+        behavior_based_utility = 0
 
         final_target_utility = time_based_target_utility
 
@@ -177,15 +177,16 @@ class SolverAgent:
 
             max_delta = max([(delta_v, abs(delta_v)), (delta_a, abs(delta_a))], key= lambda x: x[1])[0]
             emotion_value = math.copysign(math.sqrt((arousal - self.previous_arousal) ** 2 + (valance - self.previous_valance) ** 2), max_delta)
-            emotion_value_squared = emotion_value ** 2
 
-            behavior_based_target_utility = self.behaviour_based() + ((self.human_awareness ** 2) * emotion_value)
+
+            behavior_based_utility = self.behaviour_based()
+            behavior_based_target_utility = behavior_based_utility + ((self.human_awareness ** 2) * emotion_value)
             behavior_based_target_utility = behavior_based_target_utility if behavior_based_target_utility <= 1.0 else 1.0
             final_target_utility = (1 - current_time ** 2) * behavior_based_target_utility + (current_time ** 2) * time_based_target_utility
 
             print("Final: ", final_target_utility, "Behavior: ", behavior_based_target_utility, "Time: ", current_time, time_based_target_utility)
 
-            if len(self.opponent_history) > 2:
+            if len(self.opponent_history) > 8:
                 # Calculate awareness based on estimated opponent preference and utility space.
                 self.human_awareness = (
                     self.estimated_sensitivity_calculator.get_human_awareness(
@@ -234,10 +235,11 @@ class SolverAgent:
             "Agent Utility": human_offer_utility,
             "Scaled Time": current_time,
             "Final Utility": final_target_utility,
-            "Behavior Based": behavior_based_target_utility,
+            "Behavior Based Final": behavior_based_target_utility,
+            "Behavior Based": behavior_based_utility,
             "Time Based": time_based_target_utility,
             "PE": emotion_value,
-            "PE2": emotion_value_squared,
+            "PA": self.human_awareness,
             "Estimated Issue Order": self.estimated_opponent_preference.issue_weights,
             "Estimated Value Order": self.estimated_opponent_preference.issue_value_evaluation,
             "Estimated Bid Utility": self.estimated_opponent_preference.get_offer_utility(human_offer),
@@ -252,10 +254,11 @@ class SolverAgent:
             "Agent Utility": generated_offer_utility,
             "Scaled Time": current_time,
             "Final Utility": final_target_utility,
-            "Behavior Based": behavior_based_target_utility,
+            "Behavior Based Final": behavior_based_target_utility,
+            "Behavior Based": behavior_based_utility,
             "Time Based": time_based_target_utility,
             "PE": emotion_value,
-            "PE2": emotion_value_squared,
+            "PA": self.human_awareness,
             "Estimated Issue Order": self.estimated_opponent_preference.issue_weights,
             "Estimated Value Order": self.estimated_opponent_preference.issue_value_evaluation,
             "Estimated Bid Utility": self.estimated_opponent_preference.get_offer_utility(generated_offer),
