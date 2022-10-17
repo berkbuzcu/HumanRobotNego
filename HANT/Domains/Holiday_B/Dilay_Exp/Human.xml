@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<negotiation_domain>
+	<utility_space domain_name="Holiday_B" domain_type="Normal" number_of_issues="4">
+		<weight index="1" value="0.4"/>
+		<issue index="1" name="Duration">
+			<item index="1" value="3 Weeks" evaluation="1.0"/>
+			<item index="2" value="3 Days" evaluation="0.75"/>
+			<item index="3" value="1 Week" evaluation="0.5"/>
+			<item index="4" value="2 Weeks" evaluation="0.25"/>
+		</issue>
+		<weight index="2" value="0.3"/>
+		<issue index="2" name="Season">
+			<item index="1" value="Spring" evaluation="1.0"/>
+			<item index="2" value="Winter" evaluation="0.75"/>
+			<item index="3" value="Summer" evaluation="0.5"/>
+			<item index="4" value="Autumn" evaluation="0.25"/>
+		</issue>
+		<weight index="3" value="0.2"/>
+		<issue index="3" name="Destination">
+			<item index="1" value="Sydney" evaluation="1.0"/>
+			<item index="2" value="Venice" evaluation="0.75"/>
+			<item index="3" value="Lisbon" evaluation="0.5"/>
+			<item index="4" value="Miami" evaluation="0.25"/>
+		</issue>
+		<weight index="4" value="0.1"/>
+		<issue index="4" name="Accommodation">
+			<item index="1" value="Tent" evaluation="1.0"/>
+			<item index="2" value="Hotel" evaluation="0.75"/>
+			<item index="3" value="House" evaluation="0.5"/>
+			<item index="4" value="Boat" evaluation="0.25"/>
+		</issue>
+	</utility_space>
+</negotiation_domain>

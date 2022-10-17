@@ -232,6 +232,7 @@ class HANT:
     def timeout_negotiation(self):
         self.running = False
         self.human_interaction_controller.recognizer.terminate_stream()
+        self.end_negotiation("timeout")
 
     def terminate_nego(self):
         self.running = False
