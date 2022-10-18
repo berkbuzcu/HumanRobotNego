@@ -99,15 +99,15 @@ class HolidayOfferClassifier:
 				tagged_words_list[word_index][0] = "I"
 				tagged_words_list[word_index][1] = "PRON"
 				
-			if word.lower() in ["one", "two", "three", "1", "2", "3"] and len(tagged_words_list) > (word_index + 1):
-				if word.lower() == "one":
+			if word.lower() in ["one", "two", "three", "1", "2", "3", "a"] and len(tagged_words_list) > (word_index + 1):
+				if word.lower() == "one" or word.lower() == "a":
 					word = "1"
 				elif word.lower() == "two":
 					word = "2"
 				elif word.lower() == "three":
 					word = "3" 
 
-				check_words = ["weeks", "days"]    
+				check_words = ["week", "weeks", "days"]    
 
 				min_keyword = None
 				min_distance = 3        

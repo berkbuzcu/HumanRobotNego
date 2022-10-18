@@ -1,7 +1,6 @@
 from robot_interface import IRobot
 from robot_mobile_action import RobotMobileAction
 import time
-import zmq
 import ast
 
 class TestRobot(IRobot):

@@ -94,6 +94,8 @@ class SolverAgent:
 
         target_utility = previous_agent_offer_utility - ((1 - (self.human_awareness ** 2)) * (mu * delta))
 
+        print("BB TARGET: ", target_utility, previous_agent_offer_utility, mu, delta)
+
         return target_utility
 
     def check_acceptance(self, final_target_utility, human_offer_utility) -> Tuple[nego_action.Accept, str]:

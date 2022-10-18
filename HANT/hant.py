@@ -52,7 +52,8 @@ class HANT:
         self.session_type = session_type
         #name, session_type (demo, 1, 2), "face_channel" | "cl"
         self.stop_nego_signal = stop_nego_signal
-        self.camera_controller = SessionCamera(participant_name, self.session_number, self.session_type, camera_id=0) # 30 seconds
+        self.camera_id = 1
+        self.camera_controller = SessionCamera(participant_name, self.session_number, self.session_type, camera_id=self.camera_id) # 30 seconds
 
         self.running = True
 
@@ -100,6 +101,12 @@ class HANT:
 
         self.negotiation_gui.showFullScreen()
         self.time_controller.start()
+
+        print("CAMERA ID: ", self.camera_id, "(MAKE SURE ITS 1)")
+        print("SESSION: ", self.session_number)
+        print("SESSION TYPE: ", self.session_type)
+        print("DOMAIN: ", domain_name, " AGENT: ", agent_preference_file, " HUMAN: ", human_preference_file)
+        print("AGENT TYPE:", agent_type, " : ", agent_interaction_type)
 
     def start_robot_server(self, agent_interaction_type):
         gw = execnet.makegateway(
