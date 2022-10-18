@@ -110,6 +110,6 @@ class DemoHybridAgent:
         """
         num_of_moods = self.mood_controller.get_num_of_moods()
         df = pd.DataFrame(self.logs)
-        df.to_csv(f"./Logs/demohybridagent_logs_{participant_name}_{session_number}.csv")
+        df.to_excel(f"./Logs/demohybridagent_logs_{participant_name}_{session_number}.xlsx")
 
         return num_of_moods

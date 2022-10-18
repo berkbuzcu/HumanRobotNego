@@ -52,7 +52,7 @@ class HANT:
         self.session_type = session_type
         #name, session_type (demo, 1, 2), "face_channel" | "cl"
         self.stop_nego_signal = stop_nego_signal
-        self.camera_controller = SessionCamera(participant_name, self.session_number, self.session_type, camera_id=1) # 30 seconds
+        self.camera_controller = SessionCamera(participant_name, self.session_number, self.session_type, camera_id=0) # 30 seconds
 
         self.running = True
 
