@@ -73,6 +73,8 @@ class HolidayOfferClassifier:
 		self.classify_sentences(tagged_words)
 
 		is_complete = len(self.OFFER_SENTENCES.keys()) == len(self.issue_values_list.keys())
+		
+		print("OFFER SENTS: ", self.OFFER_SENTENCES)
 		offer = self.action_factory.create_offer(self.OFFER_SENTENCES)
 		
 		if is_complete:
