@@ -86,7 +86,7 @@ class SpeechStreamingRecognizerBeta:
             result = response.results[0]
             if not result.alternatives:
                 continue
-
+            
             # Display the transcription of the top alternative.
             transcript = result.alternatives[0].transcript
 
@@ -98,8 +98,11 @@ class SpeechStreamingRecognizerBeta:
 
                 num_chars_printed = len(transcript)
             else:
+                for item in response.results:
+                    best_item = max(item.alternatives, key=lambda x: float(x.confidence))
+
                 num_chars_printed = 0
-                return transcript + overwrite_chars
+                return best_item.transcript + overwrite_chars
 
     def set_stream_config(self):
         language_code = "en-US"
@@ -190,7 +193,12 @@ class SpeechStreamingRecognizerBeta:
 
 if __name__ == "__main__":
     from utility_space import UtilitySpace
-    domain = UtilitySpace("D:\PythonProjects\Human_Robot_Nego\HANT\Domains\Holiday_A\Berk\Agent.xml")
-    streamer = SpeechStreamingRecognizerBeta(domain.issue_values_list)
+    domain = UtilitySpace("..\HANT\Domains\Holiday_A\Berk\Agent.xml")
+    import os
+
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../spry-water-357912-42ef44b257e5.json"
+
+    
+    streamer = SpeechStreamingRecognizerBeta(domain_keywords = list(itertools.chain(*domain.issue_values_list.values())))
     while(True):
-        streamer.listen_and_convert_to_text()
+        print(streamer.listen_and_convert_to_text())

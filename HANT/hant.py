@@ -300,7 +300,7 @@ class HANT:
                     break
                 
             if not self.running:
-                self.end_negotiation("timeout")
+                #self.end_negotiation("timeout")
                 return
 
             self.negotiation_gui.update_agent_message("")
