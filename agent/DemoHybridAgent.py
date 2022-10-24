@@ -29,9 +29,9 @@ class DemoHybridAgent:
         self.utility_space = utility_space
         self.time_controller = time_controller
         self.action_factory = action_factory
-        self.p0 = 0.9
-        self.p1 = 0.7
-        self.p2 = 0.5
+        self.p0 = 0.95
+        self.p1 = 0.75
+        self.p2 = 0.6
         self.p3 = 0.4
         self.my_last_bids = []
         self.last_received_bids = []
