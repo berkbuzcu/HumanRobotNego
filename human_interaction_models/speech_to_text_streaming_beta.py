@@ -86,7 +86,7 @@ class SpeechStreamingRecognizerBeta:
             result = response.results[0]
             if not result.alternatives:
                 continue
-            
+
             # Display the transcription of the top alternative.
             transcript = result.alternatives[0].transcript
 
@@ -98,11 +98,8 @@ class SpeechStreamingRecognizerBeta:
 
                 num_chars_printed = len(transcript)
             else:
-                for item in response.results:
-                    best_item = max(item.alternatives, key=lambda x: float(x.confidence))
-
                 num_chars_printed = 0
-                return best_item.transcript + overwrite_chars
+                return transcript + overwrite_chars
 
     def set_stream_config(self):
         language_code = "en-US"
