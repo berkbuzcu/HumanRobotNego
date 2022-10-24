@@ -66,13 +66,15 @@ class DemoHybridAgent:
         t = self.time_controller.remaining_time
         mood = self.mood_controller.get_mood(bid)
         human_offer_utility = self.utility_space.get_offer_utility(bid)
-        target_utility = self.time_based()
+        time_based_utility = self.time_based()
+        target_utility = time_based_utility
 
         self.logs.append({
             "Logger": "Human",
             "Offer": bid.get_bid(),
             "Agent Utility": human_offer_utility,
             "Scaled Time": t,
+            "Target Utility": 0,
             "Time Based Utility": 0,
             "Behavior Based Utility": 0,
            }
@@ -95,9 +97,10 @@ class DemoHybridAgent:
         self.logs.append({
             "Logger": "Agent",
             "Offer": bid.get_bid(),
-            "Agent Utility": human_offer_utility,
+            "Agent Utility": self.utility_space.get_offer_utility(bid.get_bid()),
             "Scaled Time": t,
-            "Time Based Utility": target_utility,
+            "Target Utility": target_utility,
+            "Time Based Utility": time_based_utility,
             "Behavior Based Utility": behaviour_based_utility if behaviour_based_utility else 0,
         })
 
