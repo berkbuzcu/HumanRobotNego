@@ -1,7 +1,8 @@
-from robot_interface import IRobot
-from robot_mobile_action import RobotMobileAction
+from agent_interaction_models.robot_interface import IRobot
+from agent_interaction_models.robot_mobile_action import RobotMobileAction
 import time
 import ast
+from agent_interaction_models.QTtest import QTRobotClass
 
 class TestRobot(IRobot):
     def init_robot(self):
@@ -56,8 +57,9 @@ class RobotServer:
     
     def init_robot(self, robot_name):
         classes = {
+            "qt": QTRobotClass,
             "nao": RobotMobileAction,
-            "test": TestRobot
+            "test": TestRobot,
         }
 
         self.robot = classes[robot_name]()

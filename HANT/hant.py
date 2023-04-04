@@ -23,6 +23,8 @@ from EmotionCapturing.SessionManager.Session import SessionCamera
 
 from enum import Enum
 
+
+
 class HANT:
     def __init__(
         self,
@@ -109,18 +111,30 @@ class HANT:
         print("AGENT TYPE:", agent_type, " : ", agent_interaction_type)
 
     def start_robot_server(self, agent_interaction_type):
-        gw = execnet.makegateway(
-            "popen//python=.\\agent_interaction_models\\.venv\\Scripts\\python.exe")
-        channel = gw.remote_exec("""
-                                    from agent_interaction_models.robot_server import RobotServer
-                                    robot_server = RobotServer(channel)
-                                    robot_server.start_server()
-                                """)
+        if agent_interaction_type=="Nao":
+            gw = execnet.makegateway(
+                "popen//python=.\\agent_interaction_models\\.venv_Nao\\Scripts\\python.exe")
+            channel = gw.remote_exec("""
+                                        from agent_interaction_models.robot_server import RobotServer
+                                        robot_server = RobotServer(channel)
+                                        robot_server.start_server()
+                                    """)
+            self.robot_client = RobotClient(channel)
+            self.robot_client.send_init_robot(agent_interaction_type)
+        elif agent_interaction_type=="QT":
+            gw = execnet.makegateway(
+                "popen//python=.\\agent_interaction_models\\.venv_QT\\Scripts\\python.exe")
+            channel = gw.remote_exec("""
+                                        from agent_interaction_models.robot_server import RobotServer
+                                        robot_server = RobotServer(channel)
+                                        robot_server.start_server()
+                                    """)
+            self.robot_client = RobotClient(channel)
+            self.robot_client.send_init_robot(agent_interaction_type)
+        #BURADA KALDIN DÜZELT
 
         #169.254.177.156
 
-        self.robot_client = RobotClient(channel)
-        self.robot_client.send_init_robot(agent_interaction_type)
 
     def set_human_interaction_type(self, human_interaction_type, domain_file):
         if human_interaction_type == "Speech":

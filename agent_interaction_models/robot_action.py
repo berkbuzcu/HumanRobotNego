@@ -1,8 +1,8 @@
-from robot_interface import IRobot
-from naoqi import ALProxy
+from agent_interaction_models.robot_interface import IRobot
+#from naoqi import ALProxy¶
 import random
 from random import shuffle
-from GestureModels.nao_gesture import NaoGestures
+#from GestureModels.nao_gesture import NaoGestures
 from abc import ABCMeta, abstractmethod
 import ast
 
@@ -10,53 +10,6 @@ class RobotAction(IRobot):
     __metaclass__ = ABCMeta
 
     def init_robot(self, robot_folder):
-        self.robotIP = "nao.local"
-        self.robot_gestures = NaoGestures()
-        self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
-        self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
-        self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
-        # Set autonomous part of the robot.:9559
-        self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
-        self.autonomousProxy.setAutonomousAbilityEnabled("AutonomousBlinking", False)
-        self.autonomousProxy.setAutonomousAbilityEnabled("BasicAwareness", False)
-        self.autonomousProxy.setAutonomousAbilityEnabled("ListeningMovement", False)
-        self.autonomousProxy.setAutonomousAbilityEnabled("SpeakingMovement", False)
-        # Set speaking speed and volume of the robot.
-        self.tts.setParameter("speed", 75)
-        self.tts.setVolume(0.5)
-
-        stand_up_behavior = "%s/StandUp" % (robot_folder)
-        if (not self.managerProxy.isBehaviorRunning(stand_up_behavior)):
-            self.managerProxy.runBehavior(stand_up_behavior)
-
-        self.after_offer_sentences = [
-            "Is it okay for you?",
-            "Do we \\pau=10\\ agree?",
-            "Do we have \\pau=10\\ a deal?",
-            "Is it enough for you?",
-            "Is it acceptable?",
-        ]
-
-        #169.254.41.46
-        self.after_offer_index = 0
-        # Set offer verbs for "you take you get etc."
-        self.you_offer_verbs = ["take", "get", "have"]
-        self.you_offer_index = 0
-        # Set offer verbs for "i give you, i offer etc."
-        self.i_offer_verbs = ["give", "offer"]
-        self.i_offer_index = 0
-        # Index for i or you offers.
-        self.type_index = 0
-        # Rest phrases.
-        self.rest_phrases = [
-            "That's it",
-            "The rest is mine",
-            "I \\pau=10\\ will take the rest.",
-            "I \\pau=10\\ will have the rest",
-            "That's all",
-        ]
-        self.rest_index = 0
-        # Keywords.
         self.keywords = ["apple", "orange", "banana", "watermelon"]
 
     def receive_bid(self, bid):

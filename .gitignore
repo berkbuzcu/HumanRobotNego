@@ -13,7 +13,9 @@ EmotionCapturing/FaceChannel/CLModel/checkpoint/*
 *.idea
 .vscode/
 .venv/
-
+*venv_Nao*
+agent_interaction_models\.venv_QT
+agent_interaction_models\.venv_Nao
 sessions/
 
 speech.json

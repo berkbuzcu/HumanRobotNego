@@ -1,6 +1,6 @@
 import os
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "spry-water-357912-42ef44b257e5.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "optical-bond-378222-fcc4858a9e3c.json"
 
 from email.charset import QP
 from inspect import Parameter, trace
@@ -82,7 +82,7 @@ class DomainSelect(QWidget):
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
     "Agent Type": ["Solver", "Hybrid", "DemoHybrid"],
-    "Output Type": ["Nao+GUI","Test+GUI"],
+    "Output Type": ["QT+GUI", "Nao+GUI", "Test+GUI"],
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["continual_learning", "face_channel_only", "face_channel", "None"],
     "Protocol": ["Alternating Offer Protocol"],
@@ -179,7 +179,7 @@ class ConfigManager(QApplication):
         self.main_window.setCentralWidget(central_widget)
 
         self.threadpool = QThreadPool()
-        self.loading = LoadingScreen(self.screens()[1])       
+        self.loading = LoadingScreen(self.screens()[0])       
 
         self.main_window.show()
 
