@@ -156,11 +156,11 @@ class QTRobotClass(IRobot):
                 "worried"
             ],
             "Confirmation":[
-                "worried",
-                "worried",
-                "worried",
-                "worried",
-                "worried"
+                "neutral",
+                "neutral",
+                "neutral",
+                "neutral",
+                "neutral"
             ]
         }
         self.delays={
