@@ -9,6 +9,7 @@ if __name__=="__main__":
     talkers.call({'message': 'what\'s up? I would like to let you know, I wanna die'}) 
     print("done")
 """
+import time
 import roslibpy
 import threading
 
@@ -46,70 +47,238 @@ class QTRobotClass(IRobot):
             "Convinced": 0,
             "Content": 0,
             "Worried": 0,
+            "Confirmation":0
         }
-
-        self.files_by_mood = {
+        self.gesturePacks = {
+        "annoyed":"ozyegin.edu/HANT/annoyed-1",
+        "content-1":"ozyegin.edu/HANT/content-1",
+        "content-2":"ozyegin.edu/HANT/content-2",
+        "convinced-1":"ozyegin.edu/HANT/convinced-1",
+        "convinced-2":"ozyegin.edu/HANT/convinced-2",
+        "convinced-4":"ozyegin.edu/HANT/convinced-4",
+        "dissatisfied-1":"ozyegin.edu/HANT/dissatisfied-1",
+        "dissatisfied-2":"ozyegin.edu/HANT/dissatisfied-2",
+        "frustrated":"ozyegin.edu/HANT/frustrated-1",
+        "worried":"ozyegin.edu/HANT/worried",
+        "neutral":"ozyegin.edu/HANT/newNeutral",
+        }
+        self.moodPhrases={
+           "Annoyed": [
+                  "No, I can not accept that unfortunately",
+                  "Sorry, I can not accept that.",
+                  "That is not going to work for me!",
+                  "I'm sorry but I could not agree to your offer. ",
+                  "I really can't agree to your offer.",
+                  "Your offer is not fair enough.",
+                  "Sorry, your offer doesn't go far enough.",
+                  "I don't consider that fair."],
+            "Frustrated": [
+                   "Do you really think that is a fair offer? It is not acceptable at all. ",
+                   "I am very disappointed with your offer. It is not acceptable at all. ",
+                   "Your offer is not acceptable. Please put yourself on my shoes. ",
+                   "We cannot reach an agreement. Let's try to be more collaborative."],
+            "Dissatisfied": [
+                   "No, I can not accept that unfortunately",
+                   "Sorry, I can not accept that.",
+                   "That is not going to work for me!",
+                   "I'm sorry but I could not agree to your offer. ",
+                   "I really can't agree to your offer.",
+                   "Your offer is not fair enough.",
+                   "Sorry, your offer doesn't go far enough.",
+                   "I don't consider that fair."],
+            "Neutral": [
+                   "Omn",
+                   "Let's talk about other options."],
+            "Convinced": [
+                   "Let me think about it. It is getting better but not enough.",
+                   "I appreciate your offer. It would be great if you concede a little bit more. ",
+                   "If I am going to consider your offer, it would be great if you concede little bit more.",
+                   "Umn Sounds good, we are almost there. "],
+            "Content": [
+                   " It is getting better but not enough.",
+                   "That sounds good but you can give me a little bit more. "],
+            "Worried": [
+                   "The deadline is approaching. Let's find a deal soon.",
+                   "We are running out of time. Let's be more cooperative to find a deal.",
+                   "Hurry up! We need to find an agreement soon."],
+            "Confirmation":[
+                "Is it okay for you?",
+                "Do we agree?",
+                "Do we have a deal?",
+                "Is it enough for you?",
+                "Is it acceptable?"
+            ]
+        }
+        self.gesturesToRun={
             "Annoyed": [
-                "annoyed_1",
-                "annoyed_3",
-                "annoyed_6",
-                "annoyed_2",
-                "annoyed_4",
-                "annoyed_7",
-                "annoyed_5",
+                   "annoyed",
+                   "annoyed",
+                   "annoyed",
+                   "annoyed",
+                   "annoyed",
+                   "annoyed",
+                   "annoyed",
+                   "annoyed"
             ],
             "Frustrated": [
-                "frustrated_1",
-                "frustrated_3",
-                "frustrated_2",
-                "frustrated_4",
+                   "frustrated",
+                   "frustrated",
+                   "frustrated",
+                   "frustrated"
             ],
             "Dissatisfied": [
-                "dissatisfied_1",
-                "dissatisfied_3",
-                "dissatisfied_6",
-                "dissatisfied_2",
-                "dissatisfied_4",
-                "dissatisfied_7",
-                "dissatisfied_5",
-                "dissatisfied_8",
+               "dissatisfied-1",
+               "dissatisfied-1",
+               "dissatisfied-2",
+               "dissatisfied-1",
+               "dissatisfied-1",
+               "dissatisfied-1",
+               "dissatisfied-2",
+               "dissatisfied-1"
             ],
-            "Neutral": ["neutral_1", "neutral_2"],
+            "Neutral": [
+                   "neutral",
+                   "neutral"
+            ],
             "Convinced": [
-                "convinced_1",
-                #"convinced_2",
-                "convinced_3",
-                "convinced_4",
+                "convinced-1",
+                "convinced-2",
+                "convinced-2",
+                "convinced-4"
             ],
-            "Content": ["content_1", "content_2"],
-            "Worried": ["worried_1", "worried_2", "worried_3"],
+            "Content": [
+                   "content-1",
+                   "content-2"
+            ],
+            "Worried": [
+                "worried",
+                "worried",
+                "worried"
+            ],
+            "Confirmation":[
+                "worried",
+                "worried",
+                "worried",
+                "worried",
+                "worried"
+            ]
         }
-        self.mood_Phrases = {
-            "Annoyed": "Are you serious? I can't accept that!",
-            "Frustrated": "Your answers make me tired. Please be reasonable.",
-            "Dissatisfied": "I think we can do better.",
-            "Neutral": "Let me think about it",
-            "Convinced": "It\'s getting better.",
-            "Content": "That was nice. Let\'s keep going.",
-            "Worried": "No! I cannot accept that!",
+        self.delays={
+            "Annoyed": [
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0
+            ],
+            "Frustrated": [
+                   0,
+                   0,
+                   0,
+                   0,
+            ],
+            "Dissatisfied": [
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0
+            ],
+            "Neutral": [
+                   0,
+                   0
+            ],
+            "Convinced": [
+                   1.5,
+                   1,
+                   0,
+                   0
+            ],
+            "Content": [
+                   0,
+                   0
+            ],
+            "Worried": [
+                   0,
+                   0,
+                   0
+            ],
+            "Confirmation":[
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
         }
-        self.gesturePack = {
-            "Annoyed": "QT/imitation/hands-on-head-back",
-            "Frustrated": "QT/emotions/disgusted",
-            "Dissatisfied": "QT/peekaboo",
-            "Neutral": "QT/neutral",
-            "Convinced": "QT/clapping",
-            "Content": "QT/imitation/nodding-yes",
-            "Worried": "QT/angry",
+        self.speeds={
+            "Annoyed": [
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0
+            ],
+            "Frustrated": [
+                   0.8,
+                   0.8,
+                   0.8,
+                   0.8,
+            ],
+            "Dissatisfied": [
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0
+            ],
+            "Neutral": [
+                   0.0,
+                   0.0
+            ],
+            "Convinced": [
+                   1.0,
+                   0.0,
+                   0.9,
+                   1.0
+            ],
+            "Content": [
+                   0.0,
+                   0.0
+            ],
+            "Worried": [
+                   0.0,
+                   0.0,
+                   0.0
+            ],
+            "Confirmation":[
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0,
+                   0.0
+            ]
         }
         #self.TalkRobot("Wake up Neo!")
         #self.GestureRobot("QT/show_QT")
-        self.aSyncRobotController("Wake up Neo!","QT/show_QT")
-        self.GestureRobot("QT/neutral")
+        #self.aSyncRobotController("Wake up Neo!","QT/show_QT")
+        self.GestureRobot(self.gesturePacks["neutral"])
 
     def receive_start_nego(self):
-        self.aSyncRobotController("Hello, My name is QT! Let\'s start negotiation!","QT/point_front")
-        self.GestureRobot("QT/send_kiss")   #TODO adjust speed
+        self.aSyncRobotController("Hello, My name is QT! Let's start negotiation!","QT/show_QT",0,0)
+        self.GestureRobot(self.gesturePacks["neutral"]) 
         #self.TalkRobot()
         #self.GestureRobot("QT/neutral")
         
@@ -118,11 +287,10 @@ class QTRobotClass(IRobot):
         
     def receive_mood(self, mood):
         self.num_of_moods[mood] += 1
-        mood_file_idx = (self.num_of_moods[mood] % (len(self.files_by_mood[mood]) - 1 )) + 1
-        mood_file = mood.lower() + "_%s" % mood_file_idx
-        gesture_to_run = mood_file
-        self.aSyncRobotController(self.mood_Phrases[mood],self.gesturePack[mood])
-        self.GestureRobot("QT/neutral")
+        mood_file_idx = (self.num_of_moods[mood] % (len(self.moodPhrases[mood]) - 1 ))
+        #---------------------------#
+        self.aSyncRobotController(self.moodPhrases[mood][mood_file_idx],self.gesturePacks[self.gesturesToRun[mood][mood_file_idx]],self.speeds[mood][mood_file_idx],self.delays[mood][mood_file_idx])
+        self.GestureRobot(self.gesturePacks["neutral"])
         #getattr(self, gesture_to_run)()
         
     def GestureRobot(self,message):
@@ -142,8 +310,8 @@ class QTRobotClass(IRobot):
         client.close()
     
     def receive_nego_over(self, type):
-        self.aSyncRobotController("We are finished then! Take care","QT/bye")
-        self.GestureRobot("QT/neutral")
+        self.aSyncRobotController("We are finished then! Take care","QT/bye",0,0)
+        self.GestureRobot(self.gesturePacks["neutral"])
         #self.TalkRobot("We are finished then! Take care")
         #self.GestureRobot("QT/bye")
     
@@ -188,16 +356,22 @@ class QTRobotClass(IRobot):
             speak_strings = [speak_string]
 
         sentence = random.choice(speak_strings)
-        self.TalkRobot(sentence)
+        self.aSyncRobotController(sentence,"ozyegin.edu/HANT/newNeutral",0,0)
+        self.num_of_moods["Confirmation"] += 1
+        mood_file_idx = (self.num_of_moods["Confirmation"] % (len(self.moodPhrases["Confirmation"]) - 1 ))
+        #---------------------------#
+        self.aSyncRobotController(self.moodPhrases["Confirmation"][mood_file_idx],self.gesturePacks[self.gesturesToRun["Confirmation"][mood_file_idx]],self.speeds["Confirmation"][mood_file_idx],self.delays["Confirmation"][mood_file_idx])
+        self.GestureRobot(self.gesturePacks["neutral"])
+        #self.TalkRobot(sentence)
         return sentence    
     
-    def aSyncRobotController(self,talkText,GestureName):
-        def gestureM(message):
+    def aSyncRobotController(self,talkText,GestureName,speed,delay):
+        def gestureM(message,speed):
             client= roslibpy.Ros('192.168.100.2',port=9091)
             #talker=roslibpy.Topic(client,'/qt_robot/behavior/talkText','std_msgs/String')
             talkers=roslibpy.Service(client,'/qt_robot/gesture/play','/qt_robot_gesture_play')
             client.run()
-            talkers.call({'name': message}) 
+            talkers.call({'name': message,'speed':speed}) 
             client.close()
     
         def talkM(message):
@@ -208,8 +382,9 @@ class QTRobotClass(IRobot):
             talkers.call({'message': message}) 
             client.close()
         talkThread=threading.Thread(target=talkM,args=(talkText,))
-        gestureThread=threading.Thread(target=gestureM,args=(GestureName,))
-        talkThread.start()
+        gestureThread=threading.Thread(target=gestureM,args=(GestureName,speed,))
         gestureThread.start()
+        time.sleep(delay)
+        talkThread.start()
         talkThread.join()
         gestureThread.join()
