@@ -1,13 +1,17 @@
 import sys
-from robot_client import RobotClient
 import time
-import execnet
-from HANT.nego_action import ResourceAllocationActionFactory, NormalActionFactory
+
 from HANT import nego_action
+from HANT.nego_action import ResourceAllocationActionFactory, NormalActionFactory
 from HANT.nego_history import NegotiationHistory
-from logger.logger import Logger
 from HANT.utility_space import UtilitySpace
 from HANT.utility_space_controller import UtilitySpaceController
+from HANT.nego_timer import NegotiationTimer
+from HANT.nego_worker import NegotiationWorker
+
+from logger.logger import Logger
+from robot_client import RobotClient
+
 from human_interaction_models.holiday_offer_classifier import HolidayOfferClassifier
 from human_interaction_models.offer_classifier import OfferClassifier
 from agent.Solver_Agent.SolverAgent import SolverAgent
@@ -23,84 +27,80 @@ from EmotionCapturing.SessionManager.Session import SessionCamera
 
 from enum import Enum
 
-class HANT:
-    def __init__(
-        self,
-        participant_name,
-        session_number,
-        session_type,
-        human_interaction_type,
-        agent_interaction_type,
-        agent_type,
-        agent_preference_file,
-        human_preference_file,
-        domain_name,
-        log_file_path,
-        config_manager,
-        stop_nego_signal
-    ):
-        self.config_manager = config_manager
-        self.negotiation_gui = config_manager.nego_window
-        self.agent = None
-        self.is_first_turn = True
-        self.logger = Logger(
-            participant_name, agent_type, agent_interaction_type, log_file_path, domain_name
-        )
-        self.time_controller = self.negotiation_gui.get_time_controller()
-        self.participant_name = participant_name
-        self.session_number = session_number.replace(" ", "_") # Session 1
-        self.session_type = session_type
-        #name, session_type (demo, 1, 2), "face_channel" | "cl"
-        self.stop_nego_signal = stop_nego_signal
-        self.camera_id = 1
-        self.camera_controller = SessionCamera(participant_name, self.session_number, self.session_type, camera_id=self.camera_id) # 30 seconds
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QThreadPool
 
-        self.running = True
+from gui.nego_gui import NegotiationGUI
+from gui.config_manager import ConfigManager
 
-        self.emotion_to_color = {
-            "Happy": "green",
-            "Content": "green",
-            "Convinced": "green",
-            "Neutral": "yellow",
-            "Dissatisfied": "orange",
-            "Annoyed": "red",
-            "Frustrated": "red",
-            "Worried": "red"
-        }
 
-        self.negotiation_setup(
-            human_interaction_type,
-            agent_interaction_type,
-            agent_type,
-            agent_preference_file,
-            human_preference_file,
-            domain_name,
-        )
+class HANT(QApplication):
+    def __init__(self):
+        super().__init__()
+
+        self.config_manager = ConfigManager(self)
+        self.config_manager.show()
+        self.threadpool = QThreadPool()
+        self.robot_client = RobotClient()
+
+        #self.negotiation_setup(
+        #    human_interaction_type,
+        #    agent_interaction_type,
+        #    agent_type,
+        #    agent_preference_file,
+        #    human_preference_file,
+        #    domain_name,
+        #)
+
 
     def negotiation_setup(
         self,
-        human_interaction_type,
-        agent_interaction_type,
-        agent_type,
-        agent_preference_file,
-        human_preference_file,
-        domain_name,
+        parameters
     ):
+        participant_name=parameters["Participant Name"]
+        session_number=parameters["Session Type"]
+        session_type=parameters["Facial Expression Model"]
+        human_interaction_type=parameters["Input Type"]
+        agent_interaction_type=parameters["Output Type"]
+        agent_type=parameters["Agent Type"]
+        agent_preference_file=parameters["agent-domain"]
+        human_preference_file=parameters["human-domain"]
+        domain_name=parameters["Domain"]
+        deadline=parameters["Deadline"]
+        log_file_path="./Logs/"
+
+        self.camera_id = 1
+
+        print("deadline: ", deadline)
+
+        self.time_controller = NegotiationTimer(deadline * 10**3, self.timeout_negotiation)
+        print(participant_name, session_number, session_type, self.camera_id)
+        self.camera_controller = SessionCamera(participant_name, session_number, session_type, camera_id=self.camera_id) # 30 seconds
+        self.logger = Logger(participant_name, agent_type, agent_interaction_type, log_file_path, domain_name)
+
+        self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller)
+
         domain_dir = f"./HANT/Domains/{domain_name}/"
         domain_file = domain_dir + domain_name + ".xml"
         self.set_utility_space(
             agent_preference_file, human_preference_file, domain_file
         )
 
+        self.is_first_turn = True
+        self.running = True
+
+        self.participant_name = participant_name
+        self.session_number = session_number.replace(" ", "_") # Session 1
+        self.session_type = session_type
+        
+        #name, session_type (demo, 1, 2), "face_channel" | "cl"
+
         self.set_agent_type(agent_type)
-        self.start_robot_server(agent_interaction_type)
+        self.robot_client.start_robot_server(agent_interaction_type)
         self.set_human_interaction_type(human_interaction_type, domain_file)
         
         self.grid = self.human_utility_space.get_2d_ranked_grid_colored()
         self.negotiation_gui.create_table([issue.title() for issue in self.human_utility_space.issue_names], self.grid)
-
-        self.negotiation_gui.showFullScreen()
-        self.time_controller.start()
 
         print("CAMERA ID: ", self.camera_id, "(MAKE SURE ITS 1)")
         print("SESSION: ", self.session_number)
@@ -108,19 +108,38 @@ class HANT:
         print("DOMAIN: ", domain_name, " AGENT: ", agent_preference_file, " HUMAN: ", human_preference_file)
         print("AGENT TYPE:", agent_type, " : ", agent_interaction_type)
 
-    def start_robot_server(self, agent_interaction_type):
-        gw = execnet.makegateway(
-            "popen//python=.\\agent_interaction_models\\.venv\\Scripts\\python.exe")
-        channel = gw.remote_exec("""
-                                    from agent_interaction_models.robot_server import RobotServer
-                                    robot_server = RobotServer(channel)
-                                    robot_server.start_server()
-                                """)
+        self.negotiation_worker = NegotiationWorker(self)
+        self.threadpool.start(self.negotiation_worker)
 
-        #169.254.177.156
+        self.negotiation_gui.showFullScreen()
+        self.time_controller.start_timer()
 
-        self.robot_client = RobotClient(channel)
-        self.robot_client.send_init_robot(agent_interaction_type)
+
+    def nego_over(self):
+        #self.negotiation_gui.timer_widget.finish()
+        #self.loading.show()
+        print("NEGO IS OVER!!!")
+
+    def cleanup_nego(self):
+        #self.loading.destroy()
+        self.negotiation_gui.destroy()
+        #self.start_button.setDisabled(False)
+        self.config_manager.show()
+
+    #def start_robot_server(self, agent_interaction_type):
+    #    python2_path = ".\\agent_interaction_models\\.venv\\Scripts\\python.exe"
+    #    gw = execnet.makegateway(
+    #        f"popen//python={python2_path}")
+    #    channel = gw.remote_exec("""
+    #                                from agent_interaction_models.robot_server import RobotServer
+    #                                robot_server = RobotServer(channel)
+    #                                robot_server.start_server()
+    #                            """)
+    #
+    #    #169.254.177.156
+    #
+    #    self.robot_client = RobotClient(channel)
+    #    self.robot_client.send_init_robot(agent_interaction_type)
 
     def set_human_interaction_type(self, human_interaction_type, domain_file):
         if human_interaction_type == "Speech":
@@ -233,7 +252,6 @@ class HANT:
                 is_agreement=agreement)
 
         print("Logging complete")
-        self.stop_nego_signal.emit()
         self.camera_controller.close()
 
     def timeout_negotiation(self):
@@ -310,7 +328,7 @@ class HANT:
             self.nego_history.add_to_history(
                 bidder=human_action.get_bidder(),
                 offer=human_action.get_bid(perspective="Human"),
-                time= self.time_controller.remaining_time,
+                time= self.time_controller.get_remaining_time(),
                 emotion="",
                 predictions=predictions,
             )
@@ -326,24 +344,19 @@ class HANT:
 
             # Agent's offer to itself as list.
             agent_offer = agent_action.get_bid(perspective="Human")
+
             # Add agent offer to the logger list.
             # Send offer to the human.
-
             start_time = time.time()
             self.send_agent_offer_to_human(agent_offer, agent_mood)
             
             # Set negotiation gui according to agent's offer.
-            #if agent_mood:
-            #    emotion_color = self.emotion_to_color[agent_mood]
-            #
-            #else: emotion_color = 
-
             self.update_grid_by_offer(agent_offer, "red")
 
             self.nego_history.add_to_history(
                 bidder=agent_action.get_bidder(),
                 offer=agent_offer,
-                time=self.time_controller.remaining_time,
+                time=self.time_controller.get_remaining_time(),
                 emotion=agent_mood,
                 predictions=predictions,
             )

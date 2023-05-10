@@ -1,5 +1,4 @@
 from robot_interface import IRobot
-from robot_mobile_action import RobotMobileAction
 import time
 import ast
 
@@ -55,12 +54,16 @@ class RobotServer:
                 self.channel.send("Failed: %s" % e)
     
     def init_robot(self, robot_name):
-        classes = {
-            "nao": RobotMobileAction,
-            "test": TestRobot
-        }
+        robot_class = TestRobot
+        if robot_name == "nao":
+            from nao.robot_mobile_action import RobotMobileAction
+            robot_class = RobotMobileAction
 
-        self.robot = classes[robot_name]()
+        elif robot_name == "pepper":
+            from pepper.robot_mobile_action import RobotMobileAction
+            robot_class = RobotMobileAction
+
+        self.robot = robot_class()
         return self.robot.init_robot()
 
     def stop_server(self):

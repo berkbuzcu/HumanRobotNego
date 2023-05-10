@@ -17,18 +17,16 @@ class Color(QWidget):
         self.setPalette(palette)
 
 class Timer(QLabel):
-    def __init__(self, deadline, timeout_func):
+    def __init__(self, timer):
         super(Timer, self).__init__()
-  
-        repeater = QTimer(self)
-        self.connect(repeater, SIGNAL('timeout()'), self.show_time)
-        repeater.start(1000)
-    
-        self.deadline = deadline
 
-        self.counter = QTimer()
-        self.counter.timeout.connect(timeout_func)
-        self.counter.setSingleShot(True)
+        repeater = QTimer(self)
+
+        # Repeater will update time per the actual counter
+        self.connect(repeater, SIGNAL('timeout()'), self.update_time)
+        repeater.start(1000)
+
+        self.timer = timer
 
         self.setAlignment(Qt.AlignCenter)
         
@@ -39,28 +37,17 @@ class Timer(QLabel):
 
         metrics = QFontMetrics(font_style)
 
-        self.show_time()
         self.setStyleSheet("border: 1px solid black;")
         self.setFixedHeight(120)
         #self.setFixedWidth(400)
-    
-    def get_current_time(self) -> float:
-        result = (self.counter.remainingTime() / 1000) / self.deadline
-        return result # self.counter: us -> s
 
-    def start(self):
-        self.counter.start(self.deadline)
-
-    def show_time(self):
-        time_micro_seconds = self.counter.remainingTime()
+    def update_time(self):
+        time_micro_seconds = self.timer.remainingTime()
         time_seconds = (time_micro_seconds / 1000)
         time_minutes = time_seconds // 60
         time_left_seconds = time_seconds % 60
-        self.remaining_time = (float(self.deadline) - time_micro_seconds) / (float(self.deadline)) # hack until i solve
         self.setText("Time: " + str(f"{str(int(time_minutes)).zfill(2)}: {str(int(time_left_seconds)).zfill(2)}"))
 
-    def finish(self):
-        self.counter.stop()
 
 class QVLine(QFrame):
     def __init__(self):
@@ -192,7 +179,7 @@ class NegoStatus(QLabel):
         self.setFixedHeight(120)
 
 class NegotiationGUI(QMainWindow):
-    def __init__(self, screen, nego_time, timeout_func):
+    def __init__(self, screen, nego_time):
         super().__init__()
 
         self.setWindowTitle("Human Robot Negotiation Interface")
@@ -212,10 +199,7 @@ class NegotiationGUI(QMainWindow):
         margin.setTop(100)
         self.layout.setContentsMargins(margin)
 
-        self.timeout_func = timeout_func
-
-
-        self.timer_widget = Timer(nego_time, self.timeout)
+        self.timer_widget = Timer(nego_time)
         self.human_sentence_widget = SentenceField("Your Offer ", "-")
         self.agent_sentence_widget = SentenceField("Caduceus' Offer", "-")
 
@@ -253,9 +237,6 @@ class NegotiationGUI(QMainWindow):
     def update_status(self, message):
         self.nego_status.setText(str(message))
 
-    def get_time_controller(self):
-        return self.timer_widget
-
     def create_table(self, issue_names, data):
         self.template_table = copy.deepcopy(data)
         self.data = copy.deepcopy(data)
@@ -276,9 +257,6 @@ class NegotiationGUI(QMainWindow):
             self.data[x][y] = (str(value).title(), color)
             self.offer_details_widget.model().dataChanged.emit(x, y)
 
-    def timeout(self):
-        self.timeout_func()
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     from utility_space import UtilitySpace
@@ -288,11 +266,10 @@ if __name__ == "__main__":
     
     grid = human_utility_space.get_2d_ranked_grid_colored()
     window.create_table(human_utility_space.issue_names, grid)
-    window.timer_widget.start()
 
     window.update_grid_by_offer([(0, 0, "lol", "dark orange"), (0, 1, "lol", "orange"), (0, 2, "lol", "red"), (0, 3, "lol", "dark red")])
 
-    print(window.get_time_controller().remaining_time)
+    print(window.get_time_controller().get_remaining_time())
 
     window.show()
 

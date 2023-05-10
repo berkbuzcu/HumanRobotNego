@@ -1,4 +1,4 @@
-from __future__ import division
+#from __future__ import division
 
 import sys
 import itertools
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     domain = UtilitySpace("..\HANT\Domains\Holiday_A\Berk\Agent.xml")
     import os
 
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../spry-water-357912-42ef44b257e5.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../clever-hangar-367209-a9608efc7b1e.json"
 
     
     streamer = SpeechStreamingRecognizerBeta(domain_keywords = list(itertools.chain(*domain.issue_values_list.values())))

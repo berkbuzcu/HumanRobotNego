@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="sad2-48528d" version="0.0.0" installOnlyAtStartup="false">
+ <names>
+  <name lang="en_US">sad2</name>
+ </names>
+ <descriptions>
+  <description lang="en_US">I don't like your offer. Lets talk about other options.</description>
+ </descriptions>
+ <supportedLanguages>
+  <language>en_US</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="behavior_1">
+   <userRequestable/>
+   <nature>interactive</nature>
+   <autonomous/>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+</package>
