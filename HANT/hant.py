@@ -110,7 +110,7 @@ class HANT:
 
     def start_robot_server(self, agent_interaction_type):
         gw = execnet.makegateway(
-            "popen//python=.\\agent_interaction_models\\.venv\\Scripts\\python.exe")
+            "popen//python=.\\agent_interaction_models\\.venv_Nao\\Scripts\\python.exe")
         channel = gw.remote_exec("""
                                     from agent_interaction_models.robot_server import RobotServer
                                     robot_server = RobotServer(channel)
