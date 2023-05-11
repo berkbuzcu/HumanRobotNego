@@ -4,7 +4,7 @@ from robot_action import RobotAction
 class RobotMobileAction(RobotAction):
     def init_robot(self):
         super(RobotMobileAction, self).init_robot()
-        self.folder_path = "naobehaviorsprojectfolder-choregraphe-28-d4aa29/"
+        self.folder_path = "untitled-be6670/Pepper 2/"
 
     def greet(self):
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", False)

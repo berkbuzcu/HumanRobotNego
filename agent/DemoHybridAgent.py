@@ -42,11 +42,11 @@ class DemoHybridAgent:
         self.mood_controller = MoodController(self.utility_space, self.time_controller)
 
     def time_based(self):
-        t = self.time_controller.remaining_time
+        t = self.time_controller.get_remaining_time()
         return (1 - t) * (1 - t) * self.p0 + 2 * (1 - t) * t * self.p1 + t * t * self.p2
 
     def behaviour_based(self):
-        t = self.time_controller.remaining_time
+        t = self.time_controller.get_remaining_time()
 
         diff = [self.utility_space.get_offer_utility(self.last_received_bids[i + 1]) - \
                 self.utility_space.get_offer_utility(self.last_received_bids[i])
@@ -63,7 +63,7 @@ class DemoHybridAgent:
     
     def receive_offer(self, bid: AbstractAction, predictions, normalized_predictions):
         self.last_received_bids.append(bid)
-        t = self.time_controller.remaining_time
+        t = self.time_controller.get_remaining_time()
         mood = self.mood_controller.get_mood(bid)
         human_offer_utility = self.utility_space.get_offer_utility(bid)
         time_based_utility = self.time_based()

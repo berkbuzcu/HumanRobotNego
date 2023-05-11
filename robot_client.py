@@ -43,7 +43,7 @@ class RobotClient:
         return reply[reply.find("REPLY:")+len("REPLY:"):]
     
     def start_robot_server(self, agent_interaction_type):
-        python2_path = ".\\agent_interaction_models\\.venv\\Scripts\\python.exe"
+        python2_path = ".\\agent_interaction_models\\.venv_Nao\\Scripts\\python.exe"
         gw = execnet.makegateway(
             f"popen//python={python2_path}")
         self.channel = gw.remote_exec("""

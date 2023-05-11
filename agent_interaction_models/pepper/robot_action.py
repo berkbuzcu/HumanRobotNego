@@ -122,7 +122,7 @@ class RobotAction(IRobot):
 
         sentence = random.choice(speak_strings)
         self.tts.say(sentence)
-        self.send_after_offer_sentence()
+        #self.send_after_offer_sentence()
         return sentence
 
     def send_after_offer_sentence(self):

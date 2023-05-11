@@ -40,7 +40,7 @@ class PepperGesture:
 
         self.num_of_moods[mood] += 1
 
-        mood_file_idx = self.num_of_moods[mood] % len(self.files_by_mood[mood])
+        mood_file_idx = self.num_of_moods[mood] % (len(self.files_by_mood[mood]) + 1)
         mood_file = mood.lower() + "_%s" % mood_file_idx
 
         # Return the robot action.
