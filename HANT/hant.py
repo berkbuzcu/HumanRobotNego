@@ -13,7 +13,7 @@ from human_interaction_models.offer_classifier import OfferClassifier
 from agent.Solver_Agent.SolverAgent import SolverAgent
 from agent.HybridAgent import HybridAgent
 from agent.DemoHybridAgent import DemoHybridAgent
-
+import os
 #from Human_Interaction_Models.human_cli import HumanCLI
 from human_interaction_models.speech_controller import SpeechController
 import warnings
@@ -110,27 +110,42 @@ class HANT:
         print("DOMAIN: ", domain_name, " AGENT: ", agent_preference_file, " HUMAN: ", human_preference_file)
         print("AGENT TYPE:", agent_type, " : ", agent_interaction_type)
 
+    
+    def venv_manager(self, agent_interaction_type):
+        python2_path="C:\\Python27\\python.exe"
+        
+        python3_path=sys.executable
+
+        path=os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type)
+        python2_command=" -m virtualenv " + path
+        python3_command=" -m venv "+ path
+        
+        if not os.path.isdir(path):
+            if agent_interaction_type=="Nao":
+                os.system(python2_path+python2_command)
+                command = os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","activate")
+                os.system(command+" && pip install -r requirements"+agent_interaction_type+".txt")
+            elif agent_interaction_type=="QT":
+                os.system(python3_path+python3_command)   #for any new robot add a elif agent_interaction_type=="RobotName" with suitable python version.
+                command = os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","activate")
+                os.system(command+" && pip install -r requirements"+agent_interaction_type+".txt")
+
+
+
     def start_robot_server(self, agent_interaction_type):
-        if agent_interaction_type=="Nao":
-            gw = execnet.makegateway(
-                "popen//python=.\\agent_interaction_models\\.venv_Nao\\Scripts\\python.exe")
-            channel = gw.remote_exec("""
-                                        from agent_interaction_models.robot_server import RobotServer
-                                        robot_server = RobotServer(channel)
-                                        robot_server.start_server()
-                                    """)
-            self.robot_client = RobotClient(channel)
-            self.robot_client.send_init_robot(agent_interaction_type)
-        elif agent_interaction_type=="QT":
-            gw = execnet.makegateway(
-                "popen//python=.\\agent_interaction_models\\.venv_QT\\Scripts\\python.exe")
-            channel = gw.remote_exec("""
-                                        from agent_interaction_models.robot_server import RobotServer
-                                        robot_server = RobotServer(channel)
-                                        robot_server.start_server()
-                                    """)
-            self.robot_client = RobotClient(channel)
-            self.robot_client.send_init_robot(agent_interaction_type)
+
+        self.venv_manager(agent_interaction_type)
+
+        venvPath="popen//python="+os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","python.exe")
+        gw = execnet.makegateway(venvPath)
+        channel = gw.remote_exec("""
+                                    from agent_interaction_models.robot_server import RobotServer
+                                    robot_server = RobotServer(channel)
+                                    robot_server.start_server()
+                                """)
+        self.robot_client = RobotClient(channel)
+        self.robot_client.send_init_robot(agent_interaction_type)
+        
         #BURADA KALDIN DÜZELT
 
         #169.254.177.156
