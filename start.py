@@ -82,7 +82,7 @@ class DomainSelect(QWidget):
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
     "Agent Type": ["Solver", "Hybrid", "DemoHybrid"],
-    "Output Type": ["QT+GUI", "Nao+GUI", "Test+GUI"],
+    "Output Type": ["QT+GUI", "Nao+GUI", "Pepper+GUI"],
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["continual_learning", "face_channel_only", "face_channel", "None"],
     "Protocol": ["Alternating Offer Protocol"],

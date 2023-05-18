@@ -14,7 +14,7 @@ import roslibpy
 import threading
 
 
-from agent_interaction_models.robot_interface import IRobot
+from agent_interaction_models.QT.robot_interface import IRobot
 import random
 from random import shuffle
 from abc import ABCMeta, abstractmethod

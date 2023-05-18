@@ -1,10 +1,9 @@
-from agent_interaction_models.robot_interface import IRobot
-from agent_interaction_models.robot_mobile_action import RobotMobileAction
+#<from agent_interaction_models.Nao.robot_interface import IRobot
+#from agent_interaction_models.Nao.robot_mobile_action import RobotMobileAction
 import time
 import ast
-from agent_interaction_models.QTtest import QTRobotClass
 
-class TestRobot(IRobot):
+"""class TestRobot(IRobot):
     def init_robot(self):
         return "test robot inited"
 
@@ -27,7 +26,7 @@ class TestRobot(IRobot):
         return ("wooohooo! " + mood)
 
     def receive_nego_over(self, type):
-        return ("nego over type: " + type)
+        return ("nego over type: " + type)"""
     
 
 class RobotServer:
@@ -56,13 +55,20 @@ class RobotServer:
                 self.channel.send("Failed: %s" % e)
     
     def init_robot(self, robot_name):
-        classes = {
-            "qt": QTRobotClass,
-            "nao": RobotMobileAction,
-            "test": TestRobot,
-        }
+        if robot_name == "nao":
+            from agent_interaction_models.Nao.robot_mobile_action import RobotMobileAction
+            robot_class = RobotMobileAction
 
-        self.robot = classes[robot_name]()
+        elif robot_name == "pepper":
+            from agent_interaction_models.Pepper.robot_mobile_action import RobotMobileAction
+            robot_class = RobotMobileAction
+        elif robot_name == "qt":
+            from agent_interaction_models.QT.QTtest import QTRobotClass
+            robot_class = QTRobotClass
+        else:
+            raise "The robot not existing in robot server"
+
+        self.robot = robot_class()
         return self.robot.init_robot()
 
     def stop_server(self):

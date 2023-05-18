@@ -1,4 +1,4 @@
-from agent_interaction_models.robot_action import RobotAction
+from agent_interaction_models.Nao.robot_action import RobotAction
 
 
 class RobotMobileAction(RobotAction):

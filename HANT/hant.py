@@ -136,7 +136,7 @@ class HANT:
 
         self.venv_manager(agent_interaction_type)
 
-        venvPath="popen//python="+os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","python.exe")
+        venvPath="popen//python="+os.path.join(os.curdir,f"agent_interaction_models",f".venv_{agent_interaction_type}","Scripts","python.exe")
         gw = execnet.makegateway(venvPath)
         channel = gw.remote_exec("""
                                     from agent_interaction_models.robot_server import RobotServer
