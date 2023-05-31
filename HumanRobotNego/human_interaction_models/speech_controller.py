@@ -1,10 +1,10 @@
-from human_interaction_models.speech_to_text_streaming_beta import (
+from HumanRobotNego.human_interaction_models.speech_to_text_streaming_beta import (
     SpeechStreamingRecognizerBeta,
 )
 
 import time
 
-from HANT.nego_action import Offer, Accept
+from HumanRobotNego.HANT.nego_action import Offer, Accept
 
 
 class SpeechController:

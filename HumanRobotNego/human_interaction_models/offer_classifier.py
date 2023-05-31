@@ -2,8 +2,8 @@ import nltk
 from nltk.tokenize import word_tokenize
 import re
 import copy
-from HANT.nego_action import AbstractAction, AbstractActionFactory, Accept, Offer, ResourceAllocationActionFactory
-from HANT.utility_space import UtilitySpace
+from HumanRobotNego.HANT.nego_action import AbstractAction, AbstractActionFactory, Accept, Offer, ResourceAllocationActionFactory
+from HumanRobotNego.HANT.utility_space import UtilitySpace
 
 class OfferClassifier:
 	def __init__(self, human_utility_space: UtilitySpace, action_factory: AbstractActionFactory):

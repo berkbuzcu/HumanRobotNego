@@ -1,8 +1,8 @@
-from HANT import nego_action
-from HANT.nego_action import Accept, Offer
-from Agent.Agent_Strategy.BABT import BABT
-from Agent.Agent_Mood.mood_controller import EmotionController
-from HANT.utility_space import UtilitySpace
+from HumanRobotNego.HANT import nego_action
+from HumanRobotNego.HANT.nego_action import Accept, Offer
+from HumanRobotNego.agent.Agent_Strategy.BABT import BABT
+from HumanRobotNego.agent.Agent_Mood.mood_controller import EmotionController
+from HumanRobotNego.HANT.utility_space import UtilitySpace
 
 
 class MimicAgent:

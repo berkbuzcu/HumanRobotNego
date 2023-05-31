@@ -2,8 +2,8 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QWidget, QLabel, QMainW
 from PySide6.QtCore import Qt, QMimeData, Signal, QPoint, QDir
 from PySide6.QtGui import QDrag, QPixmap, QFont, QIcon
 import math
-from HANT import utility_space_controller
-from HANT.utility_space_controller import UtilitySpaceController
+from HumanRobotNego.HANT import utility_space_controller
+from HumanRobotNego.HANT.utility_space_controller import UtilitySpaceController
 import numpy as np
 from xml.dom import minidom
 

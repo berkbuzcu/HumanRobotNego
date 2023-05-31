@@ -45,7 +45,7 @@ autonomousProxy = ALProxy("ALAutonomousLife", NAO_IP, 9559)
 # managerProxy.runBehavior("behaviors-1-0/behaviors/LetsStart/LetsStart")
 # managerProxy.runBehavior("behaviors-1-0/behaviors/LeavingNego/LeavingNego")
 
-# from Agent_Interaction_Models.robot_mobile_action import RobotMobileAction
+# from HumanRobotNego.agent_Interaction_Models.robot_mobile_action import RobotMobileAction
 #
 # action = RobotMobileAction()
 #

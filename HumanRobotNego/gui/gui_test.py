@@ -2,10 +2,10 @@ from email.charset import QP
 from inspect import Parameter
 from PySide6.QtCore import QRunnable, Slot, QThreadPool, QDir, QObject, Signal
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QApplication, QComboBox, QFileSystemModel, QTreeView, QSplitter, QFileDialog, QHBoxLayout, QLineEdit
-from HANT.hant import HANT
+from HumanRobotNego.HANT.hant import HANT
 import sys
 import time
-from GUI.nego_gui import NegotiationGUI
+from HumanRobotNego.gui.nego_gui import NegotiationGUI
 import traceback
 from preference_elicitation import PreferenceElicitation
 

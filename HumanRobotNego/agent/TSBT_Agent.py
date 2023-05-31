@@ -1,8 +1,8 @@
-from HANT import nego_action
-from HANT.nego_action import Accept, Offer
-from Agent.Agent_Strategy.TSBT import TSBT
-from Agent.Agent_Emotion.emotion_controller import EmotionController
-from HANT.utility_space import UtilitySpace
+from HumanRobotNego.HANT import nego_action
+from HumanRobotNego.HANT.nego_action import Accept, Offer
+from HumanRobotNego.agent.Agent_Strategy.TSBT import TSBT
+from HumanRobotNego.agent.Agent_Emotion.emotion_controller import EmotionController
+from HumanRobotNego.HANT.utility_space import UtilitySpace
 
 
 class TSBTAgent:

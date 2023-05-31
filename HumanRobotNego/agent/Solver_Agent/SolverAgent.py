@@ -1,6 +1,6 @@
 import copy
-from HANT import nego_action
-from agent.Agent_Mood.mood_controller import MoodController
+from HumanRobotNego.HANT import nego_action
+from HumanRobotNego.agent.Agent_Mood.mood_controller import MoodController
 
 import pandas as pd
 
@@ -11,7 +11,7 @@ import math
 
 from typing import Tuple
 
-from HANT.utility_space import UtilitySpace
+from HumanRobotNego.HANT.utility_space import UtilitySpace
 
 
 class SolverAgent:

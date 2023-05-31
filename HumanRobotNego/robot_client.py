@@ -47,7 +47,7 @@ class RobotClient:
         gw = execnet.makegateway(
             f"popen//python={python2_path}")
         self.channel = gw.remote_exec("""
-                                    from agent_interaction_models.robot_server import RobotServer
+                                    from HumanRobotNego.agent_interaction_models.robot_server import RobotServer
                                     robot_server = RobotServer(channel)
                                     robot_server.start_server()
                                 """)
@@ -57,7 +57,7 @@ class RobotClient:
 
 #gw = execnet.makegateway("popen//python=D:\PythonProjects\Human-Robot-Nego\AgentInteractionModels\.venv\Scripts\python.exe")
 #channel = gw.remote_exec("""
-#    from AgentInteractionModels.robot_server import RobotServer
+#    from HumanRobotNego.agentInteractionModels.robot_server import RobotServer
 #    robot_server = RobotServer(channel)
 #    robot_server.start_server()
 #    """)

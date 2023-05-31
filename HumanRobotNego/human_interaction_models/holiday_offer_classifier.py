@@ -2,12 +2,11 @@ from os import read
 import nltk
 from nltk.tokenize import word_tokenize
 import re
-from HANT.nego_action import AbstractActionFactory, NormalActionFactory
 from collections import ChainMap
 import itertools
 
-
-from HANT.utility_space import UtilitySpace 
+from HumanRobotNego.HANT.nego_action import AbstractActionFactory, NormalActionFactory
+from HumanRobotNego.HANT.utility_space import UtilitySpace 
 
 
 class HolidayOfferClassifier:
@@ -190,8 +189,8 @@ class HolidayOfferClassifier:
 
 
 if __name__ == "__main__":
-	from HANT.utility_space import UtilitySpace
-	from HANT.nego_action import ResourceAllocationActionFactory
+	from HumanRobotNego.HANT.utility_space import UtilitySpace
+	from HumanRobotNego.HANT.nego_action import ResourceAllocationActionFactory
 	domain = UtilitySpace("D:\PythonProjects\Human_Robot_Nego\HANT\Domains\Holiday_B\Gevher\Human.xml")
 	action_factory = NormalActionFactory(domain)	
 	

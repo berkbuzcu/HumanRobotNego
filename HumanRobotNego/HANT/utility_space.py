@@ -2,7 +2,7 @@ from xml.dom.minidom import parse
 import xml.dom.minidom
 import itertools
 import math
-import HANT.nego_action as nego_action
+import HumanRobotNego.HANT.nego_action as nego_action
 
 
 class UtilitySpace:

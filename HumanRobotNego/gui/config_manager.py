@@ -2,7 +2,7 @@ from PySide6.QtCore import QRunnable, Slot, QThreadPool, QDir, QObject, Signal
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QApplication, QComboBox, QFileSystemModel, QTreeView, QSplitter, QFileDialog, QHBoxLayout, QLineEdit
 from PySide6.QtGui import QMovie, QIcon
 
-from HANT.preference_elicitation import PreferenceElicitation
+from HumanRobotNego.HANT.preference_elicitation import PreferenceElicitation
 
 import traceback
 

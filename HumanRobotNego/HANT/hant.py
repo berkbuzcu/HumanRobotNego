@@ -1,37 +1,37 @@
 import sys
 import time
 
-from HANT import nego_action
-from HANT.nego_action import ResourceAllocationActionFactory, NormalActionFactory
-from HANT.nego_history import NegotiationHistory
-from HANT.utility_space import UtilitySpace
-from HANT.utility_space_controller import UtilitySpaceController
-from HANT.nego_timer import NegotiationTimer
-from HANT.nego_worker import NegotiationWorker
+from HumanRobotNego.HANT import nego_action
+from HumanRobotNego.HANT.nego_action import ResourceAllocationActionFactory, NormalActionFactory
+from HumanRobotNego.HANT.nego_history import NegotiationHistory
+from HumanRobotNego.HANT.utility_space import UtilitySpace
+from HumanRobotNego.HANT.utility_space_controller import UtilitySpaceController
+from HumanRobotNego.HANT.nego_timer import NegotiationTimer
+from HumanRobotNego.HANT.nego_worker import NegotiationWorker
 
-from logger.logger import Logger
-from robot_client import RobotClient
+from HumanRobotNego.logger.logger import Logger
+from HumanRobotNego.robot_client import RobotClient
 
-from human_interaction_models.holiday_offer_classifier import HolidayOfferClassifier
-from human_interaction_models.offer_classifier import OfferClassifier
-from agent.Solver_Agent.SolverAgent import SolverAgent
-from agent.HybridAgent import HybridAgent
-from agent.DemoHybridAgent import DemoHybridAgent
+from HumanRobotNego.human_interaction_models.holiday_offer_classifier import HolidayOfferClassifier
+from HumanRobotNego.human_interaction_models.offer_classifier import OfferClassifier
+from HumanRobotNego.agent.Solver_Agent.SolverAgent import SolverAgent
+from HumanRobotNego.agent.HybridAgent import HybridAgent
+from HumanRobotNego.agent.DemoHybridAgent import DemoHybridAgent
 
-#from Human_Interaction_Models.human_cli import HumanCLI
-from human_interaction_models.speech_controller import SpeechController
+#from HumanRobotNego.human_interaction_models.human_cli import HumanCLI
+from HumanRobotNego.human_interaction_models.speech_controller import SpeechController
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-from EmotionCapturing.SessionManager.Session import SessionCamera
+from HumanRobotNego.EmotionCapturing.SessionManager.Session import SessionCamera
 
 from enum import Enum
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QThreadPool
 
-from gui.nego_gui import NegotiationGUI
-from gui.config_manager import ConfigManager
+from HumanRobotNego.gui.nego_gui import NegotiationGUI
+from HumanRobotNego.gui.config_manager import ConfigManager
 
 
 class HANT(QApplication):
@@ -131,7 +131,7 @@ class HANT(QApplication):
     #    gw = execnet.makegateway(
     #        f"popen//python={python2_path}")
     #    channel = gw.remote_exec("""
-    #                                from agent_interaction_models.robot_server import RobotServer
+    #                                from HumanRobotNego.agent_interaction_models.robot_server import RobotServer
     #                                robot_server = RobotServer(channel)
     #                                robot_server.start_server()
     #                            """)

@@ -1,8 +1,8 @@
 import requests
-from human_interaction_models.holiday_offer_classifier import HolidayOfferClassifier
-from HANT import nego_action
-from HANT.nego_action import Offer, Accept
-from HANT.utility_space_controller import UtilitySpaceController
+from HumanRobotNego.human_interaction_models.holiday_offer_classifier import HolidayOfferClassifier
+from HumanRobotNego.HANT import nego_action
+from HumanRobotNego.HANT.nego_action import Offer, Accept
+from HumanRobotNego.HANT.utility_space_controller import UtilitySpaceController
 import time
 
 

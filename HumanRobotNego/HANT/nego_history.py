@@ -1,5 +1,5 @@
-from HANT.nego_action import Offer, Accept
-from HANT.sensitivity_calculator import SensitivityCalculator
+from HumanRobotNego.HANT.nego_action import Offer, Accept
+from HumanRobotNego.HANT.sensitivity_calculator import SensitivityCalculator
 import pandas as pd
 
 
