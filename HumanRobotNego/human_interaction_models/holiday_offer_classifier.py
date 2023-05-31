@@ -184,16 +184,3 @@ class HolidayOfferClassifier:
 				if len(self.keywords) == 0:
 					return True
 		return False
-
-
-
-
-if __name__ == "__main__":
-	from HumanRobotNego.HANT.utility_space import UtilitySpace
-	from HumanRobotNego.HANT.nego_action import ResourceAllocationActionFactory
-	domain = UtilitySpace("D:\PythonProjects\Human_Robot_Nego\HANT\Domains\Holiday_B\Gevher\Human.xml")
-	action_factory = NormalActionFactory(domain)	
-	
-	classifier = HolidayOfferClassifier(domain, action_factory)
-	print(domain.issue_value_evaluation)
-	print(classifier.get_offer_and_arguments("I want to stay for two weeks at Amsterdam")[0].get_bid())

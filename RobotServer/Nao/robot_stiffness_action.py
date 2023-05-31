@@ -1,4 +1,4 @@
-from agent_interaction_models.Nao.robot_action import RobotAction
+from RobotServer.Nao.robot_action import RobotAction
 
 
 class RobotStiffnessAction(RobotAction):
