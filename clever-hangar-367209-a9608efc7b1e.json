@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "clever-hangar-367209",
+  "private_key_id": "a9608efc7b1e10706283d633e671b1f39dd43218",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC3OCZZzjjyWHbx\n4Gtc2LuMvB9VlQ06pLZ2Lr5vlUazold2AeKvdxFqy9nXV8ykf998yQ9SYr4cRGgm\nTx6yGhNxZ+h7PAHZBkmPOpPG/F06e5ybm90QZAxzXZkzVcbA+YWgTJPU6EpPz4dg\nGVhy2RrOywj9spHiiwbpmJzPGL0MFV1BbDOPlxZcUfClfUlxSkoKHUcFMOWJKPmr\nRQG7/tdy9CuU2Z1q7H1Wi0E99XaUuwBf8TTJsBPu9ksSsVeJ1AJOZLMZiUqVP2ad\nTuMtY9I3ifTxEMjP70J2gT7dwfLquyBx+kaZjlLUNPJwuAeQSPhpScK3oXZEoGzk\n2+r1oZvzAgMBAAECggEAAIAbwrUIfMj3EjQNtwQ0hu7gmwg8MAPRJ8N6660Zs1Xn\nLUBWESqfFo6V+ruXqH9c6edWrl/sqwEY07n1mIDvuqiQ/v0r+B7HRqffTXTVAFrk\nE5y6XtgXHJ2N1JEQaOiFj+mFodg8k7k6Ym3PSwkCxLvTO3YoZdkBXNP44avsoELR\nfJAbU9KZVcjySbxXaq2QqaywRKWsjQiD0AMIztlxK9nLZ7qEjnWvqrj1rva9+fFL\n+Glx75T5qCXNuDC0zB8KITOo9aKtBNVlBu/ye/FfKyOtx2kbaczLfJfu0YME0CJE\nOsUDvqqF/pwJDmUKQo1RmIIvLYS5lXkgZ+zCZ99MiQKBgQDyp5thwV7xzRxBM5mJ\nkzmxzT9tNhZESolqyfTPKBoD/tRBZ+OxRJ6hdQgaNceiagSUfJ3IjlGBsLoxlUXK\niDUuNFtzwfYqwRWru+9V97IV1nITQIpZDRY5jPUTQxyVwYlUazkxBZ2OF7UsmZvP\nRshxuwAI0ANCjHXhsnNH2ORlFwKBgQDBS7z0OwRuYQqtCgRs48+/8JC0JP8sY7ap\nTMtzGfjRmsm9F55GSEf1ChdPL513qC0/+C8r1fRlu25YbRRUC91lojPr+EZjv4yc\nX0PGktx7Sm3O+DJPAAwcYRTgmXLX79/B9qxTiB2Wx+XK8iVLdnCVOsJPETtfxXOn\nugnF9owBhQKBgFseuWiSFrcyUKPjXoqc8JNmAaVfJCls3AFv6TBJXMuXS9lry8Lr\ng64ZpntBKsBAk4u26AFCADV1SdYIufZ+A4pgOt9TPL99VkfxAMUFiKhOqPO1zr31\n/hyKZBVhpEBQNuOuiAFynGGZYX1oCWxipi6fDDpC8pZw7GteeY/HUKztAoGAbqT1\n8i9eJ/iwbcCQK+xzXQFNM3ECB9zEEED/LFGvlfuugujkFoMFfYRbN16gGoBP9pAQ\nIF2GWj1huogl3L416xlf8zDYyfw5dsEpQJ+MSZ6fIJv94C68v/nqQ25SyLxsLtEO\nb3o4xbiDFxposruHUkSiOTQ58mZJ/7aEJactGSkCgYBdbZee19aUg/3IhQT7Cv88\naLMoQTOhULSimvyjj6wiyi5hnd/OowgI+z9aBWU1vtdK6MDHCc+Qh5Iv6UMA6B9l\nwZUi065zWdfNLdjOYHmchM/14IQklJ2Fo5+c67YR4LUhOd0QkvlznxOUcuYmLP2E\nXDt2RfLn6DO++HEn8kgCMw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "speech@clever-hangar-367209.iam.gserviceaccount.com",
+  "client_id": "117439895817286225001",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/speech%40clever-hangar-367209.iam.gserviceaccount.com"
+}
