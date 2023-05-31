@@ -1,7 +1,9 @@
 # coding=utf-8
+
 import pandas as pd
 
-class SQLLogger:
+
+class Logger:
     def __init__(
         self, participant_name, agent_type, interaction_type, log_file_path, domain
     ):

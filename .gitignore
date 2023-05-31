@@ -12,7 +12,7 @@ EmotionCapturing/FaceChannel/CLModel/checkpoint/*
 # Ignore .idea and env .json
 *.idea
 .vscode/
-.venv/
+*venv*
 
 sessions/
 
@@ -26,4 +26,8 @@ solver_logs*
 
 Gestures/
 
+HANT/Domains/*
 HANT/Domains/
+
+*.json
+
