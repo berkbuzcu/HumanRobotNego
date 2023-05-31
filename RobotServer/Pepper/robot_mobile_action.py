@@ -1,4 +1,4 @@
-from agent_interaction_models.Pepper.robot_action import RobotAction
+from Pepper.robot_action import RobotAction
 
 
 class RobotMobileAction(RobotAction):

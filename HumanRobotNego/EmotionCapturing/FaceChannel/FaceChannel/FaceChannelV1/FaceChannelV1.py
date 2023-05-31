@@ -18,6 +18,8 @@ from tensorflow.keras.layers import (
     BatchNormalization, MaxPooling2D, Activation, Flatten, Dropout, Dense, Lambda, Input
 )
 
+from HumanRobotNego import PROJECT_DIR
+
 from FaceChannel.Metrics import metrics
 
 from FaceChannel.FaceChannelV1 import imageProcessingUtil
@@ -88,9 +90,9 @@ class FaceChannelV1:
             print("-----------------------------------------------")
 
         if type =="Cat":
-            modelDirectory = ".\EmotionCapturing\FaceChannel\CLModel\TrainedNetworks\CategoricalFaceChannel.h5"
+            modelDirectory = f"{PROJECT_DIR}\EmotionCapturing\FaceChannel\CLModel\TrainedNetworks\CategoricalFaceChannel.h5"
         elif type =="Dim":
-            modelDirectory = ".\EmotionCapturing\FaceChannel\CLModel\TrainedNetworks\DimensionalFaceChannel.h5"
+            modelDirectory = f"{PROJECT_DIR}\EmotionCapturing\FaceChannel\CLModel\TrainedNetworks\DimensionalFaceChannel.h5"
         else:
             raise("Model type not found!")
 

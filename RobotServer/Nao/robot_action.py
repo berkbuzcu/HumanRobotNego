@@ -1,7 +1,8 @@
-from agent_interaction_models.Nao.robot_interface import IRobot
 import random
 from random import shuffle
-from agent_interaction_models.GestureModels.nao_gesture import NaoGestures
+
+from RobotServer.Nao.robot_interface import IRobot
+from RobotServer.GestureModels.nao_gesture import NaoGestures
 from abc import ABCMeta, abstractmethod
 import ast
 

@@ -1,8 +1,8 @@
-from PySide6.QtCore import QRunnable, Slot, QThreadPool, QDir, QObject, Signal
-from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QApplication, QComboBox, QFileSystemModel, QTreeView, QSplitter, QFileDialog, QHBoxLayout, QLineEdit
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QComboBox, QFileDialog, QHBoxLayout, QLineEdit
 from PySide6.QtGui import QMovie, QIcon
 
 from HumanRobotNego.HANT.preference_elicitation import PreferenceElicitation
+from HumanRobotNego import DOMAINS_DIR
 
 import traceback
 
@@ -13,16 +13,22 @@ class DomainSelect(QWidget):
         layout = QHBoxLayout()
         layout.addWidget(QLabel("Preference Profile of " + agent_type))
         
+        self.callback_func = callback_func
+        self.agent_type = agent_type
+
         self.selected_file_label = QLabel("")
         layout.addWidget(self.selected_file_label)
         
-        select_domain_button = QPushButton("...")
-        select_domain_button.setFixedWidth(40)
-        select_domain_button.pressed.connect(lambda: callback_func(agent_type))
+        self.select_domain_button = QPushButton("...")
+        self.select_domain_button.setFixedWidth(40)
+        self.select_domain_button.pressed.connect(self.emit_callback)
 
-        layout.addWidget(select_domain_button)
+        layout.addWidget(self.select_domain_button)
 
         self.setLayout(layout)
+
+    def emit_callback(self):
+        self.callback_func(self.agent_type)
 
     def update_text(self, text):
         self.selected_file_label.setText(text)
@@ -108,8 +114,6 @@ class ConfigManager(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(layout)
 
-        self.domain_dir = QDir("HANT/Domains/").absolutePath()
-
         self.agent_domain = DomainSelect("Agent", self.select_file_dialog)
         self.human_domain = DomainSelect("Human", self.select_file_dialog)
 
@@ -129,19 +133,17 @@ class ConfigManager(QMainWindow):
 
         self.loading = LoadingScreen(tool.screens()[-1])       
 
-    
     def select_file_dialog(self, agent_type):
-        dialog = QFileDialog(self, ("Select a Preference Profile"), self.domain_dir + "/" + self.domain_dropdown.currentText() + "/" + self.name_field.text())
+        dialog = QFileDialog(self, ("Select a Preference Profile"), str(DOMAINS_DIR / self.domain_dropdown.currentText() / self.name_field.text()))
         if dialog.exec():
             agent_type = agent_type.lower()
             selected_domain = str(dialog.selectedFiles()[0])
             self.parameters[f"{agent_type}-domain"] = selected_domain
-            getattr(self, f"{agent_type}_domain").update_text(selected_domain)
+            getattr(self, f"{agent_type}_domain").update_text("/".join(selected_domain.split("/")[-3:]))
 
     def show_elicitation(self):
-        self.pref_elicitation = PreferenceElicitation(self.name_field.text(), self.domain_dir + "/" + self.domain_dropdown.currentText() + "/" + self.domain_dropdown.currentText() + ".xml")
+        self.pref_elicitation = PreferenceElicitation(self.name_field.text(), str(DOMAINS_DIR / self.domain_dropdown.currentText() / f"{self.domain_dropdown.currentText()}.xml"))
         self.pref_elicitation.show()
-
 
     def start_nego(self):
         try:

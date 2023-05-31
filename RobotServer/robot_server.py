@@ -1,5 +1,4 @@
-from robot_interface import IRobot
-import time
+from RobotServer.robot_interface import IRobot
 import ast
 
 class TestRobot(IRobot):
@@ -56,11 +55,11 @@ class RobotServer:
     def init_robot(self, robot_name):
         robot_class = TestRobot
         if robot_name == "nao":
-            from nao.robot_mobile_action import RobotMobileAction
+            from RobotServer.Nao.robot_mobile_action import RobotMobileAction
             robot_class = RobotMobileAction
 
         elif robot_name == "pepper":
-            from pepper.robot_mobile_action import RobotMobileAction
+            from RobotServer.Pepper.robot_mobile_action import RobotMobileAction
             robot_class = RobotMobileAction
 
         self.robot = robot_class()

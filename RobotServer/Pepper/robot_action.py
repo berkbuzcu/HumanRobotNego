@@ -1,7 +1,7 @@
-from agent_interaction_models.Pepper.robot_interface import IRobot
+from Pepper.robot_interface import IRobot
 import random
 from random import shuffle
-from agent_interaction_models.GestureModels.pepper_gesture import PepperGesture
+from GestureModels.pepper_gesture import PepperGesture
 from abc import ABCMeta, abstractmethod
 import ast
 

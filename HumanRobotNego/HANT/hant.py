@@ -1,6 +1,16 @@
 import sys
 import time
+import warnings
+import os 
+import execnet
 
+from enum import Enum
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QThreadPool
+
+from HumanRobotNego import DOMAINS_DIR
+from HumanRobotNego import PROJECT_DIR
+from HumanRobotNego import ROBOT_SERVER_DIR
 from HumanRobotNego.HANT import nego_action
 from HumanRobotNego.HANT.nego_action import ResourceAllocationActionFactory, NormalActionFactory
 from HumanRobotNego.HANT.nego_history import NegotiationHistory
@@ -8,31 +18,20 @@ from HumanRobotNego.HANT.utility_space import UtilitySpace
 from HumanRobotNego.HANT.utility_space_controller import UtilitySpaceController
 from HumanRobotNego.HANT.nego_timer import NegotiationTimer
 from HumanRobotNego.HANT.nego_worker import NegotiationWorker
-
-from HumanRobotNego.logger.logger import Logger
-from HumanRobotNego.robot_client import RobotClient
-
+from HumanRobotNego.HANT.robot_client import RobotClient
 from HumanRobotNego.human_interaction_models.holiday_offer_classifier import HolidayOfferClassifier
 from HumanRobotNego.human_interaction_models.offer_classifier import OfferClassifier
 from HumanRobotNego.agent.Solver_Agent.SolverAgent import SolverAgent
 from HumanRobotNego.agent.HybridAgent import HybridAgent
 from HumanRobotNego.agent.DemoHybridAgent import DemoHybridAgent
-
-#from HumanRobotNego.human_interaction_models.human_cli import HumanCLI
+from HumanRobotNego.logger.logger import Logger
 from HumanRobotNego.human_interaction_models.speech_controller import SpeechController
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
-from HumanRobotNego.EmotionCapturing.SessionManager.Session import SessionCamera
-
-from enum import Enum
-
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QThreadPool
-
 from HumanRobotNego.gui.nego_gui import NegotiationGUI
 from HumanRobotNego.gui.config_manager import ConfigManager
+from HumanRobotNego.EmotionCapturing.SessionManager.Session import SessionCamera
+#from HumanRobotNego.human_interaction_models.human_cli import HumanCLI
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class HANT(QApplication):
     def __init__(self):
@@ -41,7 +40,6 @@ class HANT(QApplication):
         self.config_manager = ConfigManager(self)
         self.config_manager.show()
         self.threadpool = QThreadPool()
-        self.robot_client = RobotClient()
 
         #self.negotiation_setup(
         #    human_interaction_type,
@@ -51,7 +49,6 @@ class HANT(QApplication):
         #    human_preference_file,
         #    domain_name,
         #)
-
 
     def negotiation_setup(
         self,
@@ -80,8 +77,7 @@ class HANT(QApplication):
 
         self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller)
 
-        domain_dir = f"./HANT/Domains/{domain_name}/"
-        domain_file = domain_dir + domain_name + ".xml"
+        domain_file = str(DOMAINS_DIR / domain_name / f"{domain_name}.xml")
         self.set_utility_space(
             agent_preference_file, human_preference_file, domain_file
         )
@@ -96,7 +92,7 @@ class HANT(QApplication):
         #name, session_type (demo, 1, 2), "face_channel" | "cl"
 
         self.set_agent_type(agent_type)
-        self.robot_client.start_robot_server(agent_interaction_type)
+        self.start_robot_server(agent_interaction_type)
         self.set_human_interaction_type(human_interaction_type, domain_file)
         
         self.grid = self.human_utility_space.get_2d_ranked_grid_colored()
@@ -116,11 +112,11 @@ class HANT(QApplication):
         
         python3_path=sys.executable
 
-        path=os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type)
-        python2_command=" -m virtualenv " + path
-        python3_command=" -m venv "+ path
+        venv_path=str(ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}")
+        python2_command=" -m virtualenv " + venv_path
+        python3_command=" -m venv "+ venv_path
         
-        if not os.path.isdir(path):
+        if not os.path.isdir(venv_path):
             if agent_interaction_type=="Nao":
                 os.system(python2_path+python2_command)
                 command = os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","activate")
@@ -130,16 +126,14 @@ class HANT(QApplication):
                 command = os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","activate")
                 os.system(command+" && pip install -r requirements"+agent_interaction_type+".txt")
 
-
-
     def start_robot_server(self, agent_interaction_type):
-
         self.venv_manager(agent_interaction_type)
 
-        venvPath="popen//python="+os.path.join(os.curdir,f"agent_interaction_models",f".venv_{agent_interaction_type}","Scripts","python.exe")
+        python_exe = str(ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}" / "Scripts" / "python.exe")
+        venvPath=f"popen//python={python_exe}"
         gw = execnet.makegateway(venvPath)
         channel = gw.remote_exec("""
-                                    from agent_interaction_models.robot_server import RobotServer
+                                    from RobotServer.robot_server import RobotServer
                                     robot_server = RobotServer(channel)
                                     robot_server.start_server()
                                 """)

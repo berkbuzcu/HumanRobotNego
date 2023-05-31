@@ -1,8 +1,8 @@
 import execnet
 
 class RobotClient:
-    def __init__(self) -> None:
-        self.channel = None
+    def __init__(self, channel) -> None:
+        self.channel = channel
 
     ### Server Methods ###
 
