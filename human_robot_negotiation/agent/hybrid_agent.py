@@ -1,15 +1,14 @@
-from ctypes import util
-from typing import List
+import typing as t
 
 from human_robot_negotiation.HANT.nego_action import AbstractAction, AbstractActionFactory
 from human_robot_negotiation.HANT.utility_space import UtilitySpace
-from human_robot_negotiation.HANT.nego_action import AbstractActionFactory
 
 import pandas as pd
 
 from human_robot_negotiation.agent.agent_mood.mood_controller import MoodController
+from human_robot_negotiation.agent.abstract_agent import AbstractAgent
 
-class HybridAgent:
+class HybridAgent(AbstractAgent):
     p0: float
     p1: float
     p2: float
@@ -20,8 +19,8 @@ class HybridAgent:
         3: [0.11, 0.22, 0.66],
         4: [0.05, 0.15, 0.3, 0.5],
     }
-    my_last_bids: List[AbstractAction]
-    last_received_bids: List[AbstractAction]
+    my_last_bids: t.List[AbstractAction]
+    last_received_bids: t.List[AbstractAction]
     utility_space: UtilitySpace
     action_factory: AbstractActionFactory
     
@@ -52,20 +51,21 @@ class HybridAgent:
 
         delta = sum([u * w for u, w in zip(diff, self.W[len(diff)])])
 
-        target_utility = self.utility_space.get_offer_utility(self.my_last_bids[-1]) - (self.p3 + self.p3 * t) * delta
+        time = self.time_controller.get_current_time()
+        target_utility = self.utility_space.get_offer_utility(self.my_last_bids[-1]) - (self.p3 + self.p3 * time) * delta
 
         return target_utility
     
     def receive_offer(self, bid: AbstractAction, predictions, normalized_predictions):
         self.last_received_bids.append(bid)
-        t = self.time_controller.get_current_time() 
+        time = self.time_controller.get_current_time() 
         mood = self.mood_controller.get_mood(bid)
         human_offer_utility = self.utility_space.get_offer_utility(bid)
         target_utility = self.time_based()
 
         self.logs.append({
             "Logger": "Human",
-            "Offer": bid.get_bid(),
+            "Offer": bid.get_bid(perspective="Human"),
             "Agent Utility": human_offer_utility,
             "Scaled Time": t,
             "Time Based Utility": 0,
@@ -75,9 +75,9 @@ class HybridAgent:
 
 
         if len(self.last_received_bids) > 2:
-            behaviour_based_utility = self.behaviour_based(t)
+            behaviour_based_utility = self.behaviour_based()
 
-            target_utility = (1. - t * t) * behaviour_based_utility + t * t * target_utility
+            target_utility = (1. - time * time) * behaviour_based_utility + time * time * target_utility
 
         if target_utility <= human_offer_utility:
             return self.action_factory.create_acceptance(), "Happy"

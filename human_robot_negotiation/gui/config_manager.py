@@ -164,6 +164,9 @@ class ConfigManager(QMainWindow):
             traceback.print_exc()
             self.start_button.setDisabled(False)
     
+    def reset_manager(self):
+        self.start_button.setDisabled(False)
+
     def nego_over(self):
         self.nego_window.timer_widget.finish()
         self.loading.show()
