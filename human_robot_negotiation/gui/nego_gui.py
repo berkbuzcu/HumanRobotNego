@@ -241,7 +241,7 @@ class NegotiationGUI(QMainWindow):
         self.template_table = copy.deepcopy(data)
         self.data = copy.deepcopy(data)
         self.offer_details_widget = OfferDetails(issue_names, self.data)
-        self.layout.addWidget(self.offer_details_widget, 3, 0, 2, 3)    
+        self.layout.addWidget(self.offer_details_widget, 3, 0, 2, 3)
 
     def reset_board(self):
         for x in range(len(self.data)):

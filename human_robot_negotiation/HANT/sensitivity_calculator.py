@@ -8,6 +8,25 @@ class SensitivityCalculator:
     This class calculates the sensitivity for given preference profiles and history of the target.
     """
 
+    def get_single_move(self, self_utility, prev_self_utility, opponent_utility, prev_opponent_utility):
+        if abs(self_utility - prev_self_utility) == 0 and \
+            abs(opponent_utility - prev_opponent_utility) == 0:
+            return "silent"
+        elif abs( self_utility - prev_self_utility) == 0 and \
+             (opponent_utility -  prev_opponent_utility > 0):
+            return "nice"
+        elif (self_utility - prev_self_utility > 0) and \
+             (opponent_utility -  prev_opponent_utility > 0):
+            return "fortunate"
+        elif (self_utility - prev_self_utility < 0) and \
+             (opponent_utility -  prev_opponent_utility < 0):
+            return "unfortunate"
+        elif (self_utility - prev_self_utility < 0) and \
+             (opponent_utility -  prev_opponent_utility > 0):
+            return "concession"
+        else:
+            return "selfish"
+
     def get_target_move_list(self, target_utility_list, opponent_utility_list):
         """
         Gets utilities of both sides as input. Can calculate for both agent and opponent based on given input.

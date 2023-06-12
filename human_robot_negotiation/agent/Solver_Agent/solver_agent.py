@@ -4,6 +4,8 @@ from human_robot_negotiation.agent.agent_mood.mood_controller import MoodControl
 
 import pandas as pd
 
+import typing as t
+
 
 # Import helper classes.
 # Math.
@@ -12,9 +14,10 @@ import math
 from typing import Tuple
 
 from human_robot_negotiation.HANT.utility_space import UtilitySpace
+from human_robot_negotiation.agent.abstract_agent import AbstractAgent
 
 
-class SolverAgent:
+class SolverAgent(AbstractAgent):
     def __init__(self, utility_space, time_controller, action_factory):
         self.utility_space: UtilitySpace = utility_space
         self.action_factory: nego_action.AbstractActionFactory = action_factory
@@ -107,7 +110,7 @@ class SolverAgent:
 
         return False, ()
 
-    def receive_offer(self, human_offer: nego_action.Offer, predictions, normalized_predictions):
+    def receive_offer(self, human_offer: t.Union[nego_action.Offer, None], predictions: t.Dict[str, float], normalized_predictions: t.Dict[str, float]) -> t.Tuple[nego_action.Offer, str]:
         """
         This function is called when the agent receives offer with ***mood_recording=True and also uses sensitivity class.
         """
@@ -192,7 +195,7 @@ class SolverAgent:
         print("ITEM SENT: ", self.agent_history[-1], " - UTIL: ", generated_offer_utility)
         return self.agent_history[-1], mood
 
-    def receive_negotiation_over(self, participant_name, session_number, type):
+    def receive_negotiation_over(self, participant_name: str, session_number: str, type: str):
         """
         Type: agent | human | timeout
         """

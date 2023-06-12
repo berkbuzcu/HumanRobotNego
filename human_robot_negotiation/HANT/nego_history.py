@@ -1,11 +1,13 @@
 from human_robot_negotiation.HANT.nego_action import Offer, Accept
 from human_robot_negotiation.HANT.sensitivity_calculator import SensitivityCalculator
-import pandas as pd
+import typing as t
+from logger import LoggerNew
 
+import pandas as pd
 
 class NegotiationHistory:
     def __init__(
-        self, utility_space_controller, agent_utility_space, human_utility_space
+        self, utility_space_controller, agent_utility_space, human_utility_space, logger: LoggerNew
     ):
         self.offer_history = []
         self.human_offer_history = []
@@ -14,43 +16,71 @@ class NegotiationHistory:
         self.agent_utility_space = agent_utility_space
         self.human_utility_space = human_utility_space
         self.sensitivity_calculator = SensitivityCalculator()
+        self.logger = logger
 
-    def add_to_history(self, bidder, offer, time, emotion, predictions):
+    def add_to_history(self, bidder: str, offer: Offer, scaled_time: float, agent_mood: str, predictions):
+        agent_utility = self.agent_utility_space.get_offer_utility(offer.get_bid(perspective="Agent"))
+        human_utility = self.human_utility_space.get_offer_utility(offer.get_bid(perspective="Human"))
+
+        move = ""
+
         if bidder == "Agent":
-            # Calculate utilities of both sides for agent offer.
-            agent_utility = self.agent_utility_space.get_offer_utility(offer)
-            human_utility = self.human_utility_space.get_offer_utility(offer)
+            if len(self.agent_offer_history) > 0:
+                self_utility = agent_utility
+                self_prev_utility = self.agent_offer_history[-1][2]
+                opponent_utility = human_utility
+                opponent_prev_utility = self.agent_offer_history[-1][3]
+
+                move = self.sensitivity_calculator.get_single_move(
+                    self_utility, self_prev_utility, opponent_utility, opponent_prev_utility)
+
             self.agent_offer_history.append(
-                (bidder, offer, agent_utility, human_utility, time)
+                (bidder, offer, agent_utility, human_utility, scaled_time)
             )
+
         elif bidder == "Human":
-            # Calculate utilities of both sides for human offer.
-            agent_utility = self.agent_utility_space.get_offer_utility(offer)
-            human_utility = self.human_utility_space.get_offer_utility(offer)
+            if len(self.human_offer_history) > 0:
+                self_utility = human_utility
+                self_prev_utility = self.human_offer_history[-1][2]
+                opponent_utility = agent_utility
+                opponent_prev_utility = self.human_offer_history[-1][3]
+
+                move = self.sensitivity_calculator.get_single_move(
+                    self_utility, self_prev_utility, opponent_utility, opponent_prev_utility)
+                
             self.human_offer_history.append(
-                (bidder, offer, agent_utility, human_utility, time)
+                (bidder, offer, agent_utility, human_utility, scaled_time)
             )
         else:
-            raise ("Invalid bidder.")
-            
-        self.offer_history.append(
-            (
+            raise Exception("Invalid bidder.")
+        
+        self.offer_history.append((
                 bidder,
-                offer,
+                offer, 
                 agent_utility,
                 human_utility,
-                time,
-                emotion,
+                scaled_time,
+                agent_mood,
                 predictions["Max_V"],
                 predictions["Min_V"],
                 predictions["Valance"],
                 predictions["Max_V"],
                 predictions["Min_V"],
-                predictions["Arousal"],
-             )
-        )
+                predictions["Arousal"]))
+        
+        self.logger.log_round(
+                bidder,
+                offer.get_bid(), ## Get bid from bidder perspective. 
+                agent_utility,
+                human_utility,
+                scaled_time,
+                move,
+                agent_mood,
+                predictions,
+                sensitivity_class="",
+                sentences=[])
 
-    def get_agent_move_list(self):
+    def get_agent_move_list(self) -> t.List[str]:
         agent_history = list(zip(*self.agent_offer_history[:]))
         agent_moves = []
         if len(agent_history) > 0:
@@ -61,12 +91,12 @@ class NegotiationHistory:
             )
         return agent_moves
 
-    def get_human_move_list(self):
+    def get_human_move_list(self) -> t.List[str]:
         human_history = list(zip(*self.human_offer_history[:]))
 
         if len(human_history) < 2:
             print("Not enough offers to log (Human)!")
-            return
+            return []
 
         agent_utilities = human_history[2]
         human_utilities = human_history[3]
