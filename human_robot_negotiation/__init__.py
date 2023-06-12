@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 PROJECT_DIR = pathlib.Path(__file__).parent
 ROBOT_SERVER_DIR = PROJECT_DIR.parent / "robot_server"
 DOMAINS_DIR = PROJECT_DIR.parent / "domains"
+REQUIREMENTS_DIR = PROJECT_DIR.parent
 
 load_dotenv(str(PROJECT_DIR / ".env"))
 
