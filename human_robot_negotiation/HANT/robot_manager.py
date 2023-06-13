@@ -66,9 +66,7 @@ class RobotManager:
 
     def start_robot_server(self, agent_interaction_type):
         self.venv_manager(agent_interaction_type)
-        if agent_interaction_type=="Nao" or agent_interaction_type=="Pepper":
-            agent_interaction_type="Nao"
-        python_exe = str(ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}" / "Scripts" / "python.exe")
+        python_exe = str(ROBOT_SERVER_DIR / f".venv_Nao" / "Scripts" / "python.exe")
         venvPath=f"popen//python={python_exe}"
         gw = execnet.makegateway(venvPath)
         self.channel = gw.remote_exec(robot_runner)

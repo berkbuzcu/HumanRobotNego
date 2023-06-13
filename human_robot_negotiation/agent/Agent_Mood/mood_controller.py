@@ -1,3 +1,6 @@
+from human_robot_negotiation.HANT.nego_action import Offer
+import typing as t
+
 class MoodController:
     def __init__(self, utility_space, time_controller):
         # Set utility space.
@@ -26,13 +29,13 @@ class MoodController:
             "Worried": 0,
         }
 
-    def get_mood(self, human_offer):
+    def get_mood(self, human_offer: t.Dict[str, str]):
         """
         This function gets offer of the opponent's and lower threshold of the current tactic as input.
         Return robot mood and mood method to call and updates mood counts.
         """
         # Get human's offer as list, so that we can compare with previous ones.
-        human_offer_list = human_offer.get_bid()
+        human_offer_list = human_offer
         # Set default mood and mood file to none.
         mood = None
 

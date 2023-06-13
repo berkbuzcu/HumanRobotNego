@@ -59,13 +59,13 @@ class HybridAgent(AbstractAgent):
     def receive_offer(self, bid: AbstractAction, predictions, normalized_predictions):
         self.last_received_bids.append(bid)
         time = self.time_controller.get_current_time() 
-        mood = self.mood_controller.get_mood(bid)
+        mood = self.mood_controller.get_mood(bid.get_bid(perspective="Agent"))
         human_offer_utility = self.utility_space.get_offer_utility(bid)
         target_utility = self.time_based()
 
         self.logs.append({
             "Logger": "Human",
-            "Offer": bid.get_bid(perspective="Human"),
+            "Offer": bid.get_bid(perspective="Agent"),
             "Agent Utility": human_offer_utility,
             "Scaled Time": t,
             "Time Based Utility": 0,
@@ -89,7 +89,7 @@ class HybridAgent(AbstractAgent):
 
         self.logs.append({
             "Logger": "Agent",
-            "Offer": bid.get_bid(),
+            "Offer": bid.get_bid(perspective="Agent"),
             "Agent Utility": human_offer_utility,
             "Scaled Time": t,
             "Time Based Utility": target_utility,
