@@ -81,7 +81,7 @@ class SolverAgent(AbstractAgent):
         return (1 - t) * (1 - t) * self.p0 + 2 * (1 - t) * t * self.p1 + t * t * self.p2
 
     def behaviour_based(self):
-        t = self.time_controller.remaining_time
+        t = self.time_controller.get_remaining_time()
 
         diff = [self.utility_space.get_offer_utility(self.opponent_history[i + 1]) - self.utility_space.get_offer_utility(self.opponent_history[i])
                 for i in range(len(self.opponent_history) - 1)]
@@ -110,17 +110,17 @@ class SolverAgent(AbstractAgent):
 
         return False, ()
 
-    def receive_offer(self, human_offer: t.Union[nego_action.Offer, None], predictions: t.Dict[str, float], normalized_predictions: t.Dict[str, float]) -> t.Tuple[nego_action.Offer, str]:
+    def receive_offer(self, human_offer: nego_action.Offer, predictions: t.Dict[str, float], normalized_predictions: t.Dict[str, float]) -> t.Tuple[nego_action.Offer, str]:
         """
         This function is called when the agent receives offer with ***mood_recording=True and also uses sensitivity class.
         """
 
-        human_offer_utility = self.utility_space.get_offer_utility(human_offer)
+        human_offer_utility = self.utility_space.get_offer_utility(human_offer.get_bid(perspective="Agent"))
         emotion_value = 0
 
         self.opponent_history.append(human_offer)
 
-        current_time = self.time_controller.remaining_time
+        current_time = self.time_controller.get_remaining_time()
         time_based_target_utility = self.time_based(current_time)
 
         behavior_based_target_utility = 0
@@ -160,7 +160,7 @@ class SolverAgent(AbstractAgent):
 
         self.logs.append({
             "Logger": "Human",
-            "Offer": human_offer.get_bid(),
+            "Offer": human_offer.get_bid(perspective="Agent"),
             "Agent Utility": human_offer_utility,
             "Scaled Time": current_time,
             "Behavior Based": behavior_based_utility,
@@ -176,7 +176,7 @@ class SolverAgent(AbstractAgent):
 
         self.logs.append({
             "Logger": "Agent",
-            "Offer": generated_offer.get_bid(),
+            "Offer": generated_offer.get_bid(perspective="Agent"),
             "Agent Utility": generated_offer_utility,
             "Scaled Time": current_time,
             "Behavior Based": behavior_based_utility,

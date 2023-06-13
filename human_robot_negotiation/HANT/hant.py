@@ -1,11 +1,8 @@
-import sys
 import time
 import warnings
-import os 
-import execnet
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QThreadPool
+from PySide6.QtCore import QThreadPool, QObject, Signal
 
 from human_robot_negotiation import DOMAINS_DIR
 from human_robot_negotiation import PROJECT_DIR
@@ -39,6 +36,10 @@ from logger import LoggerNew
 
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
+class HANTSignals(QObject):
+    nego_over = Signal()
+    
 
 class HANT(QApplication):
     config_manager: ConfigManager
@@ -99,7 +100,7 @@ class HANT(QApplication):
         self.set_agent_type(agent_type)
         self.robot_manager.start_robot_server(agent_interaction_type)
         
-        self.time_controller.start_timer()
+        self.time_controller.start_signal.emit()
         self.set_human_interaction_type(human_interaction_type, domain_file)
         
         self.grid = self.human_utility_space.get_2d_ranked_grid_colored()
@@ -247,7 +248,7 @@ class HANT(QApplication):
                 is_agreement=agreement)
         
         print("Logging complete")
-        self.time_controller.stop_timer()
+        self.time_controller.finish_signal.emit()
         self.config_manager.reset_manager()
         self.negotiation_gui.destroy()
         self.camera_controller.close()
@@ -300,7 +301,8 @@ class HANT(QApplication):
             while self.running:
                 (human_action, offer_done, total_user_input) = self.human_interaction_controller.get_human_action()
                 
-
+                received_time = self.time_controller.get_remaining_time()
+                print(received_time)
                 if isinstance(human_action, nego_action.Accept):
                     self.end_negotiation("human")
                     return
