@@ -42,7 +42,7 @@ class Timer(QLabel):
         #self.setFixedWidth(400)
 
     def update_time(self):
-        time_micro_seconds = self.timer.remainingTime()
+        time_micro_seconds = self.timer.main_timer.remainingTime()
         time_seconds = (time_micro_seconds / 1000)
         time_minutes = time_seconds // 60
         time_left_seconds = time_seconds % 60

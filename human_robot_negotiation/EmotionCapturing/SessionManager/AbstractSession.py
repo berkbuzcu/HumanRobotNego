@@ -149,9 +149,9 @@ class AbstractSession(ABC):
         :return: None
         """
         self._faces = []
-
-        self.training_manager.wait()
-        self.training_manager.stop()
+        if hasattr(self, "training_manager"):
+            self.training_manager.wait()
+            self.training_manager.stop()
 
         max_for_user = {
             "max_a": float(self.max_a),
