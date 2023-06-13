@@ -71,7 +71,7 @@ class DemoHybridAgent(AbstractAgent):
 
         self.logs.append({
             "Logger": "Human",
-            "Offer": bid.get_bid(),
+            "Offer": bid.get_bid(perspective="Agent"),
             "Agent Utility": human_offer_utility,
             "Scaled Time": t,
             "Target Utility": 0,
@@ -96,8 +96,8 @@ class DemoHybridAgent(AbstractAgent):
 
         self.logs.append({
             "Logger": "Agent",
-            "Offer": bid.get_bid(),
-            "Agent Utility": self.utility_space.get_offer_utility(bid.get_bid()),
+            "Offer": bid.get_bid(perspective="Agent"),
+            "Agent Utility": self.utility_space.get_offer_utility(bid.get_bid(perspective="Agent")),
             "Scaled Time": t,
             "Target Utility": target_utility,
             "Time Based Utility": time_based_utility,
