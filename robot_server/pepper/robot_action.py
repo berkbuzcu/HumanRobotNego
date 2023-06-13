@@ -16,6 +16,8 @@ class RobotAction(IRobot):
         self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
         self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
         self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
+        self.animatedSpeechProxy = ALProxy("ALAnimatedSpeech", self.robotIP, 9559)
+
         # Set autonomous part of the robot.:9559
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
         self.autonomousProxy.setAutonomousAbilityEnabled("AutonomousBlinking", False)
