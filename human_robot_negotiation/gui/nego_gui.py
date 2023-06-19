@@ -196,7 +196,7 @@ class NegotiationGUI(QMainWindow):
         margin = QMargins()
         margin.setLeft(75)
         margin.setRight(75)
-        margin.setTop(100)
+        margin.setTop(10)
         self.layout.setContentsMargins(margin)
 
         self.timer_widget = Timer(nego_time)

@@ -19,7 +19,7 @@ class RobotMobileAction(RobotAction):
     def play_gesture_file(self, gesture_file):
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", False)
         self.animatedSpeechProxy.say(gesture_file)
-        self.managerProxy.runBehavior("pepper-c91fbb/StandUp")
+        self.managerProxy.runBehavior("standup/behavior_1")
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
     
     def leave_negotiation(self):
