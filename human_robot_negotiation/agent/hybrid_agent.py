@@ -62,7 +62,7 @@ class HybridAgent(AbstractAgent):
         mood = self.mood_controller.get_mood(bid.get_bid(perspective="Agent"))
         human_offer_utility = self.utility_space.get_offer_utility(bid)
         target_utility = self.time_based()
-
+        behaviour_based_utility=0
         self.logs.append({
             "Logger": "Human",
             "Offer": bid.get_bid(perspective="Agent"),
