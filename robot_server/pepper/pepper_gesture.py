@@ -56,7 +56,10 @@ class PepperGesture:
 
         self.num_of_moods[mood] += 1
 
-        mood_file_idx = self.num_of_moods[mood] % len(self.files_by_mood[mood])
+        res = self.num_of_moods[mood] % len(self.files_by_mood[mood])
+        
+        mood_file_idx = res if res != 0 else 1
+        
         mood_file = mood.lower() + "_%s" % mood_file_idx
         mood_file=str("^start(")+str(self.folder_path + mood_file + "/behavior_1")+str(")")+self.animations[mood_file]
         # Return the robot action.
