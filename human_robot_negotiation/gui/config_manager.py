@@ -36,10 +36,10 @@ class DomainSelect(QWidget):
 
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
-    "Agent Type": ["DemoHybrid", "Hybrid", "Solver"],
-    "Output Type": ["Pepper+GUI","QT+GUI","Nao+GUI","Test+GUI"],
+    "Agent Type": ["Hybrid", "Solver"],
+    "Output Type": ["Pepper+GUI","Nao+GUI"],
     "Input Type": ["Speech", "Text"],
-    "Facial Expression Model": ["face_channel_only", "None"],
+    "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
     "Domain": ["Holiday_A", "Holiday_B", "Fruits", "Deserted Island"],
 }
@@ -85,7 +85,7 @@ class ConfigManager(QMainWindow):
         layout.addWidget(QLabel("Participant Name"))
         layout.addWidget(self.name_field)
         
-        self.deadline_field = QLineEdit("")
+        self.deadline_field = QLineEdit("600")
         layout.addWidget(QLabel("Deadline"))        
         layout.addWidget(self.deadline_field)
 
