@@ -41,7 +41,7 @@ form_fields = {
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
-    "Domain": ["Holiday_A", "Holiday_B", "Fruits", "Deserted Island"],
+    "Domain": ["Holiday_Demo", "Holiday_A","Holiday_B", "Fruits", "Deserted Island"],
 }
 
 class LoadingScreen(QMainWindow):

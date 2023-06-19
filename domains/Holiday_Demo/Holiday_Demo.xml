@@ -1,0 +1,55 @@
+<negotiation_domain>
+	<utility_space domain_name = "Holiday_Demo" domain_type = "Normal" number_of_issues="4">
+
+			<issue index="1" name="Accommodation">
+				<item index="1" value="Apartment">
+				</item>
+				<item index="2" value="Hotel">
+				</item>
+				<item index="3" value="Hostel">
+				</item>
+				<item index="4" value="Boat">
+				</item>
+			</issue>
+			<issue index="2" name="Destination">
+				<item index="1" value="Paris">
+				</item>
+				<item index="2" value="Moscow">
+				</item>
+				<item index="3" value="Tokyo">
+				</item>
+				<item index="4" value="Brazil">
+				</item>
+			</issue>
+			<issue index="3" name="Events">
+				<item index="1" value="Festival">
+				</item>
+				<item index="2" value="Shopping">
+				</item>
+				<item index="3" value="Museum">
+				</item>
+				<item index="4" value="Sports">
+				</item>
+			</issue>
+			<issue index="4" name="Duration">
+				<item index="1" value="3 days">
+				</item>
+				<item index="2" value="1 week">
+				</item>
+				<item index="3" value="2 weeks">
+				</item>
+				<item index="4" value="3 weeks">
+				</item>
+			</issue>
+
+			<weight index="1" value="0.15">
+			</weight>
+			<weight index="2" value="0.10">
+			</weight>
+			<weight index="3" value="0.45">
+			</weight>
+			<weight index="4" value="0.30">
+			</weight>
+
+	</utility_space>
+</negotiation_domain>
