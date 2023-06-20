@@ -29,7 +29,6 @@ from human_robot_negotiation.human_interaction_models.speech_controller import S
 from human_robot_negotiation.gui.nego_gui import NegotiationGUI
 from human_robot_negotiation.EmotionCapturing.SessionManager.Session import SessionCamera
 
-from human_robot_negotiation.logger.logger import Logger
 from human_robot_negotiation.gui.config_manager import ConfigManager
 
 from logger import LoggerNew
@@ -69,14 +68,11 @@ class HANT(QApplication):
         human_preference_file=parameters["human-domain"]
         domain_name=parameters["Domain"]
         deadline=parameters["Deadline"]
-        log_file_path="./Logs/"
 
         self.camera_id = 1
 
         self.time_controller = NegotiationTimer(deadline * 10**3, self.timeout_negotiation)
         self.camera_controller = SessionCamera(participant_name, session_number, session_type, camera_id=self.camera_id) # 30 seconds
-        self.logger = Logger(participant_name, agent_type, agent_interaction_type, log_file_path, domain_name)
-        self.logger_new = LoggerNew(participant_name, agent_type, agent_interaction_type, "ozu", domain_name)
 
         self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller)
         self.negotiation_worker = NegotiationWorker(self)
@@ -112,6 +108,8 @@ class HANT(QApplication):
         print("SESSION TYPE: ", self.session_type)
         print("DOMAIN: ", domain_name, " AGENT: ", agent_preference_file, " HUMAN: ", human_preference_file)
         print("AGENT TYPE:", agent_type, " : ", agent_interaction_type)
+
+        LoggerNew.create_session(participant_name, agent_type, agent_interaction_type, "SBU", domain_name)
 
         self.threadpool.start(self.negotiation_worker)
 
@@ -170,7 +168,6 @@ class HANT(QApplication):
             self.utility_space_controller,
             self.agent_utility_space,
             self.human_utility_space,
-            self.logger_new
         )
 
     def set_agent_type(self, agent_type):
@@ -207,10 +204,7 @@ class HANT(QApplication):
         self.negotiation_gui.update_agent_message(agent_sentence)
 
     def update_nego_history(self):
-        self.nego_history.set_sensitivity_predictions(self.agent.sensitivity_class_list) # TODO: Remove sensitivity class list
         self.nego_history.set_sentences(self.human_interaction_controller.human_sentences)
-        offer_df_list = self.nego_history.extract_history_to_df()
-        self.logger.log_offer_history(self.session_number, offer_df_list)
 
     def end_negotiation(self, termination_type: str):
         agent_num_of_emotions = self.agent.receive_negotiation_over(self.participant_name, self.session_number, termination_type)
@@ -226,18 +220,8 @@ class HANT(QApplication):
 
             time_passed, agent_score, user_score, agreement = (1, 0, 0, False) if termination_type == "timeout" else (last_offer[4], last_offer[2], last_offer[3], True)
 
-            self.logger.log_negotiation_summary(
-                session_number=self.session_number,
-                emotion_counts=agent_num_of_emotions,
-                sens_dict=human_sensitivity_dict,
-                human_awareness=human_awareness,
-                total_offers=total_offers,
-                time_passed=time_passed,
-                agent_score=agent_score,
-                user_score=user_score,
-                is_agreement=agreement)
-            
-            self.logger_new.log_summary(
+
+            LoggerNew.log_summary(
                 robot_moods=agent_num_of_emotions,
                 sensitivity_analysis=human_sensitivity_dict,
                 human_awareness=human_awareness,
@@ -283,6 +267,8 @@ class HANT(QApplication):
                 self.is_first_turn = False
             else:
                 rem_time = time.time() - start_time
+                print("REM TIME: ", rem_time)
+                time.sleep(4)
                 if rem_time < 2.01:
                     print("Sleeping for: ", 2 - rem_time)
                     time.sleep(2 - rem_time)

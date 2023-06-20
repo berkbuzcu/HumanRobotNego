@@ -8,6 +8,9 @@ import pandas as pd
 from human_robot_negotiation.agent.agent_mood.mood_controller import MoodController
 from human_robot_negotiation.agent.abstract_agent import AbstractAgent
 
+from logger import LoggerNew
+
+
 class HybridAgent(AbstractAgent):
     p0: float
     p1: float
@@ -35,7 +38,6 @@ class HybridAgent(AbstractAgent):
         self.my_last_bids = []
         self.last_received_bids = []
         self.mood_controller = MoodController(self.utility_space, self.time_controller)
-        self.logs = []
 
     def time_based(self):
         t = self.time_controller.get_current_time()
@@ -62,14 +64,15 @@ class HybridAgent(AbstractAgent):
         mood = self.mood_controller.get_mood(bid.get_bid(perspective="Agent"))
         human_offer_utility = self.utility_space.get_offer_utility(bid)
         target_utility = self.time_based()
-        behaviour_based_utility=0
-        self.logs.append({
-            "Logger": "Human",
-            "Offer": bid.get_bid(perspective="Agent"),
-            "Agent Utility": human_offer_utility,
-            "Scaled Time": t,
-            "Time Based Utility": 0,
-            "Behavior Based Utility": 0,
+        behaviour_based_utility = 0
+
+        LoggerNew.log_hybrid({
+            "logger": "Human",
+            "offer": bid.get_bid(perspective="Agent"),
+            "agent_utility": human_offer_utility,
+            "scaled_time": time,
+            "time_based": 0,
+            "behavior_based": 0,
            }
         )
 
@@ -87,13 +90,13 @@ class HybridAgent(AbstractAgent):
         
         print("BID: ", bid, " - util: ",  human_offer_utility)
 
-        self.logs.append({
-            "Logger": "Agent",
-            "Offer": bid.get_bid(perspective="Agent"),
-            "Agent Utility": human_offer_utility,
-            "Scaled Time": t,
-            "Time Based Utility": target_utility,
-            "Behavior Based Utility": behaviour_based_utility if behaviour_based_utility else 0,
+        LoggerNew.log_hybrid({
+            "logger": "Agent",
+            "offer": bid.get_bid(perspective="Agent"),
+            "agent_utility": human_offer_utility,
+            "scaled_time": time,
+            "time_based": target_utility,
+            "behavior_based": behaviour_based_utility if behaviour_based_utility else 0,
         })
 
 
@@ -104,7 +107,4 @@ class HybridAgent(AbstractAgent):
         Type: agent | human | timeout
         """
         num_of_moods = self.mood_controller.get_num_of_moods()
-        df = pd.DataFrame(self.logs)
-        df.to_csv(f"./Logs/hybridagent_logs_{participant_name}_{session_number}.csv")
-
         return num_of_moods

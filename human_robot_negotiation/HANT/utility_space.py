@@ -75,16 +75,16 @@ class UtilitySpace:
     def get_all_possible_offers_utilities(self):
         return self.__all_possible_offers_utilities
 
-    def calculate_offer_for_opponent(self, offer):
-        opponent_offer = {}
-
-        for issue_name, offered_amount in offer.items():
-            # Get max count of the issue.
-            issue_max_count = self.issue_max_counts[issue_name]
-            # Calculate leftover for the opponent of iterating issue.
-            left_count = issue_max_count - int(offered_amount)
-            opponent_offer[issue_name] = str(left_count)
-        return opponent_offer
+    #def calculate_offer_for_opponent(self, offer):
+    #    opponent_offer = {}
+#
+    #    for issue_name, offered_amount in offer.items():
+    #        # Get max count of the issue.
+    #        issue_max_count = self.issue_max_counts[issue_name]
+    #        # Calculate leftover for the opponent of iterating issue.
+    #        left_count = issue_max_count - int(offered_amount)
+    #        opponent_offer[issue_name] = str(left_count)
+    #    return opponent_offer
 
     def get_offer_utility(self, offer) -> float:
         offer_utility = 0
