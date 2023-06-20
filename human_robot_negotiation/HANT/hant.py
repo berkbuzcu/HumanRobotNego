@@ -204,7 +204,6 @@ class HANT(QApplication):
         self.negotiation_gui.update_agent_message(agent_sentence)
 
     def update_nego_history(self):
-        self.nego_history.set_sensitivity_predictions(self.agent.sensitivity_class_list) # TODO: Remove sensitivity class list
         self.nego_history.set_sentences(self.human_interaction_controller.human_sentences)
 
     def end_negotiation(self, termination_type: str):
