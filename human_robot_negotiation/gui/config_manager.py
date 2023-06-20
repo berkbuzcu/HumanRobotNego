@@ -85,9 +85,9 @@ class ConfigManager(QMainWindow):
         layout.addWidget(QLabel("Participant Name"))
         layout.addWidget(self.name_field)
         
-        self.deadline_field = QLineEdit("600")
+        """self.deadline_field = QLineEdit("600")
         layout.addWidget(QLabel("Deadline"))        
-        layout.addWidget(self.deadline_field)
+        layout.addWidget(self.deadline_field)"""
 
         domain_fields = form_fields.pop("Domain")
 
@@ -150,7 +150,8 @@ class ConfigManager(QMainWindow):
             self.start_button.setDisabled(True)
 
             self.parameters["Participant Name"] = self.name_field.text()
-            self.parameters["Deadline"] = int(self.deadline_field.text())
+            #self.parameters["Deadline"] = int(self.deadline_field.text())
+            self.parameters["Deadline"] = 600 if self.values["Session Type"].currentText() == "Demo" else 900
             self.parameters["Domain"] = self.domain_dropdown.currentText()
             
             self.parameters = {**self.parameters, **{key: value.currentText() for key, value in self.values.items()}}
