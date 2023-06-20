@@ -8,7 +8,7 @@ class AbstractAgent(ABC):
     @abstractmethod
     def receive_offer(self, human_offer: t.Union[Offer, None], predictions: t.Dict[str, float], normalized_predictions: t.Dict[str, float]) -> t.Tuple[Offer, str]:
         ...
-    
+
     @abstractmethod
     def receive_negotiation_over(self, participant_name: str, session_number: str, type: str) -> None:
         ...

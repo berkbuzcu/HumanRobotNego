@@ -1,6 +1,7 @@
 from logger.models import *
 import os
 import pathlib
+import typing as t
 
 PROJECT_DIR = pathlib.Path(__file__).parent
 LOGS_DIR = PROJECT_DIR.parent / "logs"
@@ -14,8 +15,21 @@ if not os.path.exists(DB_PATH):
     create_tables()
 
 class LoggerNew():
-    def __init__(self, participant_uuid: str, agent_type: str, interaction_type: str, session_location: str, domain: str) -> None:
-        self.session_id = SessionInformation.create(
+    session_id = 0
+
+    @classmethod
+    def log_solver(cls, log_items: t.Dict[str, t.Any]):
+        log_items["session_id"] = cls.session_id
+        SolverAgentLogs.create(**log_items)
+
+    @classmethod
+    def log_hybrid(cls, log_items):
+        log_items["session_id"] = cls.session_id
+        HybridAgentLogs.create(**log_items)
+
+    @classmethod
+    def create_session(cls, participant_uuid: str, agent_type: str, interaction_type: str, session_location: str, domain: str) -> None:
+        cls.session_id = SessionInformation.create(
             participant_uuid = participant_uuid,
             agent_type = agent_type,
             interaction_type = interaction_type,
@@ -23,9 +37,10 @@ class LoggerNew():
             domain = domain
         )
 
-    def log_round(self, bidder, offer, agent_utility, human_utility, scaled_time, move, agent_mood, predictions, sensitivity_class, sentences):        
+    @classmethod
+    def log_round(cls, bidder, offer, agent_utility, human_utility, scaled_time, move, agent_mood, predictions, sentences):        
         SessionOfferHistory.create(
-            session_id=self.session_id,
+            session_id=cls.session_id,
             bidder=bidder,
             agent_utility=agent_utility,
             human_utility=human_utility,
@@ -39,11 +54,11 @@ class LoggerNew():
             max_arousal= predictions["Max_V"],
             min_arousal= predictions["Min_V"],
             arousal= predictions["Arousal"],
-            sensitivity_class=sensitivity_class,
             sentences=sentences,
         )
     
-    def log_summary(self,
+    @classmethod
+    def log_summary(cls,
                     is_agreement,
                     final_scaled_time,
                     final_agent_score,
@@ -53,7 +68,7 @@ class LoggerNew():
                     sensitivity_analysis,
                     robot_moods):
         SessionSummary.create(
-            session_id=self.session_id,
+            session_id=cls.session_id,
             is_agreement= is_agreement,
             final_scaled_time= final_scaled_time,
             final_agent_score= final_agent_score,
@@ -63,4 +78,3 @@ class LoggerNew():
             sensitivity_analysis= sensitivity_analysis,
             robot_moods= robot_moods
         )
-        ...
