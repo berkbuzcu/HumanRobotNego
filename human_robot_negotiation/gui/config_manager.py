@@ -41,7 +41,7 @@ form_fields = {
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
-    "Domain": ["Holiday_Demo", "Holiday_A","Holiday_B", "Fruits", "Deserted Island"],
+    "Domain": ["Holiday_Demo", "Holiday_A","Holiday_B"],
 }
 
 class LoadingScreen(QMainWindow):
@@ -92,12 +92,19 @@ class ConfigManager(QMainWindow):
         domain_fields = form_fields.pop("Domain")
 
         for text, values in form_fields.items():
-            label = QLabel(text)
-            widget = QComboBox()
-            self.values[text] = widget
-            widget.addItems(values)
-            layout.addWidget(label)
-            layout.addWidget(widget)
+            if text=="Input Type"or text=="Facial Expression Model" or text == "Protocol":
+                label = QLabel(text)
+                widget = QComboBox()
+                self.values[text] = widget
+                widget.addItems(values)
+                
+            elif not text=="Agent Type":
+                label = QLabel(text)
+                widget = QComboBox()
+                self.values[text] = widget
+                widget.addItems(values)
+                layout.addWidget(label)
+                layout.addWidget(widget)
         
         layout.addWidget(QLabel("Domain"))
         domain_layout = QHBoxLayout()
@@ -153,7 +160,7 @@ class ConfigManager(QMainWindow):
             #self.parameters["Deadline"] = int(self.deadline_field.text())
             self.parameters["Deadline"] = 600 if self.values["Session Type"].currentText() == "Demo" else 900
             self.parameters["Domain"] = self.domain_dropdown.currentText()
-            
+            self.parameters["Agent Type"] = "Hybrid" if self.values["Session Type"].currentText() == "Demo" else "Solver"
             self.parameters = {**self.parameters, **{key: value.currentText() for key, value in self.values.items()}}
             
             if "+" in self.parameters["Output Type"]:
