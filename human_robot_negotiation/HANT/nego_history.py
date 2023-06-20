@@ -7,7 +7,7 @@ import pandas as pd
 
 class NegotiationHistory:
     def __init__(
-        self, utility_space_controller, agent_utility_space, human_utility_space, logger: LoggerNew
+        self, utility_space_controller, agent_utility_space, human_utility_space
     ):
         self.offer_history = []
         self.human_offer_history = []
@@ -16,7 +16,6 @@ class NegotiationHistory:
         self.agent_utility_space = agent_utility_space
         self.human_utility_space = human_utility_space
         self.sensitivity_calculator = SensitivityCalculator()
-        self.logger = logger
 
     def add_to_history(self, bidder: str, offer: Offer, scaled_time: float, agent_mood: str, predictions):
         agent_utility = self.agent_utility_space.get_offer_utility(offer.get_bid(perspective="Agent"))
@@ -68,7 +67,7 @@ class NegotiationHistory:
                 predictions["Min_V"],
                 predictions["Arousal"]))
         
-        self.logger.log_round(
+        LoggerNew.log_round(
                 bidder,
                 offer.get_bid(), ## Get bid from bidder perspective. 
                 agent_utility,
@@ -77,7 +76,6 @@ class NegotiationHistory:
                 move,
                 agent_mood,
                 predictions,
-                sensitivity_class="",
                 sentences=[])
 
     def get_agent_move_list(self) -> t.List[str]:
@@ -177,7 +175,7 @@ class NegotiationHistory:
         return len(self.offer_history)
 
     def get_human_sensitivity_rates(self):
-        return self.human_sensitivity_rates
+        return self.sensitivity_calculator.get_sensitivity_rate(self.get_human_move_list())
 
     def get_human_awareness(self):
         agent_history = list(zip(*self.agent_offer_history[:]))
@@ -196,9 +194,6 @@ class NegotiationHistory:
             )
         else:
             return 0
-
-    def set_sensitivity_predictions(self, sensitivity_predictions):
-        self.sensitivity_predictions = sensitivity_predictions
 
     def set_sentences(self, sentences):
         self.sentences = sentences

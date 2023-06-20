@@ -54,7 +54,6 @@ class SessionOfferHistory(BaseModel):
     max_arousal	= FloatField()
     min_arousal = FloatField()
     arousal	= FloatField()
-    sensitivity_class = CharField(null=True)
     sentences = ListField()
 
 class SessionSummary(BaseModel):
@@ -84,6 +83,31 @@ class SessionSummary(BaseModel):
     #Content	
     #Worried
 
+class SolverAgentLogs(BaseModel):
+    session_id = ForeignKeyField(SessionInformation, backref='solver')
+    logger = CharField()
+    offer = JSONField()
+    agent_utility = FloatField()
+    scaled_time = FloatField()
+    behavior_based = FloatField()
+    behavior_based_final = FloatField()
+    pe = FloatField()
+    pa = FloatField()
+    time_based = FloatField()
+    final_utility = FloatField()
+    predictions = JSONField()
+    normalized_predictions = JSONField()
+    sensitivity_class = CharField()
+
+class HybridAgentLogs(BaseModel):
+    session_id = ForeignKeyField(SessionInformation, backref='hybrid')
+    logger = CharField()
+    offer = JSONField()
+    agent_utility = FloatField()
+    scaled_time = FloatField()   
+    behavior_based = FloatField()
+    time_based = FloatField()
+
 def create_tables():
     with db:
-        db.create_tables([SessionInformation, SessionOfferHistory, SessionSummary])
+        db.create_tables([SolverAgentLogs, HybridAgentLogs, SessionInformation, SessionOfferHistory, SessionSummary])
