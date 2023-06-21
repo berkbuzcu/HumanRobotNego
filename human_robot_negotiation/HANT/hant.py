@@ -118,12 +118,6 @@ class HANT(QApplication):
         #self.loading.show()
         print("NEGO IS OVER!!!")
 
-    def cleanup_nego(self):
-        #self.loading.destroy()
-        self.negotiation_gui.destroy()
-        #self.start_button.setDisabled(False)
-        self.config_manager.show()
-
     def set_human_interaction_type(self, human_interaction_type, domain_file):
         if human_interaction_type == "Speech":
             self.human_interaction_controller = SpeechController(
@@ -234,7 +228,7 @@ class HANT(QApplication):
         print("Logging complete")
         self.time_controller.finish_signal.emit()
         self.config_manager.reset_manager()
-        self.negotiation_gui.destroy()
+        self.negotiation_gui.clean_gui.emit()
         self.camera_controller.close()
 
     def timeout_negotiation(self):
@@ -259,7 +253,7 @@ class HANT(QApplication):
         while self.running:
             human_action = None
             start_time = -1
-
+            self.negotiation_gui.clean_gui.emit()
             if self.is_first_turn and start_time == -1:
                 predictions = {"Valance": 0.0, "Arousal": 0.0,
                                "Max_V": 0.0, "Min_V": 0.0, "Max_A": 0.0, "Min_A": 0.0}
@@ -267,8 +261,6 @@ class HANT(QApplication):
                 self.is_first_turn = False
             else:
                 rem_time = time.time() - start_time
-                print("REM TIME: ", rem_time)
-                time.sleep(4)
                 if rem_time < 2.01:
                     print("Sleeping for: ", 2 - rem_time)
                     time.sleep(2 - rem_time)
