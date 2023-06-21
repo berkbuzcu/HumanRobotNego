@@ -93,7 +93,7 @@ class HybridAgent(AbstractAgent):
         LoggerNew.log_hybrid({
             "logger": "Agent",
             "offer": bid.get_bid(perspective="Agent"),
-            "agent_utility": human_offer_utility,
+            "agent_utility": self.utility_space.get_offer_utility(bid),
             "scaled_time": time,
             "time_based": target_utility,
             "behavior_based": behaviour_based_utility if behaviour_based_utility else 0,
