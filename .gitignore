@@ -31,3 +31,4 @@ HANT/Domains/
 
 *.json
 *.sqlite3*
+*logger/log_file/
