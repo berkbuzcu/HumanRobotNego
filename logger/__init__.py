@@ -3,13 +3,8 @@ import os
 import pathlib
 import typing as t
 
-PROJECT_DIR = pathlib.Path(__file__).parent
-LOGS_DIR = PROJECT_DIR.parent / "logs"
-DB_PATH = LOGS_DIR / "logs.sqlite3"
-
-
-if not os.path.exists(LOGS_DIR):
-    os.mkdir(LOGS_DIR)
+if not os.path.exists(DB_FOLDER_PATH):
+    os.mkdir(DB_FOLDER_PATH)
 
 if not os.path.exists(DB_PATH):
     create_tables()
