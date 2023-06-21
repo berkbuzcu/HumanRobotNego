@@ -175,20 +175,4 @@ class ConfigManager(QMainWindow):
     def reset_manager(self):
         self.start_button.setDisabled(False)
 
-    def nego_over(self):
-        self.nego_window.timer_widget.finish()
-        self.loading.show()
-        print("NEGO IS OVER!!!")
-
-    def cleanup_nego(self):
-        self.loading.destroy()
-        self.nego_window.destroy()
-        self.start_button.setDisabled(False)
-    
-    def kill_nego(self):
-        self.negotiation_worker.tool.terminate_nego()
-
-    def nego_timeout(self):
-        self.negotiation_worker.tool.timeout_negotiation()
-
 

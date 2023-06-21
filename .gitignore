@@ -30,4 +30,4 @@ HANT/Domains/*
 HANT/Domains/
 
 *.json
-
+*.sqlite3*
