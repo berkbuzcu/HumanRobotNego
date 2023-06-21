@@ -253,7 +253,6 @@ class HANT(QApplication):
         while self.running:
             human_action = None
             start_time = -1
-            self.negotiation_gui.clean_gui.emit()
             if self.is_first_turn and start_time == -1:
                 predictions = {"Valance": 0.0, "Arousal": 0.0,
                                "Max_V": 0.0, "Min_V": 0.0, "Max_A": 0.0, "Min_A": 0.0}

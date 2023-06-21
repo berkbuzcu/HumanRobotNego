@@ -3,7 +3,8 @@ import json
 import ast
 import pathlib
 
-DB_PATH = pathlib.Path(__file__).parent / "log_file" / "logs.sqlite3"
+DB_FOLDER_PATH = pathlib.Path(__file__).parent / "log_file"
+DB_PATH = DB_FOLDER_PATH / "logs.sqlite3"
 
 db =  SqliteDatabase(DB_PATH)
 
