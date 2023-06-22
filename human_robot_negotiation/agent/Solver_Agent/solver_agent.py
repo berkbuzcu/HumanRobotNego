@@ -115,6 +115,11 @@ class EstimatedSensitivityCalculator:
 		# Return human's awareness.
 		# print("awareness:", human_awareness)
 		# Return human's awareness.
+		if human_awareness > 0.75:
+			human_awareness = 0.75
+		if human_awareness < 0.25:
+			human_awareness = 0.25
+
 		return human_awareness
 
 	def get_sensitivity_index(self, target_preference_profile: UtilitySpace, opponent_preference_profile: UtilitySpace, target_history: t.List[Offer]):
