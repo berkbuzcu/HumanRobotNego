@@ -9,8 +9,8 @@ class RobotManager:
     channel: execnet.gateway_base.Channel
     ### Server Methods ###
 
-    def send_init_robot(self, robot_name):
-        request_message = f"server;init_robot;{robot_name.lower()}"
+    def send_init_robot(self, robot_name,robot_ip):
+        request_message = f"server;init_robot;{robot_name.lower()};{robot_ip}"
         print("MSG: ", request_message)
         self.__send_message(request_message)
     
@@ -64,10 +64,10 @@ class RobotManager:
             command = (ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}" / agent_interaction_type / "Scripts" / "activate").absolute
             os.system(f"{command} && pip install -r {REQUIREMENTS_FILE.absolute}")
 
-    def start_robot_server(self, agent_interaction_type):
+    def start_robot_server(self, agent_interaction_type,robot_ip):
         self.venv_manager(agent_interaction_type)
         python_exe = str(ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}" / "Scripts" / "python.exe")
         venvPath=f"popen//python={python_exe}"
         gw = execnet.makegateway(venvPath)
         self.channel = gw.remote_exec(robot_runner)
-        self.send_init_robot(agent_interaction_type)
+        self.send_init_robot(agent_interaction_type,robot_ip)

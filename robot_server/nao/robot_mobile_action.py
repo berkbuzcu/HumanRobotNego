@@ -2,14 +2,14 @@ from robot_server.nao.robot_action import RobotAction
 
 
 class RobotMobileAction(RobotAction):
-    def init_robot(self):
+    def init_robot(self,robot_ip):
         self.folder_path = "untitled-2f26e7/ExperimentVersion - NaoBehaviorsProjectFolder-Choregraphe-2.8/"
-        super(RobotMobileAction, self).init_robot(self.folder_path)
+        super(RobotMobileAction, self).init_robot(self.folder_path,robot_ip)
 
     def greet(self):
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", False)
         self.managerProxy.runBehavior(self.folder_path + "LetsStart")
-        self.managerProxy.runBehavior(self.folder_path + "StandUp")
+        self.managerProxy.runBehavior(self.folder_path + "standup")
         self.tts.say("What is your offer?")
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
 
