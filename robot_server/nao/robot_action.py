@@ -9,10 +9,10 @@ import ast
 class RobotAction(IRobot):
     __metaclass__ = ABCMeta
 
-    def init_robot(self, robot_folder):
+    def init_robot(self, robot_folder,robot_ip):
         from naoqi import ALProxy
 
-        self.robotIP = "derin.local"
+        self.robotIP = "{}".format(robot_ip)
         self.robot_gestures = NaoGestures()
         self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
         self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
@@ -27,9 +27,9 @@ class RobotAction(IRobot):
         self.tts.setParameter("speed", 75)
         self.tts.setVolume(0.5)
 
-        stand_up_behavior = "%s/StandUp" % (robot_folder)
-        if (not self.managerProxy.isBehaviorRunning(stand_up_behavior)):
-            self.managerProxy.runBehavior(stand_up_behavior)
+        #stand_up_behavior = "%s/StandUp" % (robot_folder)
+        #if (not self.managerProxy.isBehaviorRunning(stand_up_behavior)):
+        #    self.managerProxy.runBehavior(stand_up_behavior)
 
         self.after_offer_sentences = [
             "Is it okay for you?",
