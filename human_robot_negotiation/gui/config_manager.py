@@ -37,7 +37,7 @@ class DomainSelect(QWidget):
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
     "Agent Type": ["Hybrid", "Solver"],
-    "Output Type": ["QT+GUI","Pepper+GUI","Nao+GUI"],
+    "Output Type": ["Pepper+GUI","Nao+GUI"],
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
@@ -91,8 +91,13 @@ class ConfigManager(QMainWindow):
 
         domain_fields = form_fields.pop("Domain")
 
+        self.robot_name_field = QLineEdit("")
+
+        def update_robot_name_field(name):
+            self.robot_name_field.setText(name.split("+")[0])
+
         for text, values in form_fields.items():
-            if text=="Input Type"or text=="Facial Expression Model" or text == "Protocol":
+            if text=="Input Type" or text=="Facial Expression Model" or text == "Protocol":
                 label = QLabel(text)
                 widget = QComboBox()
                 self.values[text] = widget
@@ -101,11 +106,18 @@ class ConfigManager(QMainWindow):
             elif not text=="Agent Type":
                 label = QLabel(text)
                 widget = QComboBox()
+
+                if text == "Output Type":
+                    widget.currentTextChanged.connect(update_robot_name_field)
+
                 self.values[text] = widget
                 widget.addItems(values)
                 layout.addWidget(label)
                 layout.addWidget(widget)
-        
+
+        layout.addWidget(QLabel("Robot Name"))
+        layout.addWidget(self.robot_name_field)
+
         layout.addWidget(QLabel("Domain"))
         domain_layout = QHBoxLayout()
         self.domain_dropdown = QComboBox()
@@ -161,6 +173,7 @@ class ConfigManager(QMainWindow):
             self.parameters["Deadline"] = 600 if self.values["Session Type"].currentText() == "Demo" else 900
             self.parameters["Domain"] = self.domain_dropdown.currentText()
             self.parameters["Agent Type"] = "Hybrid" if self.values["Session Type"].currentText() == "Demo" else "Solver"
+            self.parameters["Robot Name"] = self.robot_name_field.text()
             self.parameters = {**self.parameters, **{key: value.currentText() for key, value in self.values.items()}}
             
             if "+" in self.parameters["Output Type"]:

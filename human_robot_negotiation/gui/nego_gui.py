@@ -196,7 +196,7 @@ class NegoStatus(QLabel):
 class NegotiationGUI(QMainWindow):
     clean_gui = Signal()
 
-    def __init__(self, screen, nego_time):
+    def __init__(self, screen, nego_time, robot_name):
         super().__init__()
 
         self.setWindowTitle("Human Robot Negotiation Interface")
@@ -209,6 +209,8 @@ class NegotiationGUI(QMainWindow):
         self.layout = QGridLayout()
         self.layout.setSpacing(15)
 
+        self.robot_name = robot_name
+
         self.layout.setRowStretch(5, 3)
         margin = QMargins()
         margin.setLeft(75)
@@ -218,7 +220,7 @@ class NegotiationGUI(QMainWindow):
 
         self.timer_widget = Timer(nego_time)
         self.human_sentence_widget = SentenceField("Your Offer ", "-")
-        self.agent_sentence_widget = SentenceField("Caduceus' Offer", "-")
+        self.agent_sentence_widget = SentenceField(f"{self.robot_name}' Offer", "-")
 
         self.utility_counter = UtilityCounter()
         self.nego_status = NegoStatus()
