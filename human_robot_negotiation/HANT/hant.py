@@ -66,15 +66,16 @@ class HANT(QApplication):
         agent_type=parameters["Agent Type"]
         agent_preference_file=parameters["agent-domain"]
         human_preference_file=parameters["human-domain"]
+        robot_name=parameters["Robot Name"]
         domain_name=parameters["Domain"]
         deadline=parameters["Deadline"]
 
         self.camera_id = 1
-
+        self.robot_name = robot_name
         self.time_controller = NegotiationTimer(deadline * 10**3, self.timeout_negotiation)
         self.camera_controller = SessionCamera(participant_name, session_number, session_type, camera_id=self.camera_id) # 30 seconds
 
-        self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller)
+        self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller, self.robot_name)
         self.negotiation_worker = NegotiationWorker(self)
 
         print(participant_name, session_number, session_type, self.camera_id, "Deadline: ", deadline)
@@ -273,7 +274,7 @@ class HANT(QApplication):
             
             print("PREDS: ", predictions)
     
-            self.negotiation_gui.update_status("Caduceus is listening")
+            self.negotiation_gui.update_status(f"{self.robot_name} is listening")
             
             while self.running:
                 (human_action, offer_done, total_user_input) = self.human_interaction_controller.get_human_action()
@@ -309,7 +310,7 @@ class HANT(QApplication):
                 return
 
             self.negotiation_gui.update_agent_message("")
-            self.negotiation_gui.update_status("Caduceus' turn")
+            self.negotiation_gui.update_status(f"{self.robot_name}'s turn")
             
             # Agent's generated offer for itself.
             (

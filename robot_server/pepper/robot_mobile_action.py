@@ -14,8 +14,6 @@ class RobotMobileAction(RobotAction):
         self.tts.say("What is your offer?")
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
 
-
-
     def play_gesture_file(self, gesture_file):
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", False)
         self.animatedSpeechProxy.say(gesture_file)
