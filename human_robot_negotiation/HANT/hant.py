@@ -68,7 +68,6 @@ class HANT(QApplication):
         human_preference_file=parameters["human-domain"]
         domain_name=parameters["Domain"]
         deadline=parameters["Deadline"]
-        robot_ip=parameters["RobotIP"]
 
         self.camera_id = 1
 
@@ -95,7 +94,7 @@ class HANT(QApplication):
         #name, session_type (demo, 1, 2), "face_channel" | "cl"
 
         self.set_agent_type(agent_type)
-        self.robot_manager.start_robot_server(agent_interaction_type,robot_ip)
+        self.robot_manager.start_robot_server(agent_interaction_type)
         
         self.time_controller.start_signal.emit()
         self.set_human_interaction_type(human_interaction_type, domain_file)
