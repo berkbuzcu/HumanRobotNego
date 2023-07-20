@@ -41,7 +41,7 @@ class RobotServer:
             #EX: message: server;stop_server|init_robot || robot;receive_mood;dissatisfied_1 
             func_selector = {
                 "server": self,
-                "robot":  self.robot
+                "robot":  self.robot,
             }
 
             try:
@@ -52,7 +52,7 @@ class RobotServer:
             except Exception as e:
                 self.channel.send("Failed: %s" % e)
     
-    def init_robot(self, robot_name,robot_ip):
+    def init_robot(self, robot_name):
         robot_class = TestRobot
         if robot_name == "nao":
             from robot_server.nao.robot_mobile_action import RobotMobileAction
@@ -62,11 +62,14 @@ class RobotServer:
             from robot_server.pepper.robot_mobile_action import RobotMobileAction
             robot_class = RobotMobileAction
         
+        elif robot_name == "qt":
+            from robot_server.qt.QTtest import QTRobotClass
+            robot_class = QTRobotClass
         else:
             self.channel.send("Failed: %s" % robot_name)
 
         self.robot = robot_class()
-        return self.robot.init_robot(robot_ip)
+        return self.robot.init_robot()
 
     def stop_server(self):
         self.server_stopped = True

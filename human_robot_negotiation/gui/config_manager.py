@@ -37,7 +37,7 @@ class DomainSelect(QWidget):
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
     "Agent Type": ["Hybrid", "Solver"],
-    "Output Type": ["Pepper+GUI","Nao+GUI"],
+    "Output Type": ["QT+GUI","Pepper+GUI","Nao+GUI"],
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
@@ -85,9 +85,9 @@ class ConfigManager(QMainWindow):
         layout.addWidget(QLabel("Participant Name"))
         layout.addWidget(self.name_field)
         
-        self.robot_ip = QLineEdit("169.254.")
-        layout.addWidget(QLabel("Robot IP"))        
-        layout.addWidget(self.robot_ip)
+        """self.deadline_field = QLineEdit("600")
+        layout.addWidget(QLabel("Deadline"))        
+        layout.addWidget(self.deadline_field)"""
 
         domain_fields = form_fields.pop("Domain")
 
@@ -157,7 +157,7 @@ class ConfigManager(QMainWindow):
             self.start_button.setDisabled(True)
 
             self.parameters["Participant Name"] = self.name_field.text()
-            self.parameters["RobotIP"] = self.robot_ip.text()
+            #self.parameters["Deadline"] = int(self.deadline_field.text())
             self.parameters["Deadline"] = 600 if self.values["Session Type"].currentText() == "Demo" else 900
             self.parameters["Domain"] = self.domain_dropdown.currentText()
             self.parameters["Agent Type"] = "Hybrid" if self.values["Session Type"].currentText() == "Demo" else "Solver"
