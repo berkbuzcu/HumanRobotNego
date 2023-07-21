@@ -26,8 +26,6 @@ solver_logs*
 
 Gestures/
 domains/*
-HANT/Domains/*
-HANT/Domains/
 
 *.json
 *.sqlite3*
