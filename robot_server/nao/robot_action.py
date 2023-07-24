@@ -12,7 +12,7 @@ class RobotAction(IRobot):
     def init_robot(self, robot_folder):
         from naoqi import ALProxy
 
-        self.robotIP = "derin.local"
+        self.robotIP = "nao.local"
         self.robot_gestures = NaoGestures()
         self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
         self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
