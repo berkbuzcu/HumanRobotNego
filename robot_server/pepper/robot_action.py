@@ -10,13 +10,22 @@ class RobotAction(IRobot):
 
     def init_robot(self, robot_folder):
         from naoqi import ALProxy
+        import qi
 
         self.robotIP = "pepper.local"
         self.robot_gestures = PepperGesture()
-        self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
-        self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
-        self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
-        self.animatedSpeechProxy = ALProxy("ALAnimatedSpeech", self.robotIP, 9559)
+        self.session = qi.Session()
+        self.session.connect("tcp://" + self.robotIP + ":9559")
+        
+        self.tts = self.session.service("ALTextToSpeech")
+        self.managerProxy = self.session.service("ALBehaviorManager")
+        self.autonomousProxy = self.session.service("ALAutonomousLife")
+        self.animatedSpeechProxy = self.session.service("ALAnimatedSpeech")
+        
+        # self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
+        # self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
+        # self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
+        # self.animatedSpeechProxy = ALProxy("ALAnimatedSpeech", self.robotIP, 9559)
 
         # Set autonomous part of the robot.:9559
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
@@ -27,10 +36,6 @@ class RobotAction(IRobot):
         # Set speaking speed and volume of the robot.
         self.tts.setParameter("speed", 75)
         self.tts.setVolume(0.5)
-
-        stand_up_behavior = "%s/StandUp" % (robot_folder)
-        if (not self.managerProxy.isBehaviorRunning(stand_up_behavior)):
-            self.managerProxy.runBehavior(stand_up_behavior)
 
         self.after_offer_sentences = [
             "Is it okay for you?",
