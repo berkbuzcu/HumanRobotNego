@@ -1,8 +1,10 @@
-from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QComboBox, QFileDialog, QHBoxLayout, QLineEdit
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QComboBox, QFileDialog, QHBoxLayout, QLineEdit, QMessageBox
 from PySide6.QtGui import QMovie, QIcon
 
 from human_robot_negotiation.HANT.preference_elicitation import PreferenceElicitation
 from human_robot_negotiation import DOMAINS_DIR
+from human_robot_negotiation.gui.camera.camera import Camera
+from human_robot_negotiation.HANT.exceptions import CameraException
 
 import traceback
 
@@ -37,7 +39,7 @@ class DomainSelect(QWidget):
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
     "Agent Type": ["Hybrid", "Solver"],
-    "Output Type": ["QT+GUI","Nao+GUI"],
+    "Output Type": ["Pepper+GUI","Nao+GUI"],
     "Input Type": ["Speech", "Text"],
     "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
@@ -144,13 +146,27 @@ class ConfigManager(QMainWindow):
         #self.stop_button.pressed.connect(self.kill_nego)
         #layout.addWidget(self.stop_button)
 
+        self.loading = LoadingScreen(tool.screens()[-1])     
+
+        #self.start_button = QPushButton("Start")
+        #self.start_button.pressed.connect(self.start_nego)
+
+        self.camera_index = 0
+
         self.start_button = QPushButton("Start")
-        self.start_button.pressed.connect(self.start_nego)
+        self.start_button.pressed.connect(self.set_camera_dialog)
         layout.addWidget(self.start_button)
 
         self.setCentralWidget(central_widget)
 
-        self.loading = LoadingScreen(tool.screens()[-1])       
+    def set_camera_id(self, camera_id):
+        self.camera_id = camera_id
+        self.camera_preview.close()
+        self.start_nego()
+
+    def set_camera_dialog(self):
+        self.camera_preview = Camera(self.set_camera_id)
+        self.camera_preview.show()
 
     def select_file_dialog(self, agent_type):
         dialog = QFileDialog(self, ("Select a Preference Profile"), str(DOMAINS_DIR / self.domain_dropdown.currentText() / self.name_field.text()))
@@ -175,14 +191,23 @@ class ConfigManager(QMainWindow):
             self.parameters["Agent Type"] = "Hybrid" if self.values["Session Type"].currentText() == "Demo" else "Solver"
             self.parameters["Robot Name"] = self.robot_name_field.text()
             self.parameters = {**self.parameters, **{key: value.currentText() for key, value in self.values.items()}}
+            self.parameters["Camera ID"] = self.camera_id
             
             if "+" in self.parameters["Output Type"]:
                 self.parameters["Output Type"] = self.parameters["Output Type"].split("+")[0]
 
             self.tool.negotiation_setup(self.parameters)
-
+        except KeyError:
+            msgBox = QMessageBox()
+            msgBox.setText("Check all the fields.")
+            msgBox.exec()
+        except CameraException:
+            msgBox = QMessageBox()
+            msgBox.setText("Error with the camera (make sure all other applications are closed)")
+            msgBox.exec()
         except Exception as e:
             traceback.print_exc()
+        finally:
             self.start_button.setDisabled(False)
     
     def reset_manager(self):

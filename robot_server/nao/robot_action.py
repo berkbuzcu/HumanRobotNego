@@ -11,12 +11,19 @@ class RobotAction(IRobot):
 
     def init_robot(self, robot_folder):
         from naoqi import ALProxy
+        import qi 
 
-        self.robotIP = "nao.local"
+        self.robotIP = "derin.local"
         self.robot_gestures = NaoGestures()
-        self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
-        self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
-        self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
+        self.session = qi.Session()
+        self.session.connect("tcp://" + self.robotIP + ":9559")
+        
+        self.tts = self.session.service("ALTextToSpeech")
+        self.managerProxy = self.session.service("ALBehaviorManager")
+        self.autonomousProxy = self.session.service("ALAutonomousLife")
+        # self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
+        # self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
+        # self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
         # Set autonomous part of the robot.:9559
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
         self.autonomousProxy.setAutonomousAbilityEnabled("AutonomousBlinking", False)
