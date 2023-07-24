@@ -69,11 +69,13 @@ class HANT(QApplication):
         robot_name=parameters["Robot Name"]
         domain_name=parameters["Domain"]
         deadline=parameters["Deadline"]
+        self.camera_id=parameters["Camera ID"]
 
-        self.camera_id = 1
         self.robot_name = robot_name
         self.time_controller = NegotiationTimer(deadline * 10**3, self.timeout_negotiation)
+        
         self.camera_controller = SessionCamera(participant_name, session_number, session_type, camera_id=self.camera_id) # 30 seconds
+
 
         self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller, self.robot_name)
         self.negotiation_worker = NegotiationWorker(self)
