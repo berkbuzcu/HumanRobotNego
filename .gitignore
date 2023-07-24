@@ -26,9 +26,7 @@ solver_logs*
 
 Gestures/
 domains/*
-HANT/Domains/Holiday_A/*
-HANT/Domains/Holiday_B/*
-HANT/Domains/Fruits/*
+
 *.json
 *.sqlite3*
 *logger/log_file/
