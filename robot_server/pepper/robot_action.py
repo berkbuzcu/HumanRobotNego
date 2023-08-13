@@ -10,12 +10,23 @@ class RobotAction(IRobot):
 
     def init_robot(self, robot_folder):
         from naoqi import ALProxy
+        import qi
 
         self.robotIP = "pepper.local"
         self.robot_gestures = PepperGesture()
-        self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
-        self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
-        self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
+        self.session = qi.Session()
+        self.session.connect("tcp://" + self.robotIP + ":9559")
+        
+        self.tts = self.session.service("ALTextToSpeech")
+        self.managerProxy = self.session.service("ALBehaviorManager")
+        self.autonomousProxy = self.session.service("ALAutonomousLife")
+        self.animatedSpeechProxy = self.session.service("ALAnimatedSpeech")
+        
+        # self.tts = ALProxy("ALTextToSpeech", self.robotIP, 9559)
+        # self.managerProxy = ALProxy("ALBehaviorManager", self.robotIP, 9559)
+        # self.autonomousProxy = ALProxy("ALAutonomousLife", self.robotIP, 9559)
+        # self.animatedSpeechProxy = ALProxy("ALAnimatedSpeech", self.robotIP, 9559)
+
         # Set autonomous part of the robot.:9559
         self.autonomousProxy.setAutonomousAbilityEnabled("BackgroundMovement", True)
         self.autonomousProxy.setAutonomousAbilityEnabled("AutonomousBlinking", False)
@@ -25,10 +36,6 @@ class RobotAction(IRobot):
         # Set speaking speed and volume of the robot.
         self.tts.setParameter("speed", 75)
         self.tts.setVolume(0.5)
-
-        stand_up_behavior = "%s/StandUp" % (robot_folder)
-        if (not self.managerProxy.isBehaviorRunning(stand_up_behavior)):
-            self.managerProxy.runBehavior(stand_up_behavior)
 
         self.after_offer_sentences = [
             "Is it okay for you?",
@@ -82,7 +89,7 @@ class RobotAction(IRobot):
         self.tts.say(message)
 
     def tell_offer(self, offer):
-        if "duration" in offer.keys():
+        if "duration" in offer.keys() and "season" in offer.keys():
             speak_strings = [
                 "I'd like to visit %s in %s for %s and stay at a %s" % (offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
                 "I want to stay at a %s in %s for %s in %s" % (offer['accommodation'], offer['season'], offer['duration'], offer['destination']),
@@ -90,7 +97,7 @@ class RobotAction(IRobot):
                 "How about visiting %s in %s for %s and stay at a nice %s?" % (offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
                 "I want to spend %s in %s during %s and stay at a %s" % (offer['duration'], offer['destination'], offer['season'], offer['accommodation'])]
         
-        elif "events" in offer.keys():
+        elif "events" in offer.keys() and  "season" in offer.keys():
             activity_to_text = {
                 "shopping": "shopping",
                 "show": "see shows",
@@ -103,7 +110,20 @@ class RobotAction(IRobot):
                 "Let's go to %s this %s to %s and stay at a %s" % (offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
                 "How about visiting %s in %s for %s and stay at a nice %s" % (offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
                 "I want to experience %s in %s during %s and stay at a %s" % (activity_to_text[offer['events']], offer['destination'], offer['season'], offer['accommodation'])]
-
+            
+        elif "duration" in offer.keys() and "events" in offer.keys():
+            activity_to_text = {
+                "shopping": "shopping",
+                "festival": "participating festival",
+                "museum": "visiting museums",
+                "sports": "do sports",
+            }
+            speak_strings = [
+                "I'd like to visit %s for %s for %s and stay at a %s" % (offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
+                "I want to stay at a %s for %s and %s in %s" % (offer['accommodation'], offer['duration'], activity_to_text[offer['events']], offer['destination']),
+                "Let's go to %s for %s to %s and stay at a %s" % (offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
+                "How about visiting %s for %s for %s and stay at a nice %s" % (offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
+                "I want to experience %s in %s for %s and stay at a %s" % (activity_to_text[offer['events']], offer['destination'], offer['duration'], offer['accommodation'])]
         else:
             speak_string = "I give you"
             non_zero_count = 0

@@ -4,7 +4,8 @@ from human_robot_negotiation.human_interaction_models.speech_to_text_streaming_b
 
 import time
 
-from human_robot_negotiation.HANT.nego_action import Offer, Accept
+from human_robot_negotiation.HANT.nego_action import Offer
+import typing as t
 
 
 class SpeechController:
@@ -16,7 +17,7 @@ class SpeechController:
         self.offer_classifier = offer_classifier
         self.recognizer = SpeechStreamingRecognizerBeta(offer_classifier.domain_keywords)
 
-    def get_human_action(self):
+    def get_human_action(self) -> t.Tuple[Offer, bool, str]:
         """
         Listen the user offer, then select keywords from sentence, check similarities and return what's left to the agent from user.
         """

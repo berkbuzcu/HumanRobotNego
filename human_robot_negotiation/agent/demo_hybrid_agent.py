@@ -3,13 +3,13 @@ from typing import List
 
 from human_robot_negotiation.HANT.nego_action import AbstractAction, AbstractActionFactory
 from human_robot_negotiation.HANT.utility_space import UtilitySpace
-from human_robot_negotiation.HANT.nego_action import AbstractActionFactory
+from human_robot_negotiation.agent.abstract_agent import AbstractAgent
 
 import pandas as pd
 
 from human_robot_negotiation.agent.agent_mood.mood_controller import MoodController
 
-class DemoHybridAgent:
+class DemoHybridAgent(AbstractAgent):
     p0: float
     p1: float
     p2: float
@@ -71,7 +71,7 @@ class DemoHybridAgent:
 
         self.logs.append({
             "Logger": "Human",
-            "Offer": bid.get_bid(),
+            "Offer": bid.get_bid(perspective="Agent"),
             "Agent Utility": human_offer_utility,
             "Scaled Time": t,
             "Target Utility": 0,
@@ -96,8 +96,8 @@ class DemoHybridAgent:
 
         self.logs.append({
             "Logger": "Agent",
-            "Offer": bid.get_bid(),
-            "Agent Utility": self.utility_space.get_offer_utility(bid.get_bid()),
+            "Offer": bid.get_bid(perspective="Agent"),
+            "Agent Utility": self.utility_space.get_offer_utility(bid.get_bid(perspective="Agent")),
             "Scaled Time": t,
             "Target Utility": target_utility,
             "Time Based Utility": time_based_utility,

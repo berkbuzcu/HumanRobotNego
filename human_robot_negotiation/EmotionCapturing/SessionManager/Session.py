@@ -1,4 +1,5 @@
 import copy
+import typing as t
 
 from .AbstractSession import *
 from .Capturing import Capturing
@@ -93,7 +94,7 @@ class SessionCamera(AbstractSession):
         
         return valid_faces
 
-    def stop(self) -> dict:
+    def stop(self) -> t.Tuple[t.Dict[str, float], t.Dict[str, float]]:
         """
             Stop Recording thread. Also, it runs FaceChannel and CL Model.
         :return: Prediction of the model

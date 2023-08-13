@@ -2,7 +2,7 @@ import execnet
 import os 
 import sys
 
-from human_robot_negotiation import ROBOT_SERVER_DIR
+from human_robot_negotiation import ROBOT_SERVER_DIR, REQUIREMENTS_DIR
 from robot_server import robot_runner
 
 class RobotManager:
@@ -55,18 +55,17 @@ class RobotManager:
         python3_command=" -m venv "+ venv_path
         
         if not os.path.isdir(venv_path):
+            REQUIREMENTS_FILE = REQUIREMENTS_DIR / f"requirements{agent_interaction_type}.txt"
             if agent_interaction_type=="Nao" or agent_interaction_type=="Pepper":
                 os.system(python2_path+python2_command)
-                command = os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","activate")
-                os.system(command+" && pip install -r requirements"+agent_interaction_type+".txt")
             elif agent_interaction_type=="QT":
                 os.system(python3_path+python3_command)   #for any new robot add a elif agent_interaction_type=="RobotName" with suitable python version.
-                command = os.path.join(os.curdir,"agent_interaction_models",".venv_"+agent_interaction_type,"Scripts","activate")
-                os.system(command+" && pip install -r requirements"+agent_interaction_type+".txt")
+
+            command = (ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}" / agent_interaction_type / "Scripts" / "activate").absolute
+            os.system(f"{command} && pip install -r {REQUIREMENTS_FILE.absolute}")
 
     def start_robot_server(self, agent_interaction_type):
         self.venv_manager(agent_interaction_type)
-
         python_exe = str(ROBOT_SERVER_DIR / f".venv_{agent_interaction_type}" / "Scripts" / "python.exe")
         venvPath=f"popen//python={python_exe}"
         gw = execnet.makegateway(venvPath)

@@ -1,11 +1,26 @@
 import sys
 import copy
-from PySide6.QtCore import QSize, Qt, QTimer, SIGNAL, QTime, QMargins, QAbstractTableModel
+from PySide6.QtCore import QSize, Qt, QTimer, SIGNAL, QTime, QMargins, QAbstractTableModel, Signal
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QGridLayout, QWidget, QLabel, QTableView, QHeaderView, QAbstractItemView, QHBoxLayout, QFrame
 from PySide6.QtGui import QPalette, QColor, QFont, QFontMetrics, QPainter, QBrush, QPageSize
 
 #from utilitySpace import UtilitySpace
 
+def clean(item):
+    """Clean up the memory by closing and deleting the item if possible."""
+    if isinstance(item, list) or isinstance(item, dict):
+        for _ in range(len(item)):
+            clean(list(item).pop())
+    else:
+        try:
+            item.close()
+        except (RuntimeError, AttributeError): # deleted or no close method
+            pass
+        try:
+            item.deleteLater()
+        except (RuntimeError, AttributeError): # deleted or no deleteLater method
+            pass
+# end clean
 
 class Color(QWidget):
     def __init__(self, color):
@@ -42,7 +57,7 @@ class Timer(QLabel):
         #self.setFixedWidth(400)
 
     def update_time(self):
-        time_micro_seconds = self.timer.remainingTime()
+        time_micro_seconds = self.timer.main_timer.remainingTime()
         time_seconds = (time_micro_seconds / 1000)
         time_minutes = time_seconds // 60
         time_left_seconds = time_seconds % 60
@@ -179,7 +194,9 @@ class NegoStatus(QLabel):
         self.setFixedHeight(120)
 
 class NegotiationGUI(QMainWindow):
-    def __init__(self, screen, nego_time):
+    clean_gui = Signal()
+
+    def __init__(self, screen, nego_time, robot_name):
         super().__init__()
 
         self.setWindowTitle("Human Robot Negotiation Interface")
@@ -192,16 +209,18 @@ class NegotiationGUI(QMainWindow):
         self.layout = QGridLayout()
         self.layout.setSpacing(15)
 
+        self.robot_name = robot_name
+
         self.layout.setRowStretch(5, 3)
         margin = QMargins()
         margin.setLeft(75)
         margin.setRight(75)
-        margin.setTop(100)
+        margin.setTop(10)
         self.layout.setContentsMargins(margin)
 
         self.timer_widget = Timer(nego_time)
         self.human_sentence_widget = SentenceField("Your Offer ", "-")
-        self.agent_sentence_widget = SentenceField("Caduceus' Offer", "-")
+        self.agent_sentence_widget = SentenceField(f"{self.robot_name}' Offer", "-")
 
         self.utility_counter = UtilityCounter()
         self.nego_status = NegoStatus()
@@ -222,6 +241,8 @@ class NegotiationGUI(QMainWindow):
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
+        self.clean_gui.connect(self.clean_up)
+
     def update_human_message(self, message):
         self.human_sentence_widget.set_label_text(str(message))
 
@@ -241,7 +262,14 @@ class NegotiationGUI(QMainWindow):
         self.template_table = copy.deepcopy(data)
         self.data = copy.deepcopy(data)
         self.offer_details_widget = OfferDetails(issue_names, self.data)
-        self.layout.addWidget(self.offer_details_widget, 3, 0, 2, 3)    
+        self.layout.addWidget(self.offer_details_widget, 3, 0, 2, 3)
+
+    def clean_up(self):
+        for i in self.__dict__:
+            item = self.__dict__[i]
+            clean(item)
+
+        self.close()
 
     def reset_board(self):
         for x in range(len(self.data)):
@@ -256,21 +284,3 @@ class NegotiationGUI(QMainWindow):
 
             self.data[x][y] = (str(value).title(), color)
             self.offer_details_widget.model().dataChanged.emit(x, y)
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    from utility_space import UtilitySpace
-    human_utility_space = UtilitySpace("D:\PythonProjects\Human-Robot-Nego\HANT\Domains\Holiday_A\Berk\Agent.xml")
-
-    window = NegotiationGUI(app.screens()[0], 5000, lambda: print("ooaaa"))
-    
-    grid = human_utility_space.get_2d_ranked_grid_colored()
-    window.create_table(human_utility_space.issue_names, grid)
-
-    window.update_grid_by_offer([(0, 0, "lol", "dark orange"), (0, 1, "lol", "orange"), (0, 2, "lol", "red"), (0, 3, "lol", "dark red")])
-
-    print(window.get_time_controller().get_remaining_time())
-
-    window.show()
-
-    app.exec_()
