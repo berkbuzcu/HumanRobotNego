@@ -1,8 +1,10 @@
-from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QComboBox, QFileDialog, QHBoxLayout, QLineEdit
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QMainWindow, QComboBox, QFileDialog, QHBoxLayout, QLineEdit, QMessageBox
 from PySide6.QtGui import QMovie, QIcon
 
 from human_robot_negotiation.HANT.preference_elicitation import PreferenceElicitation
 from human_robot_negotiation import DOMAINS_DIR
+from human_robot_negotiation.gui.camera.camera import Camera
+from human_robot_negotiation.HANT.exceptions import CameraException
 
 import traceback
 
@@ -36,12 +38,12 @@ class DomainSelect(QWidget):
 
 form_fields = {
     "Session Type": ["Demo", "Session 1", "Session 2"],
-    "Agent Type": ["DemoHybrid", "Hybrid", "Solver"],
-    "Output Type": ["Pepper+GUI","Nao+GUI","Test+GUI"],
+    "Agent Type": ["Hybrid", "Solver"],
+    "Output Type": ["Pepper+GUI","Nao+GUI"],
     "Input Type": ["Speech", "Text"],
-    "Facial Expression Model": ["face_channel_only", "None"],
+    "Facial Expression Model": ["face_channel_only"],
     "Protocol": ["Alternating Offer Protocol"],
-    "Domain": ["Holiday_A", "Holiday_B", "Fruits", "Deserted Island"],
+    "Domain": ["Holiday_Demo", "Holiday_A","Holiday_B"],
 }
 
 class LoadingScreen(QMainWindow):
@@ -85,20 +87,39 @@ class ConfigManager(QMainWindow):
         layout.addWidget(QLabel("Participant Name"))
         layout.addWidget(self.name_field)
         
-        self.deadline_field = QLineEdit("")
+        """self.deadline_field = QLineEdit("600")
         layout.addWidget(QLabel("Deadline"))        
-        layout.addWidget(self.deadline_field)
+        layout.addWidget(self.deadline_field)"""
 
         domain_fields = form_fields.pop("Domain")
 
+        self.robot_name_field = QLineEdit("")
+
+        def update_robot_name_field(name):
+            self.robot_name_field.setText(name.split("+")[0])
+
         for text, values in form_fields.items():
-            label = QLabel(text)
-            widget = QComboBox()
-            self.values[text] = widget
-            widget.addItems(values)
-            layout.addWidget(label)
-            layout.addWidget(widget)
-        
+            if text=="Input Type" or text=="Facial Expression Model" or text == "Protocol":
+                label = QLabel(text)
+                widget = QComboBox()
+                self.values[text] = widget
+                widget.addItems(values)
+                
+            elif not text=="Agent Type":
+                label = QLabel(text)
+                widget = QComboBox()
+
+                if text == "Output Type":
+                    widget.currentTextChanged.connect(update_robot_name_field)
+
+                self.values[text] = widget
+                widget.addItems(values)
+                layout.addWidget(label)
+                layout.addWidget(widget)
+
+        layout.addWidget(QLabel("Robot Name"))
+        layout.addWidget(self.robot_name_field)
+
         layout.addWidget(QLabel("Domain"))
         domain_layout = QHBoxLayout()
         self.domain_dropdown = QComboBox()
@@ -125,13 +146,27 @@ class ConfigManager(QMainWindow):
         #self.stop_button.pressed.connect(self.kill_nego)
         #layout.addWidget(self.stop_button)
 
+        self.loading = LoadingScreen(tool.screens()[-1])     
+
+        #self.start_button = QPushButton("Start")
+        #self.start_button.pressed.connect(self.start_nego)
+
+        self.camera_index = 0
+
         self.start_button = QPushButton("Start")
-        self.start_button.pressed.connect(self.start_nego)
+        self.start_button.pressed.connect(self.set_camera_dialog)
         layout.addWidget(self.start_button)
 
         self.setCentralWidget(central_widget)
 
-        self.loading = LoadingScreen(tool.screens()[-1])       
+    def set_camera_id(self, camera_id):
+        self.camera_id = camera_id
+        self.camera_preview.close()
+        self.start_nego()
+
+    def set_camera_dialog(self):
+        self.camera_preview = Camera(self.set_camera_id)
+        self.camera_preview.show()
 
     def select_file_dialog(self, agent_type):
         dialog = QFileDialog(self, ("Select a Preference Profile"), str(DOMAINS_DIR / self.domain_dropdown.currentText() / self.name_field.text()))
@@ -150,34 +185,32 @@ class ConfigManager(QMainWindow):
             self.start_button.setDisabled(True)
 
             self.parameters["Participant Name"] = self.name_field.text()
-            self.parameters["Deadline"] = int(self.deadline_field.text())
+            #self.parameters["Deadline"] = int(self.deadline_field.text())
+            self.parameters["Deadline"] = 600 if self.values["Session Type"].currentText() == "Demo" else 900
             self.parameters["Domain"] = self.domain_dropdown.currentText()
-            
+            self.parameters["Agent Type"] = "Hybrid" if self.values["Session Type"].currentText() == "Demo" else "Solver"
+            self.parameters["Robot Name"] = self.robot_name_field.text()
             self.parameters = {**self.parameters, **{key: value.currentText() for key, value in self.values.items()}}
+            self.parameters["Camera ID"] = self.camera_id
             
             if "+" in self.parameters["Output Type"]:
                 self.parameters["Output Type"] = self.parameters["Output Type"].split("+")[0]
 
             self.tool.negotiation_setup(self.parameters)
-
+        except KeyError:
+            msgBox = QMessageBox()
+            msgBox.setText("Check all the fields.")
+            msgBox.exec()
+        except CameraException:
+            msgBox = QMessageBox()
+            msgBox.setText("Error with the camera (make sure all other applications are closed)")
+            msgBox.exec()
         except Exception as e:
             traceback.print_exc()
+        finally:
             self.start_button.setDisabled(False)
     
-    def nego_over(self):
-        self.nego_window.timer_widget.finish()
-        self.loading.show()
-        print("NEGO IS OVER!!!")
-
-    def cleanup_nego(self):
-        self.loading.destroy()
-        self.nego_window.destroy()
+    def reset_manager(self):
         self.start_button.setDisabled(False)
-    
-    def kill_nego(self):
-        self.negotiation_worker.tool.terminate_nego()
-
-    def nego_timeout(self):
-        self.negotiation_worker.tool.timeout_negotiation()
 
 

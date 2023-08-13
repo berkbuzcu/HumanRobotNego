@@ -1,11 +1,8 @@
-import sys
 import time
 import warnings
-import os 
-import execnet
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QThreadPool
+from PySide6.QtCore import QThreadPool, QObject, Signal
 
 from human_robot_negotiation import DOMAINS_DIR
 from human_robot_negotiation import PROJECT_DIR
@@ -24,6 +21,7 @@ from human_robot_negotiation.human_interaction_models.offer_classifier import Of
 from human_robot_negotiation.agent.solver_agent.solver_agent import SolverAgent
 from human_robot_negotiation.agent.hybrid_agent import HybridAgent
 from human_robot_negotiation.agent.demo_hybrid_agent import DemoHybridAgent
+from human_robot_negotiation.agent.abstract_agent import AbstractAgent
 
 from human_robot_negotiation.human_interaction_models.speech_controller import SpeechController
 #from human_robot_negotiation.human_interaction_models.human_cli import HumanCLI
@@ -31,12 +29,23 @@ from human_robot_negotiation.human_interaction_models.speech_controller import S
 from human_robot_negotiation.gui.nego_gui import NegotiationGUI
 from human_robot_negotiation.EmotionCapturing.SessionManager.Session import SessionCamera
 
-from human_robot_negotiation.logger.logger import Logger
 from human_robot_negotiation.gui.config_manager import ConfigManager
+
+from logger import LoggerNew
+
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+class HANTSignals(QObject):
+    nego_over = Signal()
+    
+
 class HANT(QApplication):
+    config_manager: ConfigManager
+    robot_manager: RobotManager
+    threadpool: QThreadPool
+    agent: AbstractAgent
+
     def __init__(self):
         super().__init__()
 
@@ -57,21 +66,21 @@ class HANT(QApplication):
         agent_type=parameters["Agent Type"]
         agent_preference_file=parameters["agent-domain"]
         human_preference_file=parameters["human-domain"]
+        robot_name=parameters["Robot Name"]
         domain_name=parameters["Domain"]
         deadline=parameters["Deadline"]
-        log_file_path="./Logs/"
+        self.camera_id=parameters["Camera ID"]
 
-        self.camera_id = 1
-
-        print("deadline: ", deadline)
-
+        self.robot_name = robot_name
         self.time_controller = NegotiationTimer(deadline * 10**3, self.timeout_negotiation)
+        
         self.camera_controller = SessionCamera(participant_name, session_number, session_type, camera_id=self.camera_id) # 30 seconds
-        self.logger = Logger(participant_name, agent_type, agent_interaction_type, log_file_path, domain_name)
-        self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller)
+
+
+        self.negotiation_gui = NegotiationGUI(self.screens()[-1], self.time_controller, self.robot_name)
         self.negotiation_worker = NegotiationWorker(self)
 
-        print(participant_name, session_number, session_type, self.camera_id)
+        print(participant_name, session_number, session_type, self.camera_id, "Deadline: ", deadline)
 
         domain_file = str(DOMAINS_DIR / domain_name / f"{domain_name}.xml")
         self.set_utility_space(
@@ -81,16 +90,16 @@ class HANT(QApplication):
         self.is_first_turn = True
         self.running = True
 
-        self.participant_name = participant_name
-        self.session_number = session_number.replace(" ", "_") # Session 1
-        self.session_type = session_type
+        self.participant_name: str = participant_name
+        self.session_number: str = session_number.replace(" ", "_") # Session 1
+        self.session_type: str = session_type
         
         #name, session_type (demo, 1, 2), "face_channel" | "cl"
 
         self.set_agent_type(agent_type)
         self.robot_manager.start_robot_server(agent_interaction_type)
         
-        self.time_controller.start_timer()
+        self.time_controller.start_signal.emit()
         self.set_human_interaction_type(human_interaction_type, domain_file)
         
         self.grid = self.human_utility_space.get_2d_ranked_grid_colored()
@@ -103,18 +112,14 @@ class HANT(QApplication):
         print("DOMAIN: ", domain_name, " AGENT: ", agent_preference_file, " HUMAN: ", human_preference_file)
         print("AGENT TYPE:", agent_type, " : ", agent_interaction_type)
 
+        LoggerNew.create_session(participant_name, agent_type, agent_interaction_type, "SBU", domain_name)
+
         self.threadpool.start(self.negotiation_worker)
 
     def nego_over(self):
         #self.negotiation_gui.timer_widget.finish()
         #self.loading.show()
         print("NEGO IS OVER!!!")
-
-    def cleanup_nego(self):
-        #self.loading.destroy()
-        self.negotiation_gui.destroy()
-        #self.start_button.setDisabled(False)
-        self.config_manager.show()
 
     def set_human_interaction_type(self, human_interaction_type, domain_file):
         if human_interaction_type == "Speech":
@@ -164,16 +169,16 @@ class HANT(QApplication):
 
     def set_agent_type(self, agent_type):
         if agent_type == "Solver":
-            self.agent = SolverAgent
+            self.agent = SolverAgent(self.agent_utility_space,
+                                self.time_controller, self.agent_action_factory)
         elif agent_type == "Hybrid":
-            self.agent = HybridAgent
+            self.agent = HybridAgent(self.agent_utility_space,
+                                self.time_controller, self.agent_action_factory)
         elif agent_type == "DemoHybrid":
-            self.agent = DemoHybridAgent
+            self.agent = DemoHybridAgent(self.agent_utility_space,
+                                self.time_controller, self.agent_action_factory)
         else:
             raise Exception("Invalid agent type.")
-
-        self.agent = self.agent(self.agent_utility_space,
-                                self.time_controller, self.agent_action_factory)
 
 
     def update_grid_by_offer(self, offer, color):
@@ -196,12 +201,9 @@ class HANT(QApplication):
         self.negotiation_gui.update_agent_message(agent_sentence)
 
     def update_nego_history(self):
-        self.nego_history.set_sensitivity_predictions(self.agent.sensitivity_class_list) # TODO: Remove sensitivity class list
         self.nego_history.set_sentences(self.human_interaction_controller.human_sentences)
-        offer_df_list = self.nego_history.extract_history_to_df()
-        self.logger.log_offer_history(self.session_number, offer_df_list)
 
-    def end_negotiation(self, termination_type):
+    def end_negotiation(self, termination_type: str):
         agent_num_of_emotions = self.agent.receive_negotiation_over(self.participant_name, self.session_number, termination_type)
         self.robot_manager.send_nego_over(termination_type)
         
@@ -215,28 +217,33 @@ class HANT(QApplication):
 
             time_passed, agent_score, user_score, agreement = (1, 0, 0, False) if termination_type == "timeout" else (last_offer[4], last_offer[2], last_offer[3], True)
 
-            self.logger.log_negotiation_summary(
-                session_number=self.session_number,
-                emotion_counts=agent_num_of_emotions,
-                sens_dict=human_sensitivity_dict,
+
+            LoggerNew.log_summary(
+                robot_moods=agent_num_of_emotions,
+                sensitivity_analysis=human_sensitivity_dict,
                 human_awareness=human_awareness,
                 total_offers=total_offers,
-                time_passed=time_passed,
-                agent_score=agent_score,
-                user_score=user_score,
+                final_scaled_time=time_passed,
+                final_agent_score=agent_score,
+                final_user_score=user_score,
                 is_agreement=agreement)
-
+        
         print("Logging complete")
+        self.time_controller.finish_signal.emit()
+        self.config_manager.reset_manager()
+        self.negotiation_gui.clean_gui.emit()
         self.camera_controller.close()
 
     def timeout_negotiation(self):
-        self.running = False
-        self.human_interaction_controller.recognizer.terminate_stream()
-        self.end_negotiation("timeout")
+        if self.running:
+            self.running = False
+            self.human_interaction_controller.recognizer.terminate_stream()
+            self.end_negotiation("timeout")
 
     def terminate_nego(self):
-        self.running = False
-        self.human_interaction_controller.recognizer.terminate_stream()
+        if self.running:
+            self.running = False
+            self.human_interaction_controller.recognizer.terminate_stream()
 
     def negotiate(self):
         self.robot_manager.send_start_negotiation()
@@ -248,14 +255,14 @@ class HANT(QApplication):
     def do_normal_nego(self):
         while self.running:
             human_action = None
-
-            if self.is_first_turn:
-                predictions = {"Valance": 0, "Arousal": 0,
-                               "Max_V": 0, "Min_V": 0, "Max_A": 0, "Min_A": 0}
+            start_time = -1
+            if self.is_first_turn and start_time == -1:
+                predictions = {"Valance": 0.0, "Arousal": 0.0,
+                               "Max_V": 0.0, "Min_V": 0.0, "Max_A": 0.0, "Min_A": 0.0}
                 normalized_predictions = predictions
                 self.is_first_turn = False
             else:
-                rem_time = time.time() - start_time 
+                rem_time = time.time() - start_time
                 if rem_time < 2.01:
                     print("Sleeping for: ", 2 - rem_time)
                     time.sleep(2 - rem_time)
@@ -269,13 +276,13 @@ class HANT(QApplication):
             
             print("PREDS: ", predictions)
     
-            self.negotiation_gui.update_status("Caduceus is listening")
+            self.negotiation_gui.update_status(f"{self.robot_name} is listening")
             
             while self.running:
-                human_action, offer_done, total_user_input = (
-                    self.human_interaction_controller.get_human_action()
-                )
-
+                (human_action, offer_done, total_user_input) = self.human_interaction_controller.get_human_action()
+                
+                received_time = self.time_controller.get_remaining_time()
+                print(received_time)
                 if isinstance(human_action, nego_action.Accept):
                     self.end_negotiation("human")
                     return
@@ -290,23 +297,23 @@ class HANT(QApplication):
                 print("HUMAN OFFER UTILITY: ", str(int(self.human_utility_space.get_offer_utility(human_action.get_bid("Human")) * 100)))
 
                 if offer_done:
+                    # Add user offer to the history list.
+                    self.nego_history.add_to_history(
+                        bidder=human_action.get_bidder(),
+                        offer=human_action,
+                        scaled_time=self.time_controller.get_remaining_time(),
+                        agent_mood="",
+                        predictions=predictions,
+                    )
                     break
-                
+
             if not self.running:
                 #self.end_negotiation("timeout")
                 return
 
             self.negotiation_gui.update_agent_message("")
-            self.negotiation_gui.update_status("Caduceus' turn")
-
-            # Add user offer to the logger list.
-            self.nego_history.add_to_history(
-                bidder=human_action.get_bidder(),
-                offer=human_action.get_bid(perspective="Human"),
-                time= self.time_controller.get_remaining_time(),
-                emotion="",
-                predictions=predictions,
-            )
+            self.negotiation_gui.update_status(f"{self.robot_name}'s turn")
+            
             # Agent's generated offer for itself.
             (
                 agent_action,
@@ -330,9 +337,9 @@ class HANT(QApplication):
 
             self.nego_history.add_to_history(
                 bidder=agent_action.get_bidder(),
-                offer=agent_offer,
-                time=self.time_controller.get_remaining_time(),
-                emotion=agent_mood,
+                offer=agent_action,
+                scaled_time=self.time_controller.get_remaining_time(),
+                agent_mood=agent_mood,
                 predictions=predictions,
             )
 

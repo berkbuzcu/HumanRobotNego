@@ -1,3 +1,6 @@
+from human_robot_negotiation.HANT.nego_action import Offer
+import typing as t
+
 class MoodController:
     def __init__(self, utility_space, time_controller):
         # Set utility space.
@@ -26,13 +29,11 @@ class MoodController:
             "Worried": 0,
         }
 
-    def get_mood(self, human_offer):
+    def get_mood(self, human_offer: t.Dict[str, str]) -> str:
         """
         This function gets offer of the opponent's and lower threshold of the current tactic as input.
         Return robot mood and mood method to call and updates mood counts.
         """
-        # Get human's offer as list, so that we can compare with previous ones.
-        human_offer_list = human_offer.get_bid()
         # Set default mood and mood file to none.
         mood = None
 
@@ -61,10 +62,10 @@ class MoodController:
             )
 
             if (
-                len(self.opponent_previous_offers) >= 2 and human_offer_list == self.opponent_previous_offers[-1] and human_offer_list == self.opponent_previous_offers[-2]
+                len(self.opponent_previous_offers) >= 2 and human_offer == self.opponent_previous_offers[-1] and human_offer == self.opponent_previous_offers[-2]
             ):
                 mood = "Frustrated"
-            elif human_offer_list == self.opponent_previous_offers[-1]:
+            elif human_offer == self.opponent_previous_offers[-1]:
                 mood = "Annoyed"
             elif utility_delta == 0:
                 mood = "Neutral"
@@ -82,7 +83,7 @@ class MoodController:
             human_offer
         )
         # Append to the offer history.
-        self.opponent_previous_offers.append(human_offer_list)
+        self.opponent_previous_offers.append(human_offer)
         # Return the robot action.
 
         self.num_of_moods[mood] += 1
