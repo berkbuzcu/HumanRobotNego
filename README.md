@@ -1,3 +1,7 @@
+pip3 -r requirements.txt --no-deps
+
+python3 -m human_robot_negotiation
+
 # Human-Robot-Negotiation
 Human Robot Negotiation Framework that enables a human negotiator to negotiate with a nao humanoid robot.
 
