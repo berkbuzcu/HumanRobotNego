@@ -1,19 +1,19 @@
 import pika
 from nao_robot import NaoRobot
-from queuelib.queue_manager import MultiQueueHandler
-from queuelib.enums import HANTQueue
-
+from queue_manager import MultiQueueHandler
 
 class RobotServer:
     def __init__(self):
-        self.queue_manager = MultiQueueHandler(HANTQueue.ROBOT)
+        self.queue_manager = MultiQueueHandler()
 
         self.server_stopped = False
         self.robot = None
 
+        self.queue_manager.send_message("robot", "NAO: INIT COMPLETE")
+
     def start_server(self):
         while not self.server_stopped:
-            message = self.queue_manager.wait_for_message_from_queue(HANTQueue.ROBOT)
+            message = self.queue_manager.wait_for_message_from_queue("robot")
 
             parsed_message = list(filter(None, message.split(";")))
 
@@ -26,7 +26,7 @@ class RobotServer:
             try:
                 func = getattr(func_selector[parsed_message[0]], parsed_message[1])
                 reply = func(*parsed_message[2:])
-                self.queue_manager.send_message(HANTQueue.ROBOT,
+                self.queue_manager.send_message("robot",
                                                 "Execution successful. INPUT: %s: REPLY: %s" %
                                                 (str(parsed_message), str(reply)))
 
