@@ -2,7 +2,7 @@
 #from agent.Solver_Agent.ComparisonObject import ComparisonObject
 
 from human_robot_negotiation.agent.solver_agent.comparison_object import ComparisonObject
-from human_robot_negotiation.HANT.utility_space import UtilitySpace
+from human_robot_negotiation.core.utility_space import UtilitySpace
 
 import typing as t
 import copy

@@ -1,0 +1,33 @@
+version: '3.0'
+
+networks:
+  hantnet:
+    driver: bridge
+
+services:
+  core:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./core/Dockerfile
+    networks:
+      - hantnet
+
+  naoserver:
+    build:
+      context: ./human_robot_negotiation/robot_server/nao
+      dockerfile: Dockerfile
+    networks:
+      - hantnet
+
+  rabbitmq:
+    build:
+      context: human_robot_negotiation/orchestration/rabbitmq
+      dockerfile: Dockerfile
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - hantnet
+
+    hostname: rabbitmq
+    container_name: rabbitmq

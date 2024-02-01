@@ -1,4 +1,4 @@
-from human_robot_negotiation.HANT.nego_action import Offer
+from human_robot_negotiation.core.nego_action import Offer
 import typing as t
 
 class MoodController:

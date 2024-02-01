@@ -4,7 +4,7 @@ speech_v1p1beta1
 
 # Ignore session logs and checkpoint.
 FaceChannel/sessions
-EmotionCapturing/FaceChannel/CLModel/checkpoint/*
+emotion_analysis/FaceChannel/CLModel/checkpoint/*
 
 # Ignore logs.
 *Logs/

@@ -1,5 +1,5 @@
 import random
-from human_robot_negotiation.HANT.utility_space import UtilitySpace
+from human_robot_negotiation.core.utility_space import UtilitySpace
 
 # Time-dependent stochastic bidding tactic.
 
