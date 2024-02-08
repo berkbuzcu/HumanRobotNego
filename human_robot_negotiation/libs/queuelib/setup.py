@@ -6,5 +6,8 @@ setup(name='hant_queue_lib',
       author='Berk Buzcu',
       author_email='buzcuberk@gmail.com',
       url='www.example.com',
+      install_requires=[
+            'pika',
+      ],
       py_modules=["queue_manager"],
      )

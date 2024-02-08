@@ -1,6 +1,6 @@
 import time
 import traceback
-
+import json
 import pika
 
 host = 'rabbitmq'
@@ -15,7 +15,13 @@ queues = [
     "logger",
     "human", ]
 
-
+def prep_init_message(name, error=None):
+    return json.dumps({
+        "from": name,
+        "status": "success",
+        "error": error,
+        "type": "init_lifecheck"
+    })
 class MultiQueueHandler(object):
     _instance = None
 

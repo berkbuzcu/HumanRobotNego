@@ -1,6 +1,6 @@
 import pika
 from nao_robot import NaoRobot
-from queue_manager import MultiQueueHandler
+from queue_manager import MultiQueueHandler, prep_init_message
 
 class RobotServer:
     def __init__(self):
@@ -9,7 +9,7 @@ class RobotServer:
         self.server_stopped = False
         self.robot = None
 
-        self.queue_manager.send_message("robot", "NAO: INIT COMPLETE")
+        self.queue_manager.send_message("robot", prep_init_message("Nao"))
 
     def start_server(self):
         while not self.server_stopped:

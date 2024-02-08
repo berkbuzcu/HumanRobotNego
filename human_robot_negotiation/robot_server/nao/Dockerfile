@@ -13,8 +13,10 @@ RUN wget https://community-static.aldebaran.com/resources/2.5.5/sdk-python/pynao
 
 ENV PYTHONPATH /opt/pynaoqi-python2.7-2.5.5.5-linux64/lib/python2.7/site-packages
 
-COPY . /app
-WORKDIR /app
+COPY ./robot_server/nao/ /nao
+COPY ./libs /hant_libs
+
+WORKDIR /nao
 
 EXPOSE 9559
 

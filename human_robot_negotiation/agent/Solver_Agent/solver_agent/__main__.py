@@ -1,6 +1,8 @@
-from solver_agent import SolverAgent
+from .solver_agent import SolverAgent
 from queuelib.queue_manager import MultiQueueHandler
 from corelib.utility_space import UtilitySpace
+from agentlib.agent_manager import AgentManager
+import json
 
 # init_message:
 
@@ -16,9 +18,5 @@ domain type:
 }
 '''
 
-queue_handler = MultiQueueHandler(["agent", "logger"])
-init_message = queue_handler.wait_for_message_from_queue("agent")
-
-agent = SolverAgent()
-
-
+manager = AgentManager("Solver", SolverAgent)
+manager.start_agent()

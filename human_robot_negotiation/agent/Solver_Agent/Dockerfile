@@ -1,8 +1,8 @@
 FROM python:3.11
 
-WORKDIR /core
+WORKDIR /solver_agent
 
-COPY ./core /core
+COPY ./agent/solver_agent /solver_agent
 COPY ./libs /hant_libs
 
 RUN pip install --no-cache-dir -r requirements.txt
@@ -11,4 +11,4 @@ RUN pip install -e /hant_libs/corelib
 RUN pip install -e /hant_libs/agentlib
 RUN pip install -e /hant_libs/queuelib
 
-CMD ["python", "-u", "-m", "core"]
+CMD ["python", "-u", "-m", "solver_agent"]

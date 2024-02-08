@@ -1,3 +1,5 @@
+import json
+
 from queuelib.queue_manager import MultiQueueHandler
 from queuelib.enums import HANTQueue
 
@@ -34,10 +36,9 @@ class RobotManager:
     def send_nego_over(self, type):
         request_message = f"robot;receive_nego_over;{type}"
         self.__send_message(request_message)
-
         self.send_stop_server()
 
     def __send_message(self, request_message):
-        self.queue_handler.send_message(HANTQueue.ROBOT, request_message)
+        self.queue_handler.send_message(HANTQueue.ROBOT, json.dumps(request_message))
         reply = self.queue_handler.wait_for_message_from_queue(HANTQueue.ROBOT)
         return reply[reply.find("REPLY:") + len("REPLY:"):]

@@ -1,9 +1,5 @@
-from xml.dom.minidom import parse
-import xml.dom.minidom
 import itertools
-import math
 import corelib.nego_action as nego_action
-import json
 
 
 class UtilitySpace:
@@ -21,6 +17,7 @@ class UtilitySpace:
         self.issue_max_counts = {}
         # Call the role weight function for complete the weight dictionary.
         # SUB-SUB dictionary. ie: {"Apple": {"0": 0, "1", 0.25...}, "accomodation": {"hotel": 1, "tent": 0.75...}}
+
 
         # Generate all possible offers.
         self.__generate_all_possible_offers()
@@ -78,3 +75,6 @@ class UtilitySpace:
             left_count = issue_max_count - int(offered_amount)
             opponent_offer[issue_name] = str(left_count)
         return opponent_offer
+
+    def get_action_factory(self):
+        return

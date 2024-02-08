@@ -6,22 +6,22 @@ import json
 
 from sklearn.cluster import KMeans
 from sklearn.utils._openmp_helpers import _openmp_effective_n_threads
-from collections import OrderedDict
 
 from corelib.nego_action import Offer, Accept, AbstractActionFactory
 from corelib.utility_space import UtilitySpace
 from agentlib.abstract_agent import AbstractAgent
 
-from human_robot_negotiation.agent.agent_mood.mood_controller import MoodController
-from human_robot_negotiation.agent.solver_agent.uncertainty_module import UncertaintyModule
+from .mood_controller import MoodController
+from .uncertainty_module import UncertaintyModule
 
-from human_robot_negotiation.logger import LoggerNew
-from human_robot_negotiation import CONFIG_DIR
+
+# from human_robot_negotiation.logger import LoggerNew
+# from human_robot_negotiation import CONFIG_DIR
 
 
 class EstimatedSensitivityCalculator:
     def __init__(self):
-        with open(CONFIG_DIR / "solver_kmeans.json") as f:
+        with open("solver_kmeans.json") as f:
             jsonData = json.load(f)
             self.kmeans = KMeans().fit(np.random.rand(10, 6))
             self.kmeans._n_threads = _openmp_effective_n_threads()
@@ -145,11 +145,9 @@ class EstimatedSensitivityCalculator:
 
 
 class SolverAgent(AbstractAgent):
-    def __init__(self, utility_space, time_controller, action_factory):
-        self.utility_space: UtilitySpace = utility_space
+    def init_negotiation(self, utility_space: dict, domain_info: dict) -> t.Tuple[bool, str]:
         self.estimated_opponent_preference: UtilitySpace = copy.deepcopy(self.utility_space)
-        self.action_factory: AbstractActionFactory = action_factory
-        self.time_controller = time_controller
+        # self.time_controller = time_controller
         self.estimated_sensitivity_calculator = EstimatedSensitivityCalculator()
         self.uncertainty_module: UncertaintyModule = UncertaintyModule(utility_space)
 
@@ -206,6 +204,12 @@ class SolverAgent(AbstractAgent):
         self.bid_frequencies = {}
         self.delta_multiplier = 1
 
+    def negotiation_over(self, participant_name: str, session_number: str, termination_type: str) -> None:
+        ...
+
+    def name(self):
+        return "SolverAgent"
+
     def time_based(self, t):
         return (1 - t) * (1 - t) * self.p0 + 2 * (1 - t) * t * self.p1 + t * t * self.p2
 
@@ -235,7 +239,6 @@ class SolverAgent(AbstractAgent):
     def check_acceptance(self, final_target_utility, human_offer_utility) -> t.Tuple[Accept, str]:
         if final_target_utility < human_offer_utility:
             self.my_prev_util = final_target_utility
-            # self.agent_history.append(self.action_factory.get_offer_below_utility(final_target_utility))
 
             return True, (Accept(), "Happy")
 
@@ -274,7 +277,7 @@ class SolverAgent(AbstractAgent):
             behavior_based_target_utility = behavior_based_utility + ((self.human_awareness ** 2) * emotion_value)
             behavior_based_target_utility = behavior_based_target_utility if behavior_based_target_utility <= 1.0 else 1.0
             final_target_utility = (1 - current_time ** 2) * behavior_based_target_utility + (
-                        current_time ** 2) * time_based_target_utility
+                    current_time ** 2) * time_based_target_utility
 
             if len(self.opponent_history) > 8:
                 # Calculate awareness based on estimated opponent preference and utility space.

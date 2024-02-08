@@ -1,10 +1,20 @@
+import json
 import time
 import traceback
 
 import pika
 
-host = 'localhost'
+host = 'rabbitmq'
 credentials = pika.PlainCredentials("orchestrator", "orchestrator")
+
+
+def prep_init_message(name, error=None):
+    return json.dumps({
+        "from": name,
+        "status": "success",
+        "error": error,
+        "type": "init_lifecheck"
+    })
 
 
 class MultiQueueHandler:
@@ -21,6 +31,8 @@ class MultiQueueHandler:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
 
+            print("Connecting to: ", host, port)
+
             cls._instance.connection_params = pika.ConnectionParameters(
                 host=host,
                 port=port,
@@ -34,7 +46,6 @@ class MultiQueueHandler:
             cls._instance.connect()
 
         return cls._instance
-
 
     def connect(self):
         if not self.is_connected:
@@ -89,5 +100,3 @@ class MultiQueueHandler:
                 print(f"Error sending message: {e}")
         else:
             print("Not connected to RabbitMQ. Call 'connect()' first.")
-
-
