@@ -12,10 +12,10 @@ services:
     networks:
       - hantnet
 
-  naoserver:
+  qtserver:
     build:
-      context: ./human_robot_negotiation/robot_server/nao
-      dockerfile: Dockerfile
+      context: ./human_robot_negotiation/
+      dockerfile: ./robot_server/qt/Dockerfile
     networks:
       - hantnet
 
