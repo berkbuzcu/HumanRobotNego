@@ -5,20 +5,6 @@ networks:
     driver: bridge
 
 services:
-  core:
-    build:
-      context: ./human_robot_negotiation/
-      dockerfile: ./core/Dockerfile
-    networks:
-      - hantnet
-
-  qtserver:
-    build:
-      context: ./human_robot_negotiation/
-      dockerfile: ./robot_server/qt/Dockerfile
-    networks:
-      - hantnet
-
   rabbitmq:
     build:
       context: human_robot_negotiation/orchestration/rabbitmq
@@ -28,6 +14,94 @@ services:
       - "5672:5672"
     networks:
       - hantnet
-
     hostname: rabbitmq
     container_name: rabbitmq
+
+  core:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./core/Dockerfile
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/core:/core
+      - ./human_robot_negotiation/libs:/hant_libs
+
+  # qtserver:
+  #   build:
+  #     context: ./human_robot_negotiation/
+  #     dockerfile: ./robot_server/qt/Dockerfile
+
+  solver_agent:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./agent/solver_agent/Dockerfile
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/agent/solver_agent:/solver_agent
+      - ./human_robot_negotiation/libs:/hant_libs
+
+  backend:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./gui/webserver/backend/Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/gui/webserver/backend:/backend
+      - ./human_robot_negotiation/libs:/hant_libs
+
+  frontend:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./gui/webserver/frontend/Dockerfile
+    ports:
+      - "4000:80"
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/gui/webserver/frontend:/frontend
+
+  naoserver:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./robot_server/nao/Dockerfile
+    networks:
+      - hantnet
+
+  #emotionmodule:
+  #  build:
+  #    context: ./human_robot_negotiation/
+  #    dockerfile: ./emotion_analysis/Dockerfile
+  #  networks:
+  #    - hantnet
+  #  volumes:
+  #    - ./human_robot_negotiation/emotion_analysis:/emotion_analysis
+
+  emotionmodule2:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./emotion_analysis/Dockerfile
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/emotion_analysis:/emotion_analysis
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=hant
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+
+volumes:
+  postgres_db:
+    driver: local

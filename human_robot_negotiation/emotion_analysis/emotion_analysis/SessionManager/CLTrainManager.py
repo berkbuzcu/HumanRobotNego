@@ -10,6 +10,7 @@ from ..FaceChannel.CLModel.cl_model_c3_faster import get_arousal_valence, Episod
 
 SLEEPING = 0.25
 
+
 class TrainManager:
     queue: list
     main_thread: Thread
@@ -30,12 +31,12 @@ class TrainManager:
 
         self.sess = sess
         self.graph = graph
-        
+
         self.models = []
 
         if os.path.exists(experiment_gwrs + "/GDM_E"):
             self.models.append(gtls.import_network(experiment_gwrs + "/GDM_E", EpisodicGWR))
-            
+
         self.face_channel = face_channel
 
         self.face_channel = face_channel
@@ -61,12 +62,13 @@ class TrainManager:
         :return: None
         """
         self.__training = True
-        round_dir, gwr_dir, round, valid_faces = self.queue.pop(0)     # Dequeue
+        round_dir, gwr_dir, round, valid_faces = self.queue.pop(0)  # Dequeue
 
         print("Training Round: ", round)
         start_time = timer()
         model_copy = copy.deepcopy(self.models[-1]) if len(self.models) > 0 else None
-        model = get_arousal_valence(round_dir, gwr_dir, self.graph, self.sess, self.face_channel, valid_faces, model=model_copy)
+        model = get_arousal_valence(round_dir, gwr_dir, self.graph, self.sess, self.face_channel, valid_faces,
+                                    model=model_copy)
         self.models.append(model)
         end_time = timer()
 

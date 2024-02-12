@@ -1,10 +1,10 @@
 FROM python:3.11
 
-WORKDIR /core
 
-COPY ./core /core
 COPY ./libs /hant_libs
+COPY ./core /core
 
+WORKDIR /core
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN pip install -e /hant_libs/corelib

@@ -6,14 +6,14 @@ import copy
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-
-from threading import Thread
-from human_robot_negotiation.emotion_analysis.FaceChannel.FaceChannel.FaceChannelV1.FaceChannelV1 import FaceChannelV1
 from abc import ABC, abstractmethod
-from human_robot_negotiation import PROJECT_DIR
+from threading import Thread
 
-SESSIONS_DIR = str(PROJECT_DIR.parent / "sessions")
-SAVED_GWRS_DIR = str(PROJECT_DIR / "emotion_analysis" / "saved_gwrs")
+from ..FaceChannel.FaceChannel.FaceChannelV1.FaceChannelV1 import FaceChannelV1
+from .. import PROJECT_DIR
+
+SESSIONS_DIR = str(PROJECT_DIR / "sessions")
+SAVED_GWRS_DIR = str(PROJECT_DIR / "saved_gwrs")
 
 # Global Tensorflow Graph and Session for multi-thread operations.
 global graph
@@ -21,6 +21,7 @@ graph = tf.compat.v1.get_default_graph()
 global sess
 # sess = tf.compat.v1.Session(graph=graph, config=tf.compat.v1.ConfigProto(allow_soft_placement=True))
 sess = tf.compat.v1.InteractiveSession(graph=graph)
+
 
 class AbstractSession(ABC):
     session_name: str
@@ -57,7 +58,7 @@ class AbstractSession(ABC):
         self.session_name = f"{participant_name}_{session_id}"
         self.session_type = session_type
         self.round = 0
-        
+
         self.train_cl = session_type == "continual_learning" or session_id == "Demo"
 
         if self.train_cl:
@@ -102,7 +103,8 @@ class AbstractSession(ABC):
 
         # Generate Logger
         self.log_face_channel_path = os.path.join(self.log_dir, "face_channel.csv")
-        self.log_face_channel = pd.DataFrame(columns=["Round", "Arousal", "Valance", "Max_A", "Min_A", "Max_V", "Min_V"])
+        self.log_face_channel = pd.DataFrame(
+            columns=["Round", "Arousal", "Valance", "Max_A", "Min_A", "Max_V", "Min_V"])
 
         self.log_cl_path = os.path.join(self.log_dir, "cl.csv")
         self.log_cl = pd.DataFrame(columns=["Round", "Arousal", "Valance", "Max_A", "Min_A", "Max_V", "Min_V"])
@@ -156,13 +158,13 @@ class AbstractSession(ABC):
         max_for_user = {
             "max_a": float(self.max_a),
             "max_v": float(self.max_v),
-            "min_a": float(self.min_a), 
+            "min_a": float(self.min_a),
             "min_v": float(self.min_v)
         }
 
         with open(os.path.join(SESSIONS_DIR, f"arousal_valance/") + self.participant_name + ".json", "w") as file:
             json.dump(max_for_user, file)
-    
+
     @abstractmethod
     def get_valid_faces(self, predictions: list) -> list:
         """
@@ -192,10 +194,11 @@ class AbstractSession(ABC):
             elif self.session_type == "face_channel":
                 predictions = self.predict_face_channel(np.array(self._faces, dtype=np.float32), True)
                 self._faces = []  # Clean Faces
-                
+
                 start_time = time.time()
                 valid_faces = self.get_valid_faces(predictions)
-                print("Cleaning (s): ", time.time() - start_time, "Number of valid faces:", len(valid_faces), " / ", len(predictions))
+                print("Cleaning (s): ", time.time() - start_time, "Number of valid faces:", len(valid_faces), " / ",
+                      len(predictions))
 
                 self.training_manager.enqueue(round_dir, self.gwr_dir, self.round, valid_faces)
             elif self.session_type == "continual_learning":
@@ -207,10 +210,11 @@ class AbstractSession(ABC):
                 start_time = time.time()
                 predictions = self.predict_cl(round_dir)
                 print("CL_PRED_TIME: ", time.time() - start_time)
-                
+
                 start_time = time.time()
                 valid_faces = self.get_valid_faces(face_channel_predictions)
-                print("Cleaning: ", time.time() - start_time, "Number of valid faces:", len(valid_faces), " / ", len(predictions))
+                print("Cleaning: ", time.time() - start_time, "Number of valid faces:", len(valid_faces), " / ",
+                      len(predictions))
 
                 start_time = time.time()
                 self.training_manager.enqueue(round_dir, self.gwr_dir, self.round, valid_faces)
@@ -220,13 +224,13 @@ class AbstractSession(ABC):
                 self._faces = []  # Clean Faces
 
                 predictions = self.predict_cl(round_dir)
-                
+
                 self.training_manager.enqueue(round_dir, self.gwr_dir, self.round)
 
-            else: 
+            else:
                 print("Running Test Emotions")
                 predictions = {"Valance": 0.5, "Arousal": 0.5,
-                   "Max_V": 0.5, "Min_V": 0.5, "Max_A": 0.5, "Min_A": 0.5}
+                               "Max_V": 0.5, "Min_V": 0.5, "Max_A": 0.5, "Min_A": 0.5}
 
         # Round Update
         self.round += 1
@@ -259,7 +263,8 @@ class AbstractSession(ABC):
 
         if len(self.training_manager.models) > 0:
             model_copy = copy.deepcopy(self.training_manager.models[-1])
-            predictions = self.prediction_from_cl(log_dir=log_dir, model=model_copy, sess=sess, graph=graph, face_channel=self.face_channel)
+            predictions = self.prediction_from_cl(log_dir=log_dir, model=model_copy, sess=sess, graph=graph,
+                                                  face_channel=self.face_channel)
 
             if len(self.training_manager.models) > 2:
                 first_cp = self.training_manager.models.pop(0)
@@ -307,15 +312,15 @@ class AbstractSession(ABC):
 
         for i in range(len(predictions[0])):
             self.log_face_channel = self.log_face_channel.append({
-                                                                  "Round": self.round,
-                                                                  "Arousal": predictions[0][i][0],
-                                                                  "Valance": predictions[1][i][0],
-                                                                  "Max_A": self.max_a,
-                                                                  "Min_A": self.min_a,
-                                                                  "Max_V": self.max_v,
-                                                                  "Min_V": self.min_v,
-                                                                  },
-                                                                 ignore_index=True)
+                "Round": self.round,
+                "Arousal": predictions[0][i][0],
+                "Valance": predictions[1][i][0],
+                "Max_A": self.max_a,
+                "Min_A": self.min_a,
+                "Max_V": self.max_v,
+                "Min_V": self.min_v,
+            },
+                ignore_index=True)
 
         self.log_face_channel.to_csv(self.log_face_channel_path)
 
@@ -337,15 +342,14 @@ class AbstractSession(ABC):
 
         for i in range(len(predictions)):
             self.log_cl = self.log_cl.append({
-                                              "Round": self.round,
-                                              "Arousal": predictions[i][0][0][0],
-                                              "Valance": predictions[i][1][0][0],
-                                              "Max_A": self.max_a,
-                                              "Min_A": self.min_a,
-                                              "Max_V": self.max_v,
-                                              "Min_V": self.min_v,
-                                              },
-                                             ignore_index=True)
+                "Round": self.round,
+                "Arousal": predictions[i][0][0][0],
+                "Valance": predictions[i][1][0][0],
+                "Max_A": self.max_a,
+                "Min_A": self.min_a,
+                "Max_V": self.max_v,
+                "Min_V": self.min_v,
+            },
+                ignore_index=True)
 
         self.log_cl.to_csv(self.log_cl_path)
-

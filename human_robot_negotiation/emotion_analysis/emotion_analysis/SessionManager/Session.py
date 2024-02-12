@@ -4,6 +4,7 @@ import typing as t
 from .AbstractSession import *
 from .Capturing import Capturing
 
+
 class SessionCamera(AbstractSession):
     capturing: Capturing
     _capturing: bool
@@ -24,7 +25,7 @@ class SessionCamera(AbstractSession):
 
         self._capturing = False
         self.thread_capturing = None
-        
+
         super(SessionCamera, self).__init__(participant_name, session_id, session_type)
 
     def __run_capturing(self):
@@ -33,12 +34,12 @@ class SessionCamera(AbstractSession):
             Do not call it directly.
         :return: None
         """
-        #global sess
-        #global graph
+        # global sess
+        # global graph
 
         counter = 0
 
-        #with graph.as_default():
+        # with graph.as_default():
         #    tf.compat.v1.keras.backend.set_session(sess)
         while (self._capturing):
             face = self.get_face(counter)
@@ -47,8 +48,7 @@ class SessionCamera(AbstractSession):
             if face is None:
                 continue
 
-            self._faces.append(face)        
-            
+            self._faces.append(face)
 
     def start(self):
         """
@@ -70,28 +70,30 @@ class SessionCamera(AbstractSession):
         self.close_camera()
 
         super(SessionCamera, self).close()
-        
+
     def get_valid_faces(self, predictions: list) -> list:
         # Get Stats of the FaceChannel prediction of the current round
         mean_arousal = float(np.mean(predictions[0]))
         std_arousal = float(np.std(predictions[0]))
-                
+
         mean_valance = float(np.mean(predictions[1]))
         std_valance = float(np.std(predictions[1]))
-        
+
         valid_faces = []
         for i in range(len(predictions[0])):
             # If the arousal and valance of that image is close to mean, ignore it.
-            if mean_arousal - std_arousal <= predictions[0][i][0] <= mean_arousal + std_arousal and mean_valance - std_valance <= predictions[1][i][0] <= mean_valance + std_valance:
+            if mean_arousal - std_arousal <= predictions[0][i][
+                0] <= mean_arousal + std_arousal and mean_valance - std_valance <= predictions[1][i][
+                0] <= mean_valance + std_valance:
                 continue
-            
+
             # Add the path of corresponding image
             valid_faces.append(self.capturing.save_path_format % i)
-            
+
         # The models cannot work if the number of images is less than 2
         while len(valid_faces) < 2:
             valid_faces.append(self.capturing.save_path_format % 0)
-        
+
         return valid_faces
 
     def stop(self) -> t.Tuple[t.Dict[str, float], t.Dict[str, float]]:
@@ -103,7 +105,7 @@ class SessionCamera(AbstractSession):
             print("No Capturing!!!!!!!!!!!")
             self.round += 1
             self.generate_round_folders()
-            
+
             results = {
                 "Arousal": 0.,
                 "Valance": 0.,
@@ -112,7 +114,7 @@ class SessionCamera(AbstractSession):
                 "Max_V": float(self.max_v),
                 "Min_V": float(self.min_v),
             }
-            return results, results #padding result
+            return results, results  # padding result
 
         #  Close Thread
         self._capturing = False
@@ -132,8 +134,8 @@ class SessionCamera(AbstractSession):
             return results, results
         else:
             result = {
-                "Arousal": float(np.mean(np.array(predictions, dtype=np.float32)[:,0])),
-                "Valance": float(np.mean(np.array(predictions, dtype=np.float32)[:,1])),
+                "Arousal": float(np.mean(np.array(predictions, dtype=np.float32)[:, 0])),
+                "Valance": float(np.mean(np.array(predictions, dtype=np.float32)[:, 1])),
                 "Max_A": float(self.max_a),
                 "Min_A": float(self.min_a),
                 "Max_V": float(self.max_v),
@@ -141,8 +143,10 @@ class SessionCamera(AbstractSession):
             }
 
             normalized_result = copy.deepcopy(result)
-            normalized_result["Arousal"] = 2 * ((normalized_result["Arousal"] - self.min_a)/(self.max_a - self.min_a)) - 1 
-            normalized_result["Valance"] = 2 * ((normalized_result["Valance"] - self.min_v)/(self.max_v - self.min_v)) - 1 
+            normalized_result["Arousal"] = 2 * (
+                        (normalized_result["Arousal"] - self.min_a) / (self.max_a - self.min_a)) - 1
+            normalized_result["Valance"] = 2 * (
+                        (normalized_result["Valance"] - self.min_v) / (self.max_v - self.min_v)) - 1
 
             return result, normalized_result
 
@@ -153,7 +157,7 @@ class SessionCamera(AbstractSession):
         :return: Face Image
         """
         face = self.capturing.run(id)
-        
+
         if face is None:
             return None
 
@@ -189,4 +193,3 @@ class SessionCamera(AbstractSession):
         self.capturing.close()
 
         self._faces = []
-

@@ -3,13 +3,11 @@ import json
 from queuelib.queue_manager import MultiQueueHandler
 from queuelib.enums import HANTQueue
 from corelib.nego_action import Offer
+from .abstract_manager import AbstractManager
 
 
-class AgentManager:
+class AgentManager(AbstractManager):
     queue_manager: MultiQueueHandler
-
-    def __init__(self):
-        self.queue_manager = MultiQueueHandler()
 
     def send_offer(self, offer: Offer, predictions, normalized_predictions) -> None:
         message = {

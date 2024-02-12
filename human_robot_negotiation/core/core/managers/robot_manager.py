@@ -2,13 +2,11 @@ import json
 
 from queuelib.queue_manager import MultiQueueHandler
 from queuelib.enums import HANTQueue
+from .abstract_manager import AbstractManager
 
 
 class RobotManager:
     queue_handler: MultiQueueHandler
-
-    def __init__(self):
-        self.queue_handler = MultiQueueHandler()
 
     ### Server Methods ###
     def send_init_robot(self, robot_name):

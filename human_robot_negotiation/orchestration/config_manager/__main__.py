@@ -1,10 +1,6 @@
-import pika
-import threading
-import traceback
 import json
-import xml
+import pika
 
-from human_robot_negotiation import DOMAINS_DIR
 from utils import get_utility_space_json, get_preferences, get_domain_info, create_preference_xml
 
 host = 'localhost'

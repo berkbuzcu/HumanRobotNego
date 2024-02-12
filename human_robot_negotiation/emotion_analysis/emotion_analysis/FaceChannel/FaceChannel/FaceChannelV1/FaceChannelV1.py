@@ -22,9 +22,9 @@ from tensorflow.keras.layers import (
     BatchNormalization, MaxPooling2D, Activation, Flatten, Dropout, Dense, Lambda, Input
 )
 
-from human_robot_negotiation import PROJECT_DIR
-from human_robot_negotiation.emotion_analysis.FaceChannel.FaceChannel.Metrics import metrics
-from human_robot_negotiation.emotion_analysis.FaceChannel.FaceChannel.FaceChannelV1 import imageProcessingUtil
+from emotion_analysis import PROJECT_DIR
+from emotion_analysis.FaceChannel.FaceChannel.Metrics import metrics
+from emotion_analysis.FaceChannel.FaceChannel.FaceChannelV1 import imageProcessingUtil
 
 class FaceChannelV1:
     IMAGE_SIZE = (64, 64)

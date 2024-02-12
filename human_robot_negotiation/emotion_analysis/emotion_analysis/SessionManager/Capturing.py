@@ -1,10 +1,12 @@
 from ..FaceChannel.FaceChannel.FaceChannelV1.imageProcessingUtil import imageProcessingUtil
 import cv2
-from PIL import Image as PILImage
-from human_robot_negotiation.core.exceptions import CameraException
-
 
 IMAGE_CUT_SIZE = (96, 96)
+
+
+class CameraException(Exception):
+    def __init__(self):
+        super().__init__()
 
 class Capturing:
     save_path_format: str
@@ -24,7 +26,7 @@ class Capturing:
         self.face_model = imageProcessingUtil()
 
         self.cap = cv2.VideoCapture(self.camera_id)
-    
+
         ret, frame = self.cap.read()
 
         if ret == False:

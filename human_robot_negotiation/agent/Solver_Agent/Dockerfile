@@ -2,8 +2,8 @@ FROM python:3.11
 
 WORKDIR /solver_agent
 
-COPY ./agent/solver_agent /solver_agent
-COPY ./libs /hant_libs
+# COPY ./agent/solver_agent /solver_agent
+# COPY ./libs /hant_libs
 
 RUN pip install --no-cache-dir -r requirements.txt
 

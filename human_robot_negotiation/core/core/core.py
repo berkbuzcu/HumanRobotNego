@@ -1,16 +1,14 @@
 import time
 import warnings
 
-from corelib.nego_action import ResourceAllocationActionFactory, NormalActionFactory, Offer, Accept
-
-# from human_robot_negotiation.emotion_analysis.SessionManager.Session import SessionCamera
-from .nego_timer import NegotiationTimer
-
+from corelib.nego_action import Accept
+from queuelib.queue_manager import MultiQueueHandler
 from .managers.agent_manager import AgentManager
 from .managers.emotion_manager import EmotionManager
 from .managers.gui_manager import GUIManager
-from .managers.robot_manager import RobotManager
 from .managers.human_interaction_manager import HumanInteractionManager
+from .managers.robot_manager import RobotManager
+from .nego_timer import NegotiationTimer
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -22,9 +20,9 @@ def nego_over():
 
 
 class Core():
-    def __init__(self, queue_handler, parameters):
+    def __init__(self, parameters):
         super().__init__()
-        self.queue_handler = queue_handler
+        self.queue_handler = MultiQueueHandler()
         self.agent_utility_space = None
         self.human_utility_space = None
 
@@ -44,29 +42,8 @@ class Core():
         self.deadline = parameters["deadline"]
         self.camera_id = parameters["camera_id"]
 
-        self.time_controller = NegotiationTimer(self.deadline * 10 ** 3,
-                                                self.timeout_negotiation)  ### conversion of time, beware
-
-        #self.camera_controller = SessionCamera(self.participant_name, self.session_number, self.session_type,
+        # self.camera_controller = SessionCamera(self.participant_name, self.session_number, self.session_type,
         #                                       camera_id=self.camera_id)  # 30 seconds
-
-        action_factory_selector = {
-            "Resource Allocation": ResourceAllocationActionFactory,
-            "Normal": NormalActionFactory,
-        }
-
-        offer_classifier_selector = {
-            "Resource Allocation": OfferClassifier,
-            "Normal": HolidayOfferClassifier
-        }
-
-        self.human_action_factory = action_factory_selector[self.domain_info["domain_type"]](
-            self.human_utility_space, "Human")
-        self.agent_action_factory = action_factory_selector[self.domain_info["domain_type"]](
-            self.agent_utility_space, "Agent")
-
-        self.offer_classifier = offer_classifier_selector[self.domain_info["domain_type"]](
-            self.human_utility_space, self.human_action_factory)
 
         self.robot_manager = RobotManager()
         self.agent_manager = AgentManager()
@@ -90,26 +67,21 @@ class Core():
             time_passed, agent_score, user_score, agreement = (1, 0, 0, False) if termination_type == "timeout" else (
                 last_offer[4], last_offer[2], last_offer[3], True)
 
-            LoggerNew.log_summary(
-                robot_moods=agent_num_of_emotions,
-                sensitivity_analysis=human_sensitivity_dict,
-                human_awareness=human_awareness,
-                total_offers=total_offers,
-                final_scaled_time=time_passed,
-                final_agent_score=agent_score,
-                final_user_score=user_score,
-                is_agreement=agreement)
+            #LoggerNew.log_summary(
+            #    robot_moods=agent_num_of_emotions,
+            #    sensitivity_analysis=human_sensitivity_dict,
+            #    human_awareness=human_awareness,
+            #    total_offers=total_offers,
+            #    final_scaled_time=time_passed,
+            #    final_agent_score=agent_score,
+            #    final_user_score=user_score,
+            #    is_agreement=agreement)
 
         print("Logging complete")
-        self.time_controller.finish_signal.emit()
-        self.config_manager.reset_manager()
-        self.negotiation_gui.clean_gui.emit()
-        self.camera_controller.close()
 
     def timeout_negotiation(self):
         if self.running:
             self.running = False
-            self.human_interaction_controller.recognizer.terminate_stream()
             self.end_negotiation("timeout")
 
     def terminate_nego(self):
@@ -129,8 +101,7 @@ class Core():
         if mood is not None:
             self.robot_manager.send_mood(mood)
 
-        if self.camera_controller:
-            self.camera_controller.start()
+        self.emotion_manager.start_camera()
 
         # send offer to robot interface and let it handle
         agent_sentence = self.robot_manager.send_offer(agent_offer_to_human)
@@ -151,47 +122,39 @@ class Core():
                     print("Sleeping for: ", 2 - rem_time)
                     time.sleep(2 - rem_time)
 
-                if self.camera_controller:
-                    predictions, normalized_predictions = self.camera_controller.stop()
-                else:
-                    predictions = {"Valance": 0.5, "Arousal": 0.5,
-                                   "Max_V": 0.5, "Min_V": 0.5, "Max_A": 0.5, "Min_A": 0.5}
-                    normalized_predictions = predictions
+                predictions, normalized_predictions = self.emotion_manager.get_predictions()
 
             self.gui_manager.update_status(f"{self.robot_name} is listening")
 
             while self.running:
                 human_action, offer_done, total_user_input = self.human_interaction_manager.get_human_action()
 
-                received_time = self.time_controller.get_remaining_time()
-                print(received_time)
                 if isinstance(human_action, Accept):
                     self.end_negotiation("human")
                     return
 
                 self.gui_manager.reset_offer_grid()
-
                 self.gui_manager.update_offer_grid(human_action.get_bid("Human"), "blue")
                 self.gui_manager.update_offer_message("Human", total_user_input)
                 self.gui_manager.update_offer_utility("Human", str(int(self.human_utility_space.get_offer_utility(
-                                                                            human_action.get_bid("Human")) * 100)))
+                    human_action.get_bid("Human")) * 100)))
 
                 if offer_done:
                     # Add user offer to the history list.
-                    #self.nego_history.add_to_history(
+                    # self.nego_history.add_to_history(
                     #    bidder=human_action.get_bidder(),
                     #    offer=human_action,
                     #    scaled_time=self.time_controller.get_remaining_time(),
                     #    agent_mood="",
                     #    predictions=predictions,
-                    #)
+                    # )
                     break
 
             if not self.running:
                 # self.end_negotiation("timeout")
                 return
 
-            self.gui_manager.update_offer_message("")
+            self.gui_manager.update_offer_message(self.robot_name, "")
             self.gui_manager.update_status(f"{self.robot_name}'s turn")
 
             # Agent's generated offer for itself.
@@ -208,7 +171,6 @@ class Core():
 
             # Add agent offer to the logger list.
             # Send offer to the human.
-            start_time = time.time()
             self.send_agent_offer_to_human(agent_offer, agent_mood)
 
             # Set negotiation gui according to agent's offer.

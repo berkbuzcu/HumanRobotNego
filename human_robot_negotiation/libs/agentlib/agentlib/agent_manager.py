@@ -38,6 +38,7 @@ class AgentManager:
         while True:
             message = self.queue_handler.wait_for_message_from_queue(HANTQueue.AGENT.value)
 
+            print("SOLVER: ", message)
             # init - bid - termination
             message_body = message["body"]
             message_from = message["from"]
