@@ -1,5 +1,5 @@
-from ..FaceChannel.FaceChannel.FaceChannelV1.imageProcessingUtil import imageProcessingUtil
 import cv2
+from utils import imageProcessingUtil
 
 IMAGE_CUT_SIZE = (96, 96)
 

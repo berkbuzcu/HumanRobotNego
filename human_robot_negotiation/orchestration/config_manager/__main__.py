@@ -1,14 +1,16 @@
 import json
+import pathlib
+
 import pika
 
 from utils import get_utility_space_json, get_preferences, get_domain_info, create_preference_xml
 
-host = 'localhost'
-queues = ["internal", "robot_server", "gui", "emotion", "logger"]
-credentials = pika.PlainCredentials("orchestrator", "orchestrator")
+from queuelib.queue_manager import MultiQueueHandler
+from queuelib.enums import HANTQueue
+from queuelib.message import ConfigMessage
+from human_robot_negotiation import DOMAINS_DIR
 
-connection = pika.BlockingConnection(host, 5672)
-channel = connection.channel()
+queue_handler = MultiQueueHandler([HANTQueue.CONFIG], host="localhost")
 
 participant_name = "Berk Buzcu"
 session_type = "Session 1"
@@ -22,9 +24,8 @@ domain_info = get_domain_info(domain_file)
 
 human_preferences, agent_preferences = get_preferences(domain_info["issue_names"], domain_info["issue_values_list"])
 
-create_preference_xml(domain_info, participant_name, "Human", human_preferences)
-create_preference_xml(domain_info, participant_name, "Agent", agent_preferences)
-
+human_file_path: pathlib.Path = create_preference_xml(domain_info, participant_name, "Human", human_preferences)
+agent_file_path: pathlib.Path = create_preference_xml(domain_info, participant_name, "Agent", agent_preferences)
 
 config_message = {
     "participant_name": participant_name,
@@ -33,21 +34,12 @@ config_message = {
     "input_type": "",
     "output_type": "",
     "agent_type": agent_type,
-    "agent_preferences": get_utility_space_json(human_preferences),
-    "human_preferences": get_utility_space_json(agent_preferences),
+    "agent_preferences": get_utility_space_json(str(agent_file_path.absolute())),
+    "human_preferences": get_utility_space_json(str(human_file_path.absolute())),
     "robot_name": "Nao",
     "domain_info": domain_info,
     "deadline": 600,
     "camera_id": "1",
 }
 
-channel.basic_publish(
-    exchange='',
-    routing_key="internal",
-    body=json.dumps(config_message),
-    properties=pika.BasicProperties(
-        delivery_mode=2,
-    )
-)
-
-print(f"Message sent to queue internal: {json.dumps(config_message)}")
+queue_handler.send_message(ConfigMessage("CONFIG", config_message, True))

@@ -1,3 +1,4 @@
+#python2.7
 import time
 import traceback
 import json
@@ -6,31 +7,45 @@ import pika
 host = 'rabbitmq'
 credentials = pika.PlainCredentials("orchestrator", "orchestrator")
 
-queues = [
-    "internal",
-    "robot",
-    "gui",
-    "emotion",
-    "agent",
-    "logger",
-    "human", ]
 
-def prep_init_message(name, error=None):
-    return json.dumps({
-        "from": name,
-        "status": "success",
-        "error": error,
-        "type": "init_lifecheck"
-    })
+class RobotMessage:
+    def __init__(self, sender, payload, status):
+        self.sender = sender
+        self.payload = payload
+        self.status = status
+        self.queue_type = "robot"
+
+    def to_json(self):
+        return json.dumps({
+            "sender": self.sender,
+            "payload": self.payload,
+            "status": self.status,
+            "queue_type": self.queue_type
+        })
+
+
+def prep_init_message(name: str, error: bool = None):
+    message_dict = {
+        "sender": name,
+        "status": "true",
+        "payload": {"error": error},
+        "queue_type": "robot"
+    }
+    return RobotMessage(message_dict)
+
+
 class MultiQueueHandler(object):
     _instance = None
 
-    def __new__(cls, queues=None, port=5672):
+    def __new__(cls, queues=None, host='rabbitmq', port=5672, correlation_id="nao"):
         if queues is None:
             queues = []
 
+        if type(queues) != list:
+            queues = list(queues)
+
         if cls._instance is None:
-            cls._instance = super(MultiQueueHandler, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
 
             print("Connecting to: ", host, port)
 
@@ -43,6 +58,7 @@ class MultiQueueHandler(object):
             cls._instance.channel = None
             cls._instance.is_connected = False
             cls._instance.queues = queues
+            cls._instance.correlation_id = correlation_id
 
             cls._instance.connect()
 
@@ -55,9 +71,15 @@ class MultiQueueHandler(object):
                 self.channel = self.connection.channel()
                 self.is_connected = True
                 print("Connection is successful.")
+
+                for queue in self.queues:
+                    self.channel.queue_declare(queue=queue.value, durable=True)
+
             except Exception as e:
-                print("Error connecting to RabbitMQ: %s" % e)
+                print("Error connecting to RabbitMQ: {}".format(e))
                 print(traceback.format_exc())
+                print("Retrying RabbitMQ Connection...")
+                self.connect()
 
     def disconnect(self):
         if self.is_connected:
@@ -65,39 +87,44 @@ class MultiQueueHandler(object):
             self.is_connected = False
             print("Disconnected from RabbitMQ.")
 
-    def consume_all_queues_with_callback(self, callback):
-        try:
-            for queue_name in self.queues:
-                self.channel.queue_declare(queue=queue_name, durable=True)
-                self.channel.basic_consume(queue_name, callback, auto_ack=True)
+    @staticmethod
+    def __wrap_message(message_json):
+        return RobotMessage(**message_json)
 
-            self.channel.start_consuming()
-        except Exception as e:
-            print(traceback.format_exc())
-
-    def wait_for_message_from_queue(self, queue_name):
+    def wait_for_message_from_queue(self, queue_name="robot"):
         method_frame, header_frame, body = self.channel.basic_get(queue_name)
 
-        while not method_frame:
+        while True:
+            if method_frame:
+                if header_frame.correlation_id == self.correlation_id:
+                    print("Message is from myself, ignoring.")
+                else:
+                    break
+            else:
+                print("No message in queue, waiting.")
+
             time.sleep(1)
+            method_frame, header_frame, body = self.channel.basic_get(queue_name)
+        self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+        print("Message received from queue: ", queue_name)
+        return self.__wrap_message(body)
 
-        return body
-
-    def send_message(self, queue_name, message):
+    def send_message(self, message) -> None:
         if self.connection and self.connection.is_open:
             try:
                 # Send the message to the specified queue
                 self.channel.basic_publish(
                     exchange='',
-                    routing_key=queue_name,
-                    body=message,
+                    routing_key=message.queue_type.value,
+                    body=message.to_json(),
                     properties=pika.BasicProperties(
-                        delivery_mode=2,
+                        correlation_id=self.correlation_id
                     )
                 )
 
-                print("Message sent to queue {} : {}".format(queue_name, message) )
+                print("Message sent to queue '{}': {}".format(message.queue_type.value, message))
             except Exception as e:
+                traceback.print_exc()
                 print("Error sending message: {}".format(e))
         else:
             print("Not connected to RabbitMQ. Call 'connect()' first.")

@@ -1,4 +1,4 @@
-from peewee import * 
+from peewee import *
 import json
 import ast
 import pathlib
@@ -6,32 +6,36 @@ import pathlib
 DB_FOLDER_PATH = pathlib.Path(__file__).parent / "log_file"
 DB_PATH = DB_FOLDER_PATH / "logs.sqlite3"
 
-db =  SqliteDatabase(DB_PATH)
+db = SqliteDatabase(DB_PATH)
+
 
 class JSONField(TextField):
     def db_value(self, value):
-        #serialize JSON to string
+        # serialize JSON to string
         return value if value is None else json.dumps(value)
 
     def python_value(self, value):
-        #deserialize
+        # deserialize
         return value if value is None else json.loads(value)
+
 
 class ListField(TextField):
     def db_value(self, value):
-        #serialize list to string
-        #list -> str
+        # serialize list to string
+        # list -> str
         return str(value)
 
     def python_value(self, value):
-        #deserialize
-        #str -> list
-        #warning: nuclear if online
+        # deserialize
+        # str -> list
+        # warning: nuclear if online
         return ast.literal_eval(value)
 
-class BaseModel( Model):
+
+class BaseModel(Model):
     class Meta:
         database = db
+
 
 class SessionInformation(BaseModel):
     participant_uuid = UUIDField()
@@ -39,6 +43,7 @@ class SessionInformation(BaseModel):
     agent_type = CharField()
     interaction_type = CharField()
     domain = CharField()
+
 
 class SessionOfferHistory(BaseModel):
     session_id = ForeignKeyField(SessionInformation, backref='offer_history')
@@ -50,12 +55,13 @@ class SessionOfferHistory(BaseModel):
     move = CharField(null=True)
     agent_mood = CharField(null=True)
     max_valance = FloatField()
-    min_valance	= FloatField()
+    min_valance = FloatField()
     valance = FloatField()
-    max_arousal	= FloatField()
+    max_arousal = FloatField()
     min_arousal = FloatField()
-    arousal	= FloatField()
+    arousal = FloatField()
     sentences = ListField()
+
 
 class SessionSummary(BaseModel):
     session_id = ForeignKeyField(SessionInformation, backref='summary')
@@ -76,13 +82,14 @@ class SessionSummary(BaseModel):
     # Selfish	
 
     # Robot Moods
-    #Frustrated	
-    #Annoyed	
-    #Dissatisfied	
-    #Neutral	
-    #Convinced	
-    #Content	
-    #Worried
+    # Frustrated
+    # Annoyed
+    # Dissatisfied
+    # Neutral
+    # Convinced
+    # Content
+    # Worried
+
 
 class SolverAgentLogs(BaseModel):
     session_id = ForeignKeyField(SessionInformation, backref='solver')
@@ -100,14 +107,16 @@ class SolverAgentLogs(BaseModel):
     normalized_predictions = JSONField()
     sensitivity_class = CharField()
 
+
 class HybridAgentLogs(BaseModel):
     session_id = ForeignKeyField(SessionInformation, backref='hybrid')
     logger = CharField()
     offer = JSONField()
     agent_utility = FloatField()
-    scaled_time = FloatField()   
+    scaled_time = FloatField()
     behavior_based = FloatField()
     time_based = FloatField()
+
 
 def create_tables():
     with db:

@@ -3,6 +3,7 @@ import json
 from .abstract_agent import AbstractAgent
 from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from queuelib.enums import HANTQueue
+from queuelib.message import AgentMessage
 
 ''' 
 init agent messsage:
@@ -29,25 +30,26 @@ class AgentManager:
         self.agent = agent_class()
         self.agent.name = agent_name
 
-        self.queue_handler = MultiQueueHandler([HANTQueue.AGENT.value, HANTQueue.LOGGER.value])
-        self.queue_handler.send_message(HANTQueue.AGENT.value, prep_init_message(agent_name))
+        self.queue_handler = MultiQueueHandler([HANTQueue.AGENT, HANTQueue.LOGGER], correlation_id=self.agent.name)
+        self.queue_handler.send_message(prep_init_message(agent_name, HANTQueue.AGENT))
 
         self.start_agent()
 
     def start_agent(self):
         while True:
-            message = self.queue_handler.wait_for_message_from_queue(HANTQueue.AGENT.value)
+            message = self.queue_handler.wait_for_message_from_queue(HANTQueue.AGENT)
 
             print("SOLVER: ", message)
             # init - bid - termination
-            message_body = message["body"]
-            message_from = message["from"]
-            message_type = message["type"]
+            message_from = message.sender
+
+            message_payload = message.payload
+            payload_context = message_payload["context"]
 
             print(self.agent.name, ": MESSAGE RECEIVED FROM: ", message_from)
 
-            if message_type == "init":
-                self.agent._init_negotiation(message_body["utility_space"], message_body["domain_info"])
+            if payload_context == "init_negotiation":
+                self.agent._init_negotiation(message_payload["utility_space"], message_payload["domain_info"])
                 reply = {
                     "from": self.agent.__class__.name,
                     "to": "core",
@@ -55,14 +57,14 @@ class AgentManager:
                     "body": "",
                     "status": "success",
                 }
-                self.queue_handler.send_message(HANTQueue.AGENT.value, json.dumps(reply))
+                reply_message = AgentMessage(self.agent.name, reply, True)
+                self.queue_handler.send_message(reply_message)
 
             ###
-            if message_type == "bid":
-                ## returns offer, agent mood
-                offer, agent_mood = self.agent._receive_offer(message_body["offer"],
-                                                              message_body["predictions"],
-                                                              message_body["normalized_predictions"])
+            if payload_context == "receive_bid":
+                offer, agent_mood = self.agent._receive_offer(message_payload["offer"],
+                                                              message_payload["predictions"],
+                                                              message_payload["normalized_predictions"])
                 reply = {
                     "from": self.agent.__class__.name,
                     "to": "core",
@@ -70,13 +72,13 @@ class AgentManager:
                     "body": {"offer": offer, "agent_mood": agent_mood},
                     "status": "success",
                 }
-                self.queue_handler.send_message(HANTQueue.AGENT.value, json.dumps(reply))
+                reply_message = AgentMessage(self.agent.name, reply, True)
+                self.queue_handler.send_message(reply_message)
 
-
-            if message_type == "termination":
-                self.agent._negotiation_over(message_body["participant_name"],
-                                             message_body["session_number"],
-                                             message_body["termination_type"])
+            if payload_context == "termination":
+                self.agent._negotiation_over(message_payload["participant_name"],
+                                             message_payload["session_number"],
+                                             message_payload["termination_type"])
 
                 reply = {
                     "from": self.agent.__class__.name,
@@ -86,5 +88,6 @@ class AgentManager:
                     "status": "success",
                 }
 
-                self.queue_handler.send_message(HANTQueue.AGENT.value, json.dumps(reply))
+                reply_message = AgentMessage(self.agent.name, reply, True)
+                self.queue_handler.send_message(reply_message)
                 break

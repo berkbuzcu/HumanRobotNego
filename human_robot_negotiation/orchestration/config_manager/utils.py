@@ -1,9 +1,7 @@
 import pathlib
 import xml
 import numpy as np
-import minidom
-
-from human_robot_negotiation import DOMAINS_DIR
+import xml.dom.minidom as minidom
 
 
 def get_utility_space_json(profile_file):
@@ -54,8 +52,8 @@ def get_utility_space_json(profile_file):
 
 
 def get_domain_info(domain_file: str) -> dict:
-    DOMTree = xml.dom.minidom.parse(domain_file)
-    collection = DOMTree.documentElement
+    tree = xml.dom.minidom.parse(domain_file)
+    collection = tree.documentElement
     # Get issue list from the preference profile.
     utility_space_obj = collection.getElementsByTagName("utility_space")[0]
 
@@ -82,7 +80,9 @@ def get_domain_info(domain_file: str) -> dict:
         "domain_type": domain_type,
         "issue_names": issue_names,
         "issue_values_list": issue_values_list,
+        "path": domain_file,
     }
+
 
 ### NEED THEM ORDERED ACCORDING TO PREFERENCE > ###
 def get_preferences(issues_ordered, issue_values_ordered):
@@ -181,5 +181,7 @@ def create_preference_xml(domain_info: dict, negotiator_name: str, negotiator_ty
 
     file_dir = file_dir / negotiator_name
 
-    with open(file_dir / f"/{negotiator_type}.xml", "w") as f:
+    with open(file_dir / f"{negotiator_type}.xml", "w") as f:
         f.write(xml_str)
+
+    return file_dir / f"{negotiator_type}.xml"

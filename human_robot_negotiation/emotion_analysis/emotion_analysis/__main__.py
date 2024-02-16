@@ -6,21 +6,21 @@ participant_name = "Berk"
 session_number = "Session 1"
 session_type = "FaceChannel"
 
-queue_manager = MultiQueueHandler(HANTQueue.EMOTION.value)
+queue_manager = MultiQueueHandler([HANTQueue.EMOTION.value])
 
-queue_manager.send_message(HANTQueue.EMOTION.value, prep_init_message("emotion_controller"))
+queue_manager.send_message(prep_init_message("emotion_controller", HANTQueue.EMOTION))
 
-config = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION.value)
+config = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
 camera_controller = SessionCamera(participant_name, session_number, session_type, camera_id=0)
 
 while True:
-    msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION.value)
+    msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
     if msg["action"] == "start_recording":
         camera_controller.start()
 
-        msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION.value)
+        msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
         if msg["action"] == "stop_recording":
             if camera_controller:

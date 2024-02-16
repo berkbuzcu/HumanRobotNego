@@ -32,21 +32,15 @@ class Core():
         self.participant_name = parameters["participant_name"]
         self.session_number = parameters["session_type"].replace(" ", "_")
         self.session_type = parameters["facial_expression_model"]
-        self.human_interaction_type = parameters["input_type"]
-        self.agent_interaction_type = parameters["output_type"]
-        self.agent_type = parameters["agent_type"]
         self.agent_preferences = parameters["agent_preferences"]
         self.human_preferences = parameters["human_preferences"]
-        self.robot_name = parameters["robot_name"]
         self.domain_info = parameters["domain_info"]
         self.deadline = parameters["deadline"]
-        self.camera_id = parameters["camera_id"]
 
-        # self.camera_controller = SessionCamera(self.participant_name, self.session_number, self.session_type,
-        #                                       camera_id=self.camera_id)  # 30 seconds
+        print("CORE: Config applied: ", parameters)
 
-        self.robot_manager = RobotManager()
         self.agent_manager = AgentManager()
+        self.robot_manager = RobotManager()
         self.gui_manager = GUIManager()
         self.emotion_manager = EmotionManager()
         self.human_interaction_manager = HumanInteractionManager()

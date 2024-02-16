@@ -1,14 +1,14 @@
 #from __future__ import division
 
+import queue
 import sys
-import itertools
 
 import pyaudio
-import queue
-
 from google.api_core import exceptions
+from google.cloud import speech_v1
 
-from google.cloud import speech_v1 
+from queuelib.queue_manager import MultiQueueHandler
+from queuelib.enums import HANTQueue
 
 class MicrophoneStream(object):
     """Opens a recording stream as a generator yielding the audio chunks."""
@@ -37,7 +37,7 @@ class MicrophoneStream(object):
 
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exit_type, value, traceback):
         self.closed = True
         try: 
             self._audio_stream.stop_stream()
@@ -71,41 +71,45 @@ class MicrophoneStream(object):
             yield b"".join(data)
 
 
+def listen_print_loop(responses):
+    num_chars_printed = 0
+    for response in responses:
+        if not response.results:
+            continue
+
+        result = response.results[0]
+        if not result.alternatives:
+            continue
+
+        # Display the transcription of the top alternative.
+        transcript = result.alternatives[0].transcript
+
+        overwrite_chars = " " * (num_chars_printed - len(transcript))
+
+        if not result.is_final:
+            sys.stdout.write(transcript + overwrite_chars + "\r")
+            sys.stdout.flush()
+
+            num_chars_printed = len(transcript)
+        else:
+            num_chars_printed = 0
+            return transcript + overwrite_chars
+
+
 class SpeechStreamingRecognizerBeta:
     def __init__(self, domain_keywords):
+        self.streaming_config = None
+        self.client = None
         self.domain_keywords = domain_keywords
         self.set_stream_config()
         self.finished = False
-
-    def listen_print_loop(self, responses):
-        num_chars_printed = 0
-        for response in responses:
-            if not response.results:
-                continue
-
-            result = response.results[0]
-            if not result.alternatives:
-                continue
-
-            # Display the transcription of the top alternative.
-            transcript = result.alternatives[0].transcript
-
-            overwrite_chars = " " * (num_chars_printed - len(transcript))
-
-            if not result.is_final:
-                sys.stdout.write(transcript + overwrite_chars + "\r")
-                sys.stdout.flush()
-
-                num_chars_printed = len(transcript)
-            else:
-                num_chars_printed = 0
-                return transcript + overwrite_chars
+        self.queue_manager = MultiQueueHandler([HANTQueue.MICROPHONE])
 
     def set_stream_config(self):
         language_code = "en-US"
         
         list_of_numbers = ["one", "two", "three", "four", "zero", "Four", "Zero", "Two", "Three"]
-        domain_contexts_element = {"phrases": self.domain_keywords + list_of_numbers + ["boat"], "boost": 5.0} # , "boost": 45.0
+        domain_contexts_element = {"phrases": self.domain_keywords + list_of_numbers + ["boat"], "boost": 5.0}
 
         negotiation_phrases = [
             "want",
@@ -177,7 +181,8 @@ class SpeechStreamingRecognizerBeta:
                     self.streaming_config, requests, timeout=999
                 )
                 # Now, put the transcription responses to use.
-                return self.listen_print_loop(responses)
+                self.queue_manager.send_message(HANTQueue.MICROPHONE.value, {"responses": "responses"})
+                return listen_print_loop(responses)
 
             except exceptions.DeadlineExceeded as e:
                 print("Exception occurred - {}".format(str(e)))

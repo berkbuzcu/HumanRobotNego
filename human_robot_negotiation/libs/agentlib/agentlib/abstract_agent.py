@@ -47,3 +47,7 @@ class AbstractAgent(ABC):
     @abstractmethod
     def negotiation_over(self, participant_name: str, session_number: str, termination_type: str) -> None:
         ...
+
+    @name.setter
+    def name(self, value):
+        self._name = value

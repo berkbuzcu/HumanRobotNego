@@ -27,11 +27,6 @@ services:
       - ./human_robot_negotiation/core:/core
       - ./human_robot_negotiation/libs:/hant_libs
 
-  # qtserver:
-  #   build:
-  #     context: ./human_robot_negotiation/
-  #     dockerfile: ./robot_server/qt/Dockerfile
-
   solver_agent:
     build:
       context: ./human_robot_negotiation/
@@ -71,17 +66,11 @@ services:
       dockerfile: ./robot_server/nao/Dockerfile
     networks:
       - hantnet
-
-  #emotionmodule:
-  #  build:
-  #    context: ./human_robot_negotiation/
-  #    dockerfile: ./emotion_analysis/Dockerfile
-  #  networks:
-  #    - hantnet
-  #  volumes:
-  #    - ./human_robot_negotiation/emotion_analysis:/emotion_analysis
+    volumes:
+      - ./human_robot_negotiation/robot_server/nao:/nao
 
   emotionmodule2:
+    privileged: true
     build:
       context: ./human_robot_negotiation/
       dockerfile: ./emotion_analysis/Dockerfile
@@ -89,6 +78,15 @@ services:
       - hantnet
     volumes:
       - ./human_robot_negotiation/emotion_analysis:/emotion_analysis
+      - ./human_robot_negotiation/libs:/hant_libs
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
 
   db:
     image: postgres:16-alpine

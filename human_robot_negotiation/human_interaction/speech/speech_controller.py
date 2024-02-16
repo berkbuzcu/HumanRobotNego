@@ -1,11 +1,9 @@
 import typing as t
+from corelib import nego_action
 
-
-from speech_to_text_streaming_beta import (
+from human_robot_negotiation.device_managers.microphone.speech_to_text_streaming_beta import (
     SpeechStreamingRecognizerBeta,
 )
-
-from corelib.nego_action import Offer
 
 
 class SpeechController:
@@ -17,15 +15,20 @@ class SpeechController:
         self.offer_classifier = offer_classifier
         self.recognizer = SpeechStreamingRecognizerBeta(offer_classifier.domain_keywords)
 
-    def get_human_action(self) -> t.Tuple[Offer, bool, str]:
+    def get_human_action(self, user_input) -> t.Tuple[nego_action.Offer, bool, str]:
         """
         Listen the user offer, then select keywords from sentence, check similarities and return what's left to the agent from user.
         """
         offer_done = False
         total_user_input = ""
-        user_input = (
+
+        # user_input = MultiQueueHandler.wait_for_message_from_queue(HANTQueue.MICROPHONE)
+
+        '''
+        (
             self.recognizer.listen_and_convert_to_text()
         )
+        '''
         
         # If there is no timeout.
         if str(user_input) != "timeouterror":

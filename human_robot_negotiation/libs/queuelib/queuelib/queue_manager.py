@@ -3,18 +3,21 @@ import time
 import traceback
 import uuid
 import pika
+import functools
 
-host = 'rabbitmq'
+from queuelib.message import AbstractMessage
+from queuelib.enums import HANTQueue
+
 credentials = pika.PlainCredentials("orchestrator", "orchestrator")
 
-
-def prep_init_message(name, error=None):
-    return json.dumps({
-        "from": name,
-        "status": "success",
-        "error": error,
-        "type": "init_lifecheck"
+def prep_init_message(name: str, module_type: HANTQueue, error: bool=None):
+    message_dict = json.dumps({
+        "sender": name,
+        "status": "true",
+        "payload": {"error": error},
+        "queue_type": module_type.value
     })
+    return AbstractMessage.from_json(message_dict)
 
 
 class MultiQueueHandler:
@@ -22,12 +25,15 @@ class MultiQueueHandler:
 
     connection: pika.BlockingConnection
     is_connected: bool
-    queues: list[str]
+    queues: list[HANTQueue]
     correlation_id: str
 
-    def __new__(cls, queues=None, port=5672, correlation_id=None):
+    def __new__(cls, queues=None, host='rabbitmq', port=5672, correlation_id=None):
         if queues is None:
             queues = []
+
+        if type(queues) != list:
+            queues = list(queues)
 
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -56,6 +62,10 @@ class MultiQueueHandler:
                 self.channel = self.connection.channel()
                 self.is_connected = True
                 print("Connection is successful.")
+
+                for queue in self.queues:
+                    self.channel.queue_declare(queue=queue.value, durable=True)
+
             except Exception as e:
                 print(f"Error connecting to RabbitMQ: {e}")
                 print(traceback.format_exc())
@@ -68,52 +78,68 @@ class MultiQueueHandler:
             self.is_connected = False
             print("Disconnected from RabbitMQ.")
 
+    @staticmethod
+    def __wrap_message(message_json) -> AbstractMessage:
+        return AbstractMessage.from_json(message_json)
+
+    def __wrap_callback(self, ch, method, properties, body, callback):
+        message: AbstractMessage = self.__wrap_message(body)
+        callback(ch, method, properties, message)
+
     def consume_all_queues_with_callback(self, callback):
         try:
             for queue_name in self.queues:
-                self.channel.queue_declare(queue=queue_name, durable=True)
-                self.channel.basic_consume(queue_name, callback, auto_ack=False)
+                callback_wrapped = functools.partial(self.__wrap_callback, callback=callback)
+                self.channel.basic_consume(queue_name.value, callback_wrapped, auto_ack=True)
 
             self.channel.start_consuming()
         except Exception as e:
             print(traceback.format_exc())
 
-    def wait_for_message_from_queue(self, queue_name):
-        method_frame, header_frame, body = self.channel.basic_get(queue_name)
+    def wait_for_message_from_queue(self, queue_name: HANTQueue | str) -> AbstractMessage:
+        if queue_name is HANTQueue:
+            queue_name = queue_name.value
+
+        elif queue_name not in HANTQueue and type(queue_name) is not str:
+            raise ValueError("Queue name must be of type HANTQueue or str")
+
+        method_frame, header_frame, body = self.channel.basic_get(queue_name.value)
 
         while True:
-            print(method_frame, header_frame, body)
-
             if method_frame:
-                print(self.correlation_id, "---", header_frame.correlation_id)
-
                 if header_frame.correlation_id == self.correlation_id:
                     print("Message is from myself, ignoring.")
-                else: break
+                else:
+                    break
             else:
                 print("No message in queue, waiting.")
 
             time.sleep(1)
-            method_frame, header_frame, body = self.channel.basic_get(queue_name)
+            method_frame, header_frame, body = self.channel.basic_get(queue_name.value)
+        print("ACKING...")
+        self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+        print("Message received from queue: ", queue_name)
+        return self.__wrap_message(body)
 
-        return json.loads(body)
+    def send_message(self, message: AbstractMessage) -> None:
+        if not isinstance(message, AbstractMessage):
+            raise ValueError("Message must be of type AbstractMessage")
 
-    def send_message(self, queue_name, message):
         if self.connection and self.connection.is_open:
             try:
                 # Send the message to the specified queue
                 self.channel.basic_publish(
                     exchange='',
-                    routing_key=queue_name,
-                    body=message,
+                    routing_key=message.queue_type.value,
+                    body=message.to_json(),
                     properties=pika.BasicProperties(
-                        delivery_mode=2,
                         correlation_id=self.correlation_id
                     )
                 )
 
-                print(f"Message sent to queue '{queue_name}': {message}")
+                print(f"Message sent to queue '{message.queue_type.value}': {message}")
             except Exception as e:
+                traceback.print_exc()
                 print(f"Error sending message: {e}")
         else:
             print("Not connected to RabbitMQ. Call 'connect()' first.")
