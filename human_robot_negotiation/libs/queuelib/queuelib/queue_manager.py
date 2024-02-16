@@ -95,7 +95,6 @@ class MultiQueueHandler:
             self.channel.start_consuming()
         except Exception as e:
             print(traceback.format_exc())
-
     def wait_for_message_from_queue(self, queue_name: HANTQueue | str) -> AbstractMessage:
         if queue_name is HANTQueue:
             queue_name = queue_name.value
@@ -120,6 +119,17 @@ class MultiQueueHandler:
         self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         print("Message received from queue: ", queue_name)
         return self.__wrap_message(body)
+
+    def get_message_from_queue(self, queue_name: HANTQueue | str) -> AbstractMessage:
+        if queue_name is HANTQueue:
+            queue_name = queue_name.value
+
+        elif queue_name not in HANTQueue and type(queue_name) is not str:
+            raise ValueError("Queue name must be of type HANTQueue or str")
+
+        method_frame, header_frame, body = self.channel.basic_get(queue_name.value, auto_ack=True)
+
+        return self.__wrap_message(body) if body else None
 
     def send_message(self, message: AbstractMessage) -> None:
         if not isinstance(message, AbstractMessage):

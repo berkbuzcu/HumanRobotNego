@@ -27,7 +27,8 @@ class AbstractMessage(ABC):
             HANTQueue.EMOTION.value: EmotionMessage,
             HANTQueue.GUI.value: GUIMessage,
             HANTQueue.LOGGER.value: LoggerMessage,
-            HANTQueue.CONFIG.value: ConfigMessage
+            HANTQueue.CONFIG.value: ConfigMessage,
+            HANTQueue.CAMERA.value: CameraMessage,
         }
 
         return class_switch[message_dict.pop("queue_type")](**message_dict)
