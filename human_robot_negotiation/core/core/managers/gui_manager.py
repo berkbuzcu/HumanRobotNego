@@ -2,6 +2,7 @@ import json
 
 from queuelib.queue_manager import MultiQueueHandler
 from queuelib.enums import HANTQueue
+from queuelib.message import GUIMessage
 from .abstract_manager import AbstractManager
 
 
@@ -10,7 +11,7 @@ class GUIManager(AbstractManager):
 
     def __init__(self):
         super().__init__()
-        self.message = {
+        self.message_payload = {
             "message": None,
             "offer_content": None,
             "round": None,
@@ -21,49 +22,30 @@ class GUIManager(AbstractManager):
         }
 
     def update_status(self, text):
-        self.message["status"] = text
-
-        self.queue_manager.send_message(HANTQueue.GUI.value, json.dumps(self.message))
+        self.message_payload["status"] = text
+        gui_message = GUIMessage("CORE", self.message_payload, "status")
+        self.queue_manager.send_message(gui_message)
 
     def reset_offer_grid(self):
-        message = {
-            "type": "board",
-            "bidder": None,
-            "body": None,
-        }
-
-        self.queue_manager.send_message(HANTQueue.GUI.value, json.dumps(message))
+        self.message_payload["offer_content"] = None
+        gui_message = GUIMessage("CORE", self.message_payload, "reset_offer_grid")
+        self.queue_manager.send_message(gui_message)
 
     def update_offer_grid(self, bidder, offer):
-        # message = {
-        #    "type": "message",
-        #    "bidder": bidder,
-        #    "body": offer.to_json_str(),
-        # }
-
-        self.message["offer_content"] = offer.to_json_str()
-
-        self.queue_manager.send_message(HANTQueue.GUI.value, json.dumps(self.message))
+        self.message_payload["offer_content"] = offer.to_json_str()
+        self.message_payload["who"] = bidder
+        gui_message = GUIMessage("CORE", self.message_payload, "offer_grid")
+        self.queue_manager.send_message(gui_message)
 
     def update_offer_message(self, bidder, text):
-        # message = {
-        #    "type": "message",
-        #    "body": text,
-        #    "bidder": bidder
-        # }
+        self.message_payload["who"] = bidder
+        self.message_payload["message"] = text
 
-        self.message["who"] = bidder
-        self.message["message"] = text
-
-        self.queue_manager.send_message(HANTQueue.GUI.value, json.dumps(self.message))
+        gui_message = GUIMessage("CORE", self.message_payload, "offer_grid")
+        self.queue_manager.send_message(gui_message)
 
     def update_offer_utility(self, bidder, text):
-        # message = {
-        #     "type": "message",
-        #     "body": text,
-        #     "bidder": bidder
-        # }
-
-        self.message["who"] = bidder
-        self.message["utility"] = text
-        self.queue_manager.send_message(HANTQueue.GUI.value, json.dumps(self.message))
+        self.message_payload["who"] = bidder
+        self.message_payload["utility"] = text
+        gui_message = GUIMessage("CORE", self.message_payload, "offer_grid")
+        self.queue_manager.send_message(gui_message)

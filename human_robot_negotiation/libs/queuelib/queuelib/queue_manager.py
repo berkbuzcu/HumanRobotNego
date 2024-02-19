@@ -1,16 +1,19 @@
 import json
 import time
 import traceback
+import typing as t
 import uuid
 import pika
 import functools
+import threading
 
 from queuelib.message import AbstractMessage
 from queuelib.enums import HANTQueue
 
 credentials = pika.PlainCredentials("orchestrator", "orchestrator")
 
-def prep_init_message(name: str, module_type: HANTQueue, error: bool=None):
+
+def prep_init_message(name: str, module_type: HANTQueue, error: bool = None):
     message_dict = json.dumps({
         "sender": name,
         "status": "true",
@@ -25,7 +28,7 @@ class MultiQueueHandler:
 
     connection: pika.BlockingConnection
     is_connected: bool
-    queues: list[HANTQueue]
+    queues: t.List[HANTQueue]
     correlation_id: str
 
     def __new__(cls, queues=None, host='rabbitmq', port=5672, correlation_id=None):
@@ -84,7 +87,7 @@ class MultiQueueHandler:
 
     def __wrap_callback(self, ch, method, properties, body, callback):
         message: AbstractMessage = self.__wrap_message(body)
-        callback(ch, method, properties, message)
+        return callback(ch, method, properties, message)
 
     def consume_all_queues_with_callback(self, callback):
         try:
@@ -95,6 +98,7 @@ class MultiQueueHandler:
             self.channel.start_consuming()
         except Exception as e:
             print(traceback.format_exc())
+
     def wait_for_message_from_queue(self, queue_name: HANTQueue | str) -> AbstractMessage:
         if queue_name is HANTQueue:
             queue_name = queue_name.value
@@ -115,10 +119,33 @@ class MultiQueueHandler:
 
             time.sleep(1)
             method_frame, header_frame, body = self.channel.basic_get(queue_name.value)
-        print("ACKING...")
+
         self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         print("Message received from queue: ", queue_name)
         return self.__wrap_message(body)
+
+    def __wrap_parallel_callback(self, ch, method, properties, body, callback):
+        message: AbstractMessage = self.__wrap_message(body)
+        print("Received parallel message: ", message)
+        ch.stop_consuming()
+        return callback(ch, method, properties, message)
+
+    def __thread_connection(self, queue_name, callback):
+        print("Initiating parallel connection to queue: ", queue_name)
+        connection = pika.BlockingConnection(self.connection_params)
+        channel = connection.channel()
+        result = channel.queue_declare(queue_name, durable=True)
+
+        channel.basic_consume(
+            queue=queue_name,
+            on_message_callback=callback,
+            auto_ack=True)
+
+        channel.start_consuming()
+
+    def non_blocking_message_from_queue(self, queue_name: HANTQueue | str, callback) -> None:
+        callback_wrapped = functools.partial(self.__wrap_parallel_callback, callback=callback)
+        threading.Thread(target=self.__thread_connection, args=(queue_name.value, callback_wrapped)).start()
 
     def get_message_from_queue(self, queue_name: HANTQueue | str) -> AbstractMessage:
         if queue_name is HANTQueue:

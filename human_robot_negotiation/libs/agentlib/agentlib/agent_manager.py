@@ -44,20 +44,17 @@ class AgentManager:
             message_from = message.sender
 
             message_payload = message.payload
-            payload_context = message_payload["context"]
+            payload_context = message.context
 
             print(self.agent.name, ": MESSAGE RECEIVED FROM: ", message_from)
 
             if payload_context == "init_negotiation":
                 self.agent._init_negotiation(message_payload["utility_space"], message_payload["domain_info"])
                 reply = {
-                    "from": self.agent.__class__.name,
-                    "to": "core",
-                    "type": "init",
-                    "body": "",
+                    "body": {"context": "init", "value": "success"},
                     "status": "success",
                 }
-                reply_message = AgentMessage(self.agent.name, reply, True)
+                reply_message = AgentMessage(self.agent.name, reply, "init")
                 self.queue_handler.send_message(reply_message)
 
             ###
@@ -66,13 +63,11 @@ class AgentManager:
                                                               message_payload["predictions"],
                                                               message_payload["normalized_predictions"])
                 reply = {
-                    "from": self.agent.__class__.name,
-                    "to": "core",
-                    "type": "offer",
+                    "context": "offer",
                     "body": {"offer": offer, "agent_mood": agent_mood},
                     "status": "success",
                 }
-                reply_message = AgentMessage(self.agent.name, reply, True)
+                reply_message = AgentMessage(self.agent.name, reply)
                 self.queue_handler.send_message(reply_message)
 
             if payload_context == "termination":
@@ -81,13 +76,11 @@ class AgentManager:
                                              message_payload["termination_type"])
 
                 reply = {
-                    "from": self.agent.__class__.name,
-                    "to": "core",
-                    "type": "termination",
-                    "body": "",
+                    "context": "termination",
+                    "body": {""},
                     "status": "success",
                 }
 
-                reply_message = AgentMessage(self.agent.name, reply, True)
+                reply_message = AgentMessage(self.agent.name, reply)
                 self.queue_handler.send_message(reply_message)
                 break

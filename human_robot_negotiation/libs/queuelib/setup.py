@@ -9,5 +9,5 @@ setup(name='hant_queue_lib',
       install_requires=[
             'pika',
       ],
-      py_modules=["queue_manager"],
+      py_modules=["queuelib.queue_manager", "queuelib.message", "queuelib.enums"],
      )

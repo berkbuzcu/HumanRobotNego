@@ -1,12 +1,8 @@
-import json
 import time
-import xml
 
-from queuelib.queue_manager import MultiQueueHandler
-from queuelib.enums import HANTQueue
 from queuelib.message import *
+from queuelib.queue_manager import MultiQueueHandler
 from .core import Core
-
 
 queue_list = set([e for e in HANTQueue])
 validation_done = set()

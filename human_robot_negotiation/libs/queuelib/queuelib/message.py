@@ -9,7 +9,8 @@ from queuelib.enums import HANTQueue
 class AbstractMessage(ABC):
     sender: str
     payload: dict
-    status: bool
+    context: str
+    status: bool = True
     queue_type: HANTQueue = field(init=False)
 
     def to_json(self) -> str:

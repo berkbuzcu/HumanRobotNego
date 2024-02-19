@@ -8,6 +8,8 @@ from .managers.emotion_manager import EmotionManager
 from .managers.gui_manager import GUIManager
 from .managers.human_interaction_manager import HumanInteractionManager
 from .managers.robot_manager import RobotManager
+from .managers.logger_manager import LoggerManager
+from .managers.time_manager import TimeManager
 from .nego_timer import NegotiationTimer
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -19,9 +21,8 @@ def nego_over():
     print("NEGO IS OVER!!!")
 
 
-class Core():
+class Core:
     def __init__(self, parameters):
-        super().__init__()
         self.queue_handler = MultiQueueHandler()
         self.agent_utility_space = None
         self.human_utility_space = None
@@ -36,6 +37,7 @@ class Core():
         self.human_preferences = parameters["human_preferences"]
         self.domain_info = parameters["domain_info"]
         self.deadline = parameters["deadline"]
+        self.robot_name = parameters["robot_name"]
 
         print("CORE: Config applied: ", parameters)
 
@@ -44,6 +46,8 @@ class Core():
         self.gui_manager = GUIManager()
         self.emotion_manager = EmotionManager()
         self.human_interaction_manager = HumanInteractionManager()
+        self.logger_manager = LoggerManager()
+        self.time_manager = TimeManager(self.deadline, self.timeout_negotiation)
 
     def end_negotiation(self, termination_type: str):
         agent_num_of_emotions = self.agent.receive_negotiation_over(self.participant_name, self.session_number,
@@ -61,7 +65,7 @@ class Core():
             time_passed, agent_score, user_score, agreement = (1, 0, 0, False) if termination_type == "timeout" else (
                 last_offer[4], last_offer[2], last_offer[3], True)
 
-            #LoggerNew.log_summary(
+            # LoggerNew.log_summary(
             #    robot_moods=agent_num_of_emotions,
             #    sensitivity_analysis=human_sensitivity_dict,
             #    human_awareness=human_awareness,
@@ -81,14 +85,10 @@ class Core():
     def terminate_nego(self):
         if self.running:
             self.running = False
-            self.human_interaction_controller.recognizer.terminate_stream()
 
     def negotiate(self):
         self.robot_manager.send_start_negotiation()
         self.do_normal_nego()
-
-    def generate_selected_tuples(self, offer):
-        return [self.human_utility_space.get_value_coord(value) for value in offer.values()]
 
     def send_agent_offer_to_human(self, agent_offer_to_human, mood):
         # Send the mood to robot
@@ -116,7 +116,7 @@ class Core():
                     print("Sleeping for: ", 2 - rem_time)
                     time.sleep(2 - rem_time)
 
-                predictions, normalized_predictions = self.emotion_manager.get_predictions()
+                predictions, normalized_predictions = self.emotion_manager.stop_camera()
 
             self.gui_manager.update_status(f"{self.robot_name} is listening")
 
@@ -134,14 +134,18 @@ class Core():
                     human_action.get_bid("Human")) * 100)))
 
                 if offer_done:
-                    # Add user offer to the history list.
-                    # self.nego_history.add_to_history(
-                    #    bidder=human_action.get_bidder(),
-                    #    offer=human_action,
-                    #    scaled_time=self.time_controller.get_remaining_time(),
-                    #    agent_mood="",
-                    #    predictions=predictions,
-                    # )
+                    self.logger_manager.log_round(
+                        bidder=human_action.get_bidder(),
+                        offer=human_action,
+                        scaled_time=self.time_manager.get_remaining_time(),
+                        agent_mood="",
+                        predictions=predictions,
+                        agent_utility=self.agent_utility_space.get_offer_utility(human_action.get_bid("Agent")),
+                        human_utility=self.human_utility_space.get_offer_utility(human_action.get_bid("Human")),
+                        sentences=[],
+                        move="offer",
+
+                    )
                     break
 
             if not self.running:
@@ -170,13 +174,17 @@ class Core():
             # Set negotiation gui according to agent's offer.
             self.gui_manager.update_offer_grid("Agent", agent_offer)
 
-            # self.nego_history.add_to_history(
-            #     bidder=agent_action.get_bidder(),
-            #     offer=agent_action,
-            #     scaled_time=self.time_controller.get_remaining_time(),
-            #     agent_mood=agent_mood,
-            #     predictions=predictions,
-            # )
+            self.logger_manager.log_round(
+                bidder=agent_action.get_bidder(),
+                offer=agent_action,
+                scaled_time=self.time_manager.get_remaining_time(),
+                agent_mood=agent_mood,
+                predictions=predictions,
+                agent_utility=self.agent_utility_space.get_offer_utility(agent_offer),
+                human_utility=self.human_utility_space.get_offer_utility(human_action.get_bid("Human")),
+                sentences=[],
+                move="offer",
+            )
 
             self.gui_manager.update_offer_utility(
                 "Agent",
