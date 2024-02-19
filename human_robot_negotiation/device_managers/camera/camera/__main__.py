@@ -26,19 +26,15 @@ def get_face(id: int) -> np.ndarray:
 
 
 print("CAMERA INIT COMPLETE, WAITING INITIAL MESSAGE...")
-queue_manager.send_message(prep_init_message("camera", HANTQueue.CAMERA))
-init_message = queue_manager.wait_for_message_from_queue(HANTQueue.CAMERA)
-init_payload = init_message.payload
-
-camera_id = 0
-user_id = init_payload["username"]
-capturing = Capturing(user_id, camera_id)
-
-
 while True:
     message = queue_manager.wait_for_message_from_queue(HANTQueue.CAMERA)
 
     _recording = False
+
+    if message.context == "init":
+        camera_id = 0
+        user_id = message.payload["username"]
+        capturing = Capturing(user_id, camera_id)
 
     def stop_recording_callback(ch, method, properties, message):
         if message.payload["action"] == "stop_recording":

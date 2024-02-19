@@ -77,6 +77,7 @@ init_agent_message = AgentMessage("CORE", {"utility_space": hant_core.agent_util
 init_emotion_message = EmotionMessage("CORE", {"participant_name": hant_core.participant_name,
                                                "session_number": hant_core.session_number,
                                                "session_type": hant_core.session_type}, context="init")
+
 init_human_interaction_message = HumanMessage("CORE", {"domain_info": hant_core.domain_info}, context="init")
 
 init_camera_message = CameraMessage("CORE", {"username": hant_core.participant_name}, context="init")
