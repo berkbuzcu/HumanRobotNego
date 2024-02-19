@@ -1,12 +1,11 @@
-
 import time
 import roslibpy
 import threading
 
-
 import random
 from random import shuffle
 import ast
+
 
 class QTRobotClass:
 
@@ -22,22 +21,22 @@ class QTRobotClass:
             "Confirmation": 0
         }
         self.gesturePacks = {
-        "annoyed-1":"ozyegin.edu/HANT/annoyed-1",
-        "annoyed-1-1":"ozyegin.edu/HANT/annoyed-1-1",
-        "annoyed-1-2":"ozyegin.edu/HANT/annoyed-1-2",
-        "content-1":"ozyegin.edu/HANT/content-1",
-        "content-2":"ozyegin.edu/HANT/content-2",
-        "convinced-1":"ozyegin.edu/HANT/convinced-1",
-        "convinced-2":"ozyegin.edu/HANT/convinced-2",
-        "convinced-4":"ozyegin.edu/HANT/convinced-4",
-        "dissatisfied-1":"ozyegin.edu/HANT/dissatisfied-1",
-        "dissatisfied-2":"ozyegin.edu/HANT/dissatisfied-2",
-        "frustrated-1":"ozyegin.edu/HANT/frustrated-1",
-        "frustrated-1-1":"ozyegin.edu/HANT/frustrated-1-1",
-        "worried":"ozyegin.edu/HANT/worried",
-        "hurry":"ozyegin.edu/HANT/hurry",
-        "neutral":"ozyegin.edu/HANT/newNeutral",
-    }
+            "annoyed-1": "ozyegin.edu/HANT/annoyed-1",
+            "annoyed-1-1": "ozyegin.edu/HANT/annoyed-1-1",
+            "annoyed-1-2": "ozyegin.edu/HANT/annoyed-1-2",
+            "content-1": "ozyegin.edu/HANT/content-1",
+            "content-2": "ozyegin.edu/HANT/content-2",
+            "convinced-1": "ozyegin.edu/HANT/convinced-1",
+            "convinced-2": "ozyegin.edu/HANT/convinced-2",
+            "convinced-4": "ozyegin.edu/HANT/convinced-4",
+            "dissatisfied-1": "ozyegin.edu/HANT/dissatisfied-1",
+            "dissatisfied-2": "ozyegin.edu/HANT/dissatisfied-2",
+            "frustrated-1": "ozyegin.edu/HANT/frustrated-1",
+            "frustrated-1-1": "ozyegin.edu/HANT/frustrated-1-1",
+            "worried": "ozyegin.edu/HANT/worried",
+            "hurry": "ozyegin.edu/HANT/hurry",
+            "neutral": "ozyegin.edu/HANT/newNeutral",
+        }
         self.moodPhrases = {
             "Annoyed": [
                 "No, It is not acceptable! ",
@@ -247,21 +246,26 @@ class QTRobotClass:
         # self.TalkRobot("Wake up Neo!")
         # self.GestureRobot("QT/show_QT")
         # self.aSyncRobotController("Wake up Neo!","QT/show_QT")
-        ROBOT_IP='192.168.100.2'
-        PORT=9091
+        ROBOT_IP = '192.168.100.2'
+        PORT = 9091
         while True:
             print("Trying to connect Robot..")
             try:
                 self.client = roslibpy.Ros(ROBOT_IP, port=PORT)
                 self.client.run()
             except:
-                print("Connection failed trying again on ",ROBOT_IP)
+                print("Connection failed trying again on ", ROBOT_IP)
             if self.client.is_connected:
                 break
             time.sleep(1)
         self.animator = roslibpy.Service(self.client, '/qt_robot/gesture/play', '/qt_robot_gesture_play')
         self.talker = roslibpy.Service(self.client, '/qt_robot/behavior/talkText', '/qt_robot_behavior_talk_text')
         self.GestureRobot(self.gesturePacks["neutral"])
+        return {"status": "success"}
+
+    def stop_robot(self):
+        self.client.close()
+        return {"status": "success"}
 
     def receive_start_nego(self):
         print("RECEIVE START NEGO")
@@ -277,12 +281,13 @@ class QTRobotClass:
     def receive_mood(self, mood):
         self.num_of_moods[mood] += 1
         mood_file_idx = (self.num_of_moods[mood] % (
-            len(self.moodPhrases[mood]) - 1))
+                len(self.moodPhrases[mood]) - 1))
         # ---------------------------#
         self.aSyncRobotController(self.moodPhrases[mood][mood_file_idx], self.gesturePacks[self.gesturesToRun[mood]
-                                  [mood_file_idx]], self.speeds[mood][mood_file_idx], self.delays[mood][mood_file_idx])
+        [mood_file_idx]], self.speeds[mood][mood_file_idx], self.delays[mood][mood_file_idx])
         self.GestureRobot(self.gesturePacks["neutral"])
         # getattr(self, gesture_to_run)()
+        return {"status": "success"}
 
     def GestureRobot(self, message):
         self.animator.call({'name': message})
@@ -297,6 +302,7 @@ class QTRobotClass:
         self.client.close()
         # self.TalkRobot("We are finished then! Take care")
         # self.GestureRobot("QT/bye")
+        return {"status": "success"}
 
     '''
     {
@@ -306,16 +312,22 @@ class QTRobotClass:
     "accommodation": "hotel"
     }
     '''
+
     def tell_offer(self, offer):
         if "duration" in offer.keys() and "season" in offer.keys():
             speak_strings = [
-                "I'd like to visit %s in %s for %s and stay at a %s" % (offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
-                "I want to stay at a %s in %s for %s in %s" % (offer['accommodation'], offer['season'], offer['duration'], offer['destination']),
-                "Let's go to %s this %s for %s and stay at a %s" % (offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
-                "How about visiting %s in %s for %s and stay at a nice %s?" % (offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
-                "I want to spend %s in %s during %s and stay at a %s" % (offer['duration'], offer['destination'], offer['season'], offer['accommodation'])]
-        
-        elif "events" in offer.keys() and  "season" in offer.keys():
+                "I'd like to visit %s in %s for %s and stay at a %s" % (
+                offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
+                "I want to stay at a %s in %s for %s in %s" % (
+                offer['accommodation'], offer['season'], offer['duration'], offer['destination']),
+                "Let's go to %s this %s for %s and stay at a %s" % (
+                offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
+                "How about visiting %s in %s for %s and stay at a nice %s?" % (
+                offer['destination'], offer['season'], offer['duration'], offer['accommodation']),
+                "I want to spend %s in %s during %s and stay at a %s" % (
+                offer['duration'], offer['destination'], offer['season'], offer['accommodation'])]
+
+        elif "events" in offer.keys() and "season" in offer.keys():
             activity_to_text = {
                 "shopping": "shopping",
                 "show": "see shows",
@@ -323,12 +335,17 @@ class QTRobotClass:
                 "sports": "do sports",
             }
             speak_strings = [
-                "I'd like to visit %s in %s for %s and stay at a %s" % (offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
-                "I want to stay at a %s in %s and %s in %s" % (offer['accommodation'], offer['season'], activity_to_text[offer['events']], offer['destination']),
-                "Let's go to %s this %s to %s and stay at a %s" % (offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
-                "How about visiting %s in %s for %s and stay at a nice %s" % (offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
-                "I want to experience %s in %s during %s and stay at a %s" % (activity_to_text[offer['events']], offer['destination'], offer['season'], offer['accommodation'])]
-            
+                "I'd like to visit %s in %s for %s and stay at a %s" % (
+                offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
+                "I want to stay at a %s in %s and %s in %s" % (
+                offer['accommodation'], offer['season'], activity_to_text[offer['events']], offer['destination']),
+                "Let's go to %s this %s to %s and stay at a %s" % (
+                offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
+                "How about visiting %s in %s for %s and stay at a nice %s" % (
+                offer['destination'], offer['season'], activity_to_text[offer['events']], offer['accommodation']),
+                "I want to experience %s in %s during %s and stay at a %s" % (
+                activity_to_text[offer['events']], offer['destination'], offer['season'], offer['accommodation'])]
+
         elif "duration" in offer.keys() and "events" in offer.keys():
             activity_to_text = {
                 "shopping": "shopping",
@@ -337,11 +354,16 @@ class QTRobotClass:
                 "sports": "do sports",
             }
             speak_strings = [
-                "I'd like to visit %s for %s for %s and stay at a %s" % (offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
-                "I want to stay at a %s for %s and %s in %s" % (offer['accommodation'], offer['duration'], activity_to_text[offer['events']], offer['destination']),
-                "Let's go to %s for %s to %s and stay at a %s" % (offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
-                "How about visiting %s for %s for %s and stay at a nice %s" % (offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
-                "I want to experience %s in %s for %s and stay at a %s" % (activity_to_text[offer['events']], offer['destination'], offer['duration'], offer['accommodation'])]
+                "I'd like to visit %s for %s for %s and stay at a %s" % (
+                offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
+                "I want to stay at a %s for %s and %s in %s" % (
+                offer['accommodation'], offer['duration'], activity_to_text[offer['events']], offer['destination']),
+                "Let's go to %s for %s to %s and stay at a %s" % (
+                offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
+                "How about visiting %s for %s for %s and stay at a nice %s" % (
+                offer['destination'], offer['duration'], activity_to_text[offer['events']], offer['accommodation']),
+                "I want to experience %s in %s for %s and stay at a %s" % (
+                activity_to_text[offer['events']], offer['destination'], offer['duration'], offer['accommodation'])]
         else:
             speak_string = "I give you"
             non_zero_count = 0
@@ -363,22 +385,26 @@ class QTRobotClass:
             sentence, "ozyegin.edu/HANT/newNeutral", 0, 0)
         self.num_of_moods["Confirmation"] += 1
         mood_file_idx = (self.num_of_moods["Confirmation"] % (
-            len(self.moodPhrases["Confirmation"]) - 1))
+                len(self.moodPhrases["Confirmation"]) - 1))
         # ---------------------------#
-        self.aSyncRobotController(self.moodPhrases["Confirmation"][mood_file_idx], self.gesturePacks[self.gesturesToRun["Confirmation"]
-                                  [mood_file_idx]], self.speeds["Confirmation"][mood_file_idx], self.delays["Confirmation"][mood_file_idx])
+        self.aSyncRobotController(self.moodPhrases["Confirmation"][mood_file_idx],
+                                  self.gesturePacks[self.gesturesToRun["Confirmation"]
+                                  [mood_file_idx]], self.speeds["Confirmation"][mood_file_idx],
+                                  self.delays["Confirmation"][mood_file_idx])
         self.GestureRobot(self.gesturePacks["neutral"])
         # self.TalkRobot(sentence)
         return sentence
 
     def aSyncRobotController(self, talkText, GestureName, speed, delay):
-        print("ASYNC ROBOT CONTROLLER with the arguments: ",talkText,GestureName,speed,delay)
+        print("ASYNC ROBOT CONTROLLER with the arguments: ", talkText, GestureName, speed, delay)
         print(" paramaters are: ", talkText, GestureName, speed, delay)
+
         def gestureM(message, speed):
             self.animator.call({'name': message, 'speed': speed})
 
         def talkM(message):
             self.talker.call({'message': message})
+
         talkThread = threading.Thread(target=talkM, args=(talkText,))
         gestureThread = threading.Thread(
             target=gestureM, args=(GestureName, speed,))

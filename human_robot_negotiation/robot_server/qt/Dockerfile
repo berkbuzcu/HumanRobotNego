@@ -1,7 +1,7 @@
 FROM python:3.11
 
-COPY ./robot_server/qt /qt
-COPY ./libs /hant_libs
+ADD ./robot_server/qt /qt
+ADD ./libs /hant_libs
 
 WORKDIR /qt
 

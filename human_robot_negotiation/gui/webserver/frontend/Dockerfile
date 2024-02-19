@@ -1,6 +1,6 @@
 FROM node:lts-alpine as builder
 
-# COPY ./gui/webserver/frontend /frontend
+ADD ./gui/webserver/frontend /frontend
 WORKDIR /frontend
 
 RUN yarn install

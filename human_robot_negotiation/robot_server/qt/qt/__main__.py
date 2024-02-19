@@ -3,43 +3,55 @@ import time
 from .qt_robot import QTRobotClass
 from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from queuelib.enums import HANTQueue
-
+from queuelib.message import RobotMessage
 class RobotServer:
     def __init__(self):
         self.queue_manager = MultiQueueHandler()
 
         self.server_stopped = False
         self.robot = None
-
-        self.queue_manager.send_message(HANTQueue.ROBOT.value, prep_init_message("Qt"))
+        self.queue_manager.send_message(prep_init_message("Qt",HANTQueue.ROBOT))
 
     def start_server(self):
         while not self.server_stopped:
-            message = self.queue_manager.wait_for_message_from_queue(HANTQueue.ROBOT.value)
+            message = self.queue_manager.wait_for_message_from_queue(HANTQueue.ROBOT)
             print("MESSAGE TYPE: ",type(message))
             print("MESSAGE : ",message)
-            message=message.decode('utf-8')
-            parsed_message = list(filter(None, message.split(";")))
+            #message=message.decode('utf-8')
+            message_from = message.sender
+            message_payload = message.payload # {body:{function:"recive_mood",message:"Dissatisfied"}}
+            payload_context = message.context # robot|server
 
-            #robot;receive_mood;dissatisfied_1
-            #robot;receive_bid:
-            
-            print("PARSED MESSAGE: ", parsed_message)
-            # EX: message: server;stop_server|init_robot || robot;receive_mood;dissatisfied_1
             func_selector = {
                 "server": self,
                 "robot": self.robot,
             }
 
+
+
             try:
-                func = getattr(func_selector[parsed_message[0]], parsed_message[1])
-                reply = func(*parsed_message[2:])
-                self.queue_manager.send_message("robot",
-                                                "Execution successful. INPUT: %s: REPLY: %s" %
-                                                (str(parsed_message), str(reply)))
+                func = getattr(func_selector[payload_context], message_payload['body']['function'])
+                reply = {
+                    "context": payload_context,
+                    "body": {},
+                    "status": "success",
+                }
+                if(message_payload['body']['message']==""):
+                    reply.body = func()
+                else:
+                    reply.body = func(message_payload['body']['message'])
+
+                reply_message= RobotMessage("qt", reply)
+                self.queue_manager.send_message(reply_message)
 
             except Exception as e:
-                self.queue_manager.send_message("Failed: %s" % e)
+                reply = {
+                    "context": payload_context,
+                    "body": {"error" : e},
+                    "status": "success",
+                }
+                reply_message = RobotMessage("qt",reply)
+                self.queue_manager.send_message(reply_message)
 
 
     def init_robot(self):
@@ -48,9 +60,9 @@ class RobotServer:
 
     def stop_server(self):
         self.server_stopped = True
+        return self.robot.stop_robot()
 
 
 server = RobotServer()
 server.init_robot()
-time.sleep(5)
 server.start_server()

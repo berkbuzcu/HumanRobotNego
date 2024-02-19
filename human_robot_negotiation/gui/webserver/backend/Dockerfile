@@ -1,7 +1,7 @@
 FROM python:3.11
 
-# COPY ./gui/webserver/backend /backend
-# COPY ./libs /hant_libs
+ADD ./gui/webserver/backend /backend
+ADD ./libs /hant_libs
 
 WORKDIR /backend
 

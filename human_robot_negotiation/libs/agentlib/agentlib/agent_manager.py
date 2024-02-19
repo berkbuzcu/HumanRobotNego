@@ -51,7 +51,7 @@ class AgentManager:
             if payload_context == "init_negotiation":
                 self.agent._init_negotiation(message_payload["utility_space"], message_payload["domain_info"])
                 reply = {
-                    "body": {"context": "init", "value": "success"},
+                    "body": {"value": "success"},
                     "status": "success",
                 }
                 reply_message = AgentMessage(self.agent.name, reply, "init")

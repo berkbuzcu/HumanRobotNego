@@ -69,7 +69,17 @@ services:
     volumes:
       - ./human_robot_negotiation/robot_server/nao:/nao
 
-  emotionmodule2:
+  qtserver:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./robot_server/qt/Dockerfile
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/robot_server/qt:/qt
+      - ./human_robot_negotiation/libs:/hant_libs
+
+  emotionmodule:
     privileged: true
     build:
       context: ./human_robot_negotiation/
