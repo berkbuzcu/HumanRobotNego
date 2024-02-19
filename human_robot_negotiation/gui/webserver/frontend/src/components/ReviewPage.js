@@ -7,10 +7,10 @@ import InfoModal, {MODAL_ERROR} from "./modals/InfoModal";
 import {useDispatch, useSelector} from "react-redux";
 
 
-const initiateSession = async () => {
+const initiateSession = async (uuid) => {
     try {
-       const response = await axios.post( SERVER_ADDRESS + "/initiate/",
-           JSON.stringify({}), {
+       const response = await axios.post( SERVER_ADDRESS + "/start_negotiation/",
+           JSON.stringify({uuid}), {
            headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
        });
 
@@ -25,10 +25,8 @@ const initiateSession = async () => {
 };
 
 
-const ReviewPage = ({setPage}) => {
+const ReviewPage = ({uuid, setPage}) => {
     const preferences = useSelector(state => state.session.preferences);
-
-    const userName = useSelector(state => state.user.userName);
 
     const [errorModal, setErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -50,7 +48,7 @@ const ReviewPage = ({setPage}) => {
 
     const handleSubmit = async () => {
         setDisabled(true);
-        initiateSession(userName).then((sessionResponse) => {
+        initiateSession(uuid).then((sessionResponse) => {
             if (sessionResponse.error) {
                 setErrorMessage(sessionResponse.errorMessage);
                 setErrorModal(sessionResponse.error);

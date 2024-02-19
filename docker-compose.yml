@@ -81,6 +81,16 @@ services:
       - ./human_robot_negotiation/robot_server/qt:/qt
       - ./human_robot_negotiation/libs:/hant_libs
 
+  logger:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./orchestration/logger/Dockerfile
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/orchestration/logger:/logger
+      - ./human_robot_negotiation/libs:/hant_libs
+
   emotionmodule:
     privileged: true
     build:
@@ -100,18 +110,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [ gpu ]
-
-  db:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      - POSTGRES_DB=hant
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres_db:/var/lib/postgresql/data
 
 volumes:
   postgres_db:

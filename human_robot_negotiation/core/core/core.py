@@ -27,8 +27,8 @@ class Core:
         self.human_preferences = None
         self.agent_preferences = None
         self.queue_handler = MultiQueueHandler()
-        self.agent_utility_space = None
-        self.human_utility_space = None
+        self.agent_utility_space: UtilitySpace = None
+        self.human_utility_space: UtilitySpace = None
 
         self.running = False
         self.is_first_turn = True
@@ -54,6 +54,8 @@ class Core:
     def set_utility_spaces(self, parameters):
         self.agent_preferences = UtilitySpace(parameters["agent_preferences"])
         self.human_preferences = UtilitySpace(parameters["human_preferences"])
+
+
 
     def end_negotiation(self, termination_type: str):
         agent_num_of_emotions = self.agent.receive_negotiation_over(self.participant_name, self.session_number,

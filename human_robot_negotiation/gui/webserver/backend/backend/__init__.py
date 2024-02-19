@@ -15,24 +15,19 @@ app.config['SECRET_KEY'] = 'secret!'
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-
 def to_snake_case(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     name = re.sub('__([A-Z])', r'_\1', name)
     name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name)
     return name.lower()
 
+
 @app.route("/initiate/", methods=["GET", "POST"])
 def initiate():
-    # participant_name = "Berk Buzcu"
-    # session_type = "Session 1"
-    # agent_type = "Solver"
-    # deadline = 600
-    # facial_expression_model = "Face Channel"
-    # domain_file = "C:/Users/Lenovo/Documents/PythonProjects/HumanRobotNego/domains/Holiday_A/Holiday_A.xml"
+    queue_handler = MultiQueueHandler([HANTQueue.CONFIG])
 
     resp = {to_snake_case(key): value for key, value in dict(request.get_json()).items()}
-    print("resp: ", resp)
+    print("resp ", resp)
 
     domain_info = resp["domain_file"][resp["domain_file"].find("/domains"):]
     domain_info = get_domain_info(domain_info)
@@ -50,71 +45,55 @@ def initiate():
         "camera_id": "1",
     }
 
-    queue_handler = MultiQueueHandler([HANTQueue.CONFIG], correlation_id=resp["user_name"])
-    uuid = queue_handler.correlation_id
-
+    queue_handler.correlation_id = resp["user_name"]
     queue_handler.send_message(ConfigMessage("CONFIG", config_message, context="config"))
-
-    # preferences = {
-    #    "issues": sorted(response["preferences"]["issues"].keys(),
-    #                     key=response["preferences"]["issues"].get,
-    #                     reverse=True),
-    # }
-    #
-    # preferences["issue_values"] = {
-    #    issue_name: sorted(response["preferences"]["issue_values"][issue_name].keys(),
-    #                       key=response["preferences"]["issue_values"][issue_name].get,
-    #                       reverse=True)
-    #    for issue_name in preferences["issues"]
-    # }
-
-    return jsonify({"uuid: ": uuid, "error": False})  # , "deadline": response["deadline"], "preferences": preferences})
+    return jsonify({"uuid": resp["user_name"], "error": False})
 
 
 @app.route("/preferences_info", methods=["GET", "POST"])
 def get_preferences_info():
-    uuid = request.json["uuid"]
+    uuid = dict(request.json)["uuid"]
+    queue_handler = MultiQueueHandler([HANTQueue.GUI], uuid)
 
-    queue_handler = MultiQueueHandler([HANTQueue.GUI], correlation_id=uuid)
     domain_info = queue_handler.wait_for_message_from_queue(HANTQueue.GUI)
-    response = {"uuid": uuid, "domain_info": domain_info.payload}
 
-    random.shuffle(response["preferences"]["issues"])
+    random.shuffle(domain_info.payload["issue_names"])
 
-    for issue_name in response["preferences"]["issues"]:
-        random.shuffle(response["preferences"]["issue_values"][issue_name])
+    for issue_name in domain_info.payload["issue_values_list"].keys():
+        random.shuffle(domain_info.payload["issue_values_list"][issue_name])
 
-    return jsonify(response)
+    print("Responses from pref info ", domain_info.payload)
+    return jsonify(domain_info.payload)
 
 
 @app.route("/create_preferences", methods=["GET", "POST"])
 def create_preferences():
     uuid = request.json["uuid"]
-    queue_handler = MultiQueueHandler([HANTQueue.GUI], correlation_id=uuid)
-    participant_name = request.json["ordered_preferences"]
-    ordered_preferences = request.json["ordered_preferences"]
+    queue_handler = MultiQueueHandler([HANTQueue.CONFIG], correlation_id=uuid)
+    ordered_preferences = request.json["preferences"]
     domain_info = request.json["domain_info"]
 
-    human_preferences, agent_preferences = get_preferences(ordered_preferences["issue_names"],
-                                                           ordered_preferences["issue_values_list"])
+    human_preferences, agent_preferences = get_preferences(ordered_preferences["issues"],
+                                                           ordered_preferences["issue_values"])
 
-    human_file_path: pathlib.Path = create_preference_xml(domain_info, participant_name, "Human", human_preferences)
-    agent_file_path: pathlib.Path = create_preference_xml(domain_info, participant_name, "Agent", agent_preferences)
-    # "agent_preferences": get_utility_space_json(str(agent_file_path.absolute())),
-    # "human_preferences": get_utility_space_json(str(human_file_path.absolute())),
+    queue_handler.send_message(ConfigMessage("CONFIG",
+                                             {"human_preferences": agent_preferences,
+                                              "agent_preferences": human_preferences},
+                                             "preferences"))
+
+    create_preference_xml(domain_info, uuid, "Human", human_preferences)
+    create_preference_xml(domain_info, uuid, "Agent", agent_preferences)
 
     return jsonify({"status": "success"})
 
-@app.route("/create", methods=["GET", "POST"])
-def create():
-    if "preferences" not in request.json:
-        return jsonify({"error": True, "errorMessage": "Preferences is required."})
 
-    domain_info = request.json["domain_info"]
+@app.route("/start_negotiation/", methods=["GET", "POST"])
+def start_negotiation():
+    uuid = request.json["uuid"]
+    queue_handler = MultiQueueHandler([HANTQueue.GUI], correlation_id=uuid)
+    init_message = queue_handler.wait_for_message_from_queue(HANTQueue.GUI)
 
-    # response = requests.post(SERVER + "initiate/" + name, json={"preferences": request.json["preferences"]}).json()
-
-    return jsonify({"error": False})
+    return jsonify({"error": False, **init_message.payload})
 
 
 @app.route("/receive/", methods=["GET", "POST"])

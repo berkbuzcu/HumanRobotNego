@@ -20,27 +20,20 @@ const ConfigPage = ({setUUID, setPage}) => {
   const [errorModal, setErrorModal] = useState(false);
 
   const submitConfig = async (body) => {
-    try {
-      const response = await axios.post(SERVER_ADDRESS + "/initiate/",
-        JSON.stringify(body), {
-          headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
-        });
-
-      if (!response.error)
-        return {"error": false};
-      else {
-        setUUID(response.uuid)
-        return {"error": true};
-      }
-
-    } catch (e) {
+    const response = await axios.post(SERVER_ADDRESS + "/initiate/", JSON.stringify(body), {
+      headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
+    });
+    if (response.data.error)
       return {"error": true};
+    else {
+      console.log("UUID: ", response.data.uuid);
+      setUUID(response.data.uuid)
+      return {"error": false};
     }
   }
 
   const handleSubmit = async () => {
-    const response = await submitConfig(fields);
-    setUUID(response.uuid);
+    await submitConfig(fields);
     setPage("PREFERENCES");
   };
 

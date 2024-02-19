@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 from queuelib.enums import HANTQueue
-from queuelib.queue_manager import MultiQueueHandler
+from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from queuelib.message import CameraMessage
 from .capturing import Capturing
 
@@ -26,6 +26,7 @@ def get_face(id: int) -> np.ndarray:
 
 
 print("CAMERA INIT COMPLETE, WAITING INITIAL MESSAGE...")
+queue_manager.send_message(prep_init_message("camera", HANTQueue.CAMERA))
 init_message = queue_manager.wait_for_message_from_queue(HANTQueue.CAMERA)
 init_payload = init_message.payload
 

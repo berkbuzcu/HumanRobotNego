@@ -5,9 +5,10 @@ import corelib.nego_action as nego_action
 class UtilitySpace:
     def __init__(self, profile: dict):
         # Role weights of the agent. {issuename: issueweight, ....} etc.
-        self.issue_weights = {}
+
+        self.issue_weights = {key: value.pop("weight") for key, value in profile.items()}
         # Issue's value evaluations.  { "Apple": {0: 0.3, 1: 0.2}, "Banana": {0: 0.2, 1: 0.7} } etc.
-        self.issue_value_evaluation = {}
+        self.issue_value_evaluation = profile
         # Keep every issue's values in a dictionary.
         # {"Apple": ["0", "1", "2"...], "accomodation": ["Camp", "Tent"]}
         self.issue_values_list = {}
@@ -37,6 +38,10 @@ class UtilitySpace:
         self.all_possible_offers = [dict(zip(self.issue_names, item)) for item in
                                     itertools.product(*self.issue_values_list.values())]
         self.__all_possible_offers_utilities = [self.get_offer_utility(offer) for offer in self.all_possible_offers]
+
+
+    def get_ordered_issues(self):
+        return list(self.issue_weights.keys()), [list(self.issue_value_evaluation[issue].keys()) for issue in self.issue_weights.keys()]
 
     def get_all_possible_offers_utilities(self):
         return self.__all_possible_offers_utilities

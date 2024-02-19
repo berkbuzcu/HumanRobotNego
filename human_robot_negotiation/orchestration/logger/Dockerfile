@@ -2,7 +2,7 @@ FROM python:3.11
 
 
 COPY ./libs /hant_libs
-COPY ./logger /logger
+COPY ./orchestration/logger /logger
 
 WORKDIR /logger
 RUN pip install --no-cache-dir -r requirements.txt

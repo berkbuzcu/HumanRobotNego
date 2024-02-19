@@ -35,7 +35,7 @@ const receiveSessionInfo = async (userName) => {
 };
 
 
-const SessionPage = (setPage) => {
+const SessionPage = (uuid, setPage) => {
     const userName = useSelector(state => state.user.userName);
     const dispatch = useDispatch();
 

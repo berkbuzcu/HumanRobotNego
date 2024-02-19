@@ -113,6 +113,7 @@ class MultiQueueHandler:
             if method_frame:
                 if header_frame.correlation_id == self.correlation_id:
                     print("Message is from myself, ignoring.")
+                    print(body)
                 else:
                     break
             else:
