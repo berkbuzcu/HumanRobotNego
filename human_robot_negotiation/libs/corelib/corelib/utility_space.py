@@ -67,8 +67,9 @@ class UtilitySpace:
     def get_value_coord(self, value):
         return self.indices[str(value)]
 
-    def to_json(self):
-        ...
+    def to_dict(self):
+        return {issue_name: {"weight": weight, **self.issue_value_evaluation[issue_name]}
+                for issue_name, weight in self.issue_weights.items()}
 
     def calculate_offer_for_opponent(self, offer):
         opponent_offer = {}

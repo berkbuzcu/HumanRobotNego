@@ -76,6 +76,10 @@ class MultiQueueHandler:
                 print("Retrying RabbitMQ Connection...")
                 self.connect()
 
+    def flush_queues(self):
+        for queue in self.queues:
+            self.channel.queue_purge(queue.value)
+
     def disconnect(self):
         if self.is_connected:
             self.connection.close()

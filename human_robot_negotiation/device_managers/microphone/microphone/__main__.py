@@ -4,7 +4,7 @@ from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from .speech_to_text_streaming_beta import SpeechStreamingRecognizerBeta
 
 speech_controller = SpeechStreamingRecognizerBeta(domain_keywords=[])
-queue_handler = MultiQueueHandler([HANTQueue.MICROPHONE], host="localhost")
+queue_handler = MultiQueueHandler([HANTQueue.MICROPHONE], host="localhost", correlation_id="microphone")
 queue_handler.send_message(prep_init_message("microphone", HANTQueue.MICROPHONE))
 
 while True:

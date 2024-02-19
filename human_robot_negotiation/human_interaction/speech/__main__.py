@@ -25,7 +25,7 @@ while True:
     msg = queue_handler.wait_for_message_from_queue(HANTQueue.HUMAN)
 
     if msg.payload["action"] == "get_human_offer":
-        microphone_message = MicrophoneMessage(module_name, {"action": "get_recording"}, True)
+        microphone_message = MicrophoneMessage(module_name, {"action": "get_recording"})
         queue_handler.send_message(microphone_message)
 
         microphone_message = queue_handler.wait_for_message_from_queue(HANTQueue.MICROPHONE)
@@ -38,4 +38,4 @@ while True:
             "total_user_input": total_user_input
         }
 
-        queue_handler.send_message(HumanMessage(module_name, response, True))
+        queue_handler.send_message(HumanMessage(module_name, response))

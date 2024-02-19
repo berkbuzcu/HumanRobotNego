@@ -30,6 +30,7 @@ class AbstractMessage(ABC):
             HANTQueue.LOGGER.value: LoggerMessage,
             HANTQueue.CONFIG.value: ConfigMessage,
             HANTQueue.CAMERA.value: CameraMessage,
+            HANTQueue.MICROPHONE.value: MicrophoneMessage,
         }
 
         return class_switch[message_dict.pop("queue_type")](**message_dict)

@@ -6,9 +6,9 @@ from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from queuelib.message import CameraMessage
 from .capturing import Capturing
 
-
+module_name = "camera"
 # Load Camera Capturing
-queue_manager = MultiQueueHandler([HANTQueue.CAMERA], host="localhost")
+queue_manager = MultiQueueHandler([HANTQueue.CAMERA], host="localhost", correlation_id=module_name)
 
 
 def get_face(id: int) -> np.ndarray:
@@ -66,5 +66,5 @@ while True:
 
             faces.append(face)
 
-        message = CameraMessage("CAMERA", {"action": "stop_recording"}, "faces")
+        message = CameraMessage(module_name, {"action": "stop_recording"}, "faces")
         queue_manager.send_message(message)

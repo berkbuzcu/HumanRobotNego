@@ -32,6 +32,8 @@ gui_messsage = GUIMessage("CORE", {"deadline": hant_core.deadline,
                                    "preferences": hant_core.human_preferences.get_ordered_issues()}, "gui_grid")
 queue_handler.send_message(gui_messsage)
 
+## VALIDATION IS IGNORED FOR NOW
+"""
 def is_validation_done():
     return len(validation_done) == len(validation_modules)
 
@@ -63,15 +65,29 @@ while not is_validation_done():
     print("CORE: --- WAITING SUB-SYSTEMS ---")
     print(queue_list - validation_done)
     time.sleep(2)
+"""
 
-print("--- SUB-SYSTEMS COMPLETE ---")
-print("--- WAITING FOR CONFIG ---")
+
+queue_handler.flush_queues()
 
 ### INIT MODULES ###
-init_agent_message = AgentMessage("CORE", hant_core.agent_utility_space, True)
-queue_handler.send_message(init_agent_message)
+init_agent_message = AgentMessage("CORE", {"utility_space": hant_core.agent_utility_space.to_dict(),
+                                           "domain_info": hant_core.domain_info}, context="init_negotiation")
 
-init_gui_message = GUIMessage("CORE", hant_core.domain_info, True)
-queue_handler.send_message(init_gui_message)
+init_emotion_message = EmotionMessage("CORE", {"participant_name": hant_core.participant_name,
+                                               "session_number": hant_core.session_number,
+                                               "session_type": hant_core.session_type}, context="init")
+init_human_interaction_message = HumanMessage("CORE", {"domain_info": hant_core.domain_info}, context="init")
+
+init_camera_message = CameraMessage("CORE", {"username": hant_core.participant_name}, context="init")
+
+hant_core.robot_manager.send_start_negotiation()
+
+queue_handler.send_message(init_agent_message)
+queue_handler.send_message(init_emotion_message)
+queue_handler.send_message(init_human_interaction_message)
+
+print("--- SUB-SYSTEMS COMPLETE ---")
+print("STARTING NEGOTIATION...")
 
 hant_core.negotiate()
