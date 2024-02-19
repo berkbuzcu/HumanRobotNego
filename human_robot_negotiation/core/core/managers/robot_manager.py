@@ -66,6 +66,6 @@ class RobotManager(AbstractManager):
         request_message.pop("context")
         reply_message = RobotMessage("CORE", request_message, context_message)
         self.queue_manager.send_message(reply_message)
-        reply = self.queue_manager.wait_for_message_from_queue(HANTQueue.ROBOT)
-        print("CORE",reply)
-        return reply
+        #reply = self.queue_manager.wait_for_message_from_queue(HANTQueue.ROBOT)
+        #print("CORE",reply)
+        #return reply

@@ -184,7 +184,7 @@ class SolverAgent(AbstractAgent):
 
         # Initialize mood controller.
         self.mood_controller = MoodController(
-            self.utility_space, self.time_controller
+            self.utility_space, 0.8
         )
         # Initialize previous sensitivity class as none.
         self.previous_sensitivity_class = None
@@ -214,7 +214,7 @@ class SolverAgent(AbstractAgent):
         return (1 - t) * (1 - t) * self.p0 + 2 * (1 - t) * t * self.p1 + t * t * self.p2
 
     def behaviour_based(self):
-        t = self.time_controller.get_remaining_time()
+        t = 0.8  # self.time_controller.get_remaining_time()
 
         diff = [
             self.utility_space.get_offer_utility(self.opponent_history[i + 1]) - self.utility_space.get_offer_utility(
@@ -255,7 +255,7 @@ class SolverAgent(AbstractAgent):
 
         self.opponent_history.append(human_offer)
 
-        current_time = self.time_controller.get_remaining_time()
+        current_time = 0.8
         time_based_target_utility = self.time_based(current_time)
 
         behavior_based_target_utility = 0

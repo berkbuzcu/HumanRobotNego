@@ -19,7 +19,7 @@ class AbstractAgent(ABC):
     def _init_negotiation(self, preference_profile: t.Dict, domain_info: t.Dict) -> t.Tuple[bool, str]:
         self.utility_space: UtilitySpace = UtilitySpace(preference_profile)
         self.action_factory = NormalActionFactory(self.utility_space, "Agent") \
-            if domain_info["type"] == "normal" \
+            if domain_info["domain_type"] == "normal" \
             else ResourceAllocationActionFactory(self.utility_space, "Agent")
 
         self.init_negotiation(preference_profile, domain_info)

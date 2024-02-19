@@ -27,6 +27,16 @@ services:
       - ./human_robot_negotiation/core:/core
       - ./human_robot_negotiation/libs:/hant_libs
 
+  human_interaction:
+    build:
+      context: ./human_robot_negotiation/
+      dockerfile: ./human_interaction/Dockerfile
+    networks:
+      - hantnet
+    volumes:
+      - ./human_robot_negotiation/human_interaction:/human_interaction
+      - ./human_robot_negotiation/libs:/hant_libs
+
   solver_agent:
     build:
       context: ./human_robot_negotiation/

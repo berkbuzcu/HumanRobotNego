@@ -1,5 +1,4 @@
 import time
-import warnings
 
 from corelib.nego_action import Accept
 from corelib.utility_space import UtilitySpace
@@ -12,14 +11,6 @@ from .managers.robot_manager import RobotManager
 from .managers.logger_manager import LoggerManager
 from .managers.time_manager import TimeManager
 from .nego_timer import NegotiationTimer
-
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
-
-def nego_over():
-    # self.negotiation_gui.timer_widget.finish()
-    # self.loading.show()
-    print("NEGO IS OVER!!!")
 
 
 class Core:
@@ -106,15 +97,19 @@ class Core:
         self.gui_manager.update_offer_message("Agent", agent_sentence)
 
     def do_normal_nego(self):
+        self.running = True
+        print("Normal nego starting")
         while self.running:
             human_action = None
-            start_time = -1
+            start_time = time.time()
+            print("Emotion section")
             if self.is_first_turn and start_time == -1:
                 predictions = {"Valance": 0.0, "Arousal": 0.0,
                                "Max_V": 0.0, "Min_V": 0.0, "Max_A": 0.0, "Min_A": 0.0}
                 normalized_predictions = predictions
                 self.is_first_turn = False
             else:
+                self.emotion_manager.start_camera()
                 rem_time = time.time() - start_time
                 if rem_time < 2.01:
                     print("Sleeping for: ", 2 - rem_time)

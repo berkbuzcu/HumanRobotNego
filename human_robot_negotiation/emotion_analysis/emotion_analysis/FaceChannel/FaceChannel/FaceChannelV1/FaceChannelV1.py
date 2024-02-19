@@ -83,9 +83,9 @@ class FaceChannelV1:
             print("-----------------------------------------------")
 
         if type =="Cat":
-            modelDirectory = f"{PROJECT_DIR}\emotion_analysis\FaceChannel\CLModel\TrainedNetworks\CategoricalFaceChannel.h5"
+            modelDirectory = f"{PROJECT_DIR}/FaceChannel/CLModel/TrainedNetworks/CategoricalFaceChannel.h5"
         elif type =="Dim":
-            modelDirectory = f"{PROJECT_DIR}\emotion_analysis\FaceChannel\CLModel\TrainedNetworks\DimensionalFaceChannel.h5"
+            modelDirectory = f"{PROJECT_DIR}/FaceChannel/CLModel/TrainedNetworks/DimensionalFaceChannel.h5"
         else:
             raise("Model type not found!")
 

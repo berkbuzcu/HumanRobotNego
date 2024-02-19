@@ -51,7 +51,7 @@ const SessionPage = (uuid, setPage) => {
         const interval = setInterval(() => {
             receiveSessionInfo(uuid).then((response) => {
                 if (response.error) {
-                    if (response.error !== "nodata") {
+                    if (response.errorMessage !== "nodata") {
                         setErrorMessage(response.error.errorMessage);
                         setErrorModal(true);
                     }

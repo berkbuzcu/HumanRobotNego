@@ -106,7 +106,7 @@ def receive():
     queue_handler = MultiQueueHandler([HANTQueue.GUI])
 
     message = queue_handler.get_message_from_queue(HANTQueue.GUI)
-    if message.payload:
+    if message:
         return jsonify(json.dumps(message.payload))
 
     return jsonify({"error": True, "errorMessage": "nodata"})
