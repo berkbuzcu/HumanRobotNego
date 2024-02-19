@@ -9,7 +9,7 @@ from queuelib.enums import HANTQueue
 class AbstractMessage(ABC):
     sender: str
     payload: dict
-    context: str
+    context: str = None
     status: bool = True
     queue_type: HANTQueue = field(init=False)
 
