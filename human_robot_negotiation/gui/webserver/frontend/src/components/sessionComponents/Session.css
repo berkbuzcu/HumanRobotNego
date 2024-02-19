@@ -1,0 +1,20 @@
+
+.message-agent {
+    background: rgb(225, 220, 128);
+    font-size: 18px;
+}
+
+.message-human {
+    background: rgb(27, 211, 102);
+    font-size: 18px;
+}
+
+.offer-agent {
+    color: rgb(252 175 69);
+    font-weight: bold;
+}
+
+.offer-human {
+    color: rgb(7, 94, 84);
+    font-weight: bold;
+}

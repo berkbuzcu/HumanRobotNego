@@ -1,0 +1,11 @@
+
+
+export const SESSION_START = "SESSION_START";
+
+export const UPDATE_PREFERENCES = "PREFERENCES_UPDATE";
+
+export const LOGIN = "LOGIN";
+
+export const SESSION_UPDATE_TIME = "SESSION_UPDATE_TIME";
+
+export const RECEIVE_UPDATE = "RECEIVE_UPDATE";
