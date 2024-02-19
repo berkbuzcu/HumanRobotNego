@@ -20,20 +20,7 @@ class Capturing:
 
     def __init__(self, user_id: str, camera_id: int = 0):
         self.round = 0
-        user_dir = IMAGE_PATH / user_id
-        round_dir = IMAGE_PATH / str(self.round)
-
-        self.faces_dir = round_dir / "faces"
-        self.faces_cut_dir = round_dir / "faces_cut"
-        self.imagined_dir = round_dir / "imagined"
-        self.frames_dir = round_dir / "frames"
-
-        if not os.path.exists(user_dir):
-            os.mkdir(user_dir)
-            os.mkdir(self.faces_dir)
-            os.mkdir(self.faces_cut_dir)
-            os.mkdir(self.imagined_dir)
-            os.mkdir(self.frames_dir)
+        self.user_id = user_id
 
         self.camera_id = camera_id
         self.face_model = imageProcessingUtil()
@@ -44,12 +31,32 @@ class Capturing:
         if ret == False:
             raise CameraException()
 
+
+    def create_user_dir(self, round):
+        user_dir = IMAGE_PATH / self.user_id
+        round_dir = user_dir / str(round)
+        self.faces_dir = round_dir / "faces"
+        self.faces_cut_dir = round_dir / "faces_cut"
+        self.imagined_dir = round_dir / "imagined"
+        self.frames_dir = round_dir / "frames"
+
+        if not os.path.exists(user_dir):
+            os.mkdir(user_dir)
+        if not os.path.exists(round_dir):
+            os.mkdir(round_dir)
+            os.mkdir(self.faces_dir)
+            os.mkdir(self.faces_cut_dir)
+            os.mkdir(self.imagined_dir)
+            os.mkdir(self.frames_dir)
+
     def run(self, id: int):
         """
         Get face from camera
         :param id: Image index
         :return: Face
         """
+        self.create_user_dir(self.round)
+
         if self.cap is None:
             self.cap = cv2.VideoCapture(self.camera_id)
 

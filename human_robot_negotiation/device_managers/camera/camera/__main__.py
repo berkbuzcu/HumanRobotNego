@@ -1,14 +1,13 @@
 import numpy as np
-import os
+import time
 
-from .capturing import Capturing
-from queuelib.queue_manager import MultiQueueHandler
 from queuelib.enums import HANTQueue
+from queuelib.queue_manager import MultiQueueHandler
+from queuelib.message import CameraMessage
+from .capturing import Capturing
 
-camera_id = "0"
 
 # Load Camera Capturing
-capturing = Capturing(camera_id)
 queue_manager = MultiQueueHandler([HANTQueue.CAMERA], host="localhost")
 
 
@@ -30,14 +29,34 @@ print("CAMERA INIT COMPLETE, WAITING INITIAL MESSAGE...")
 init_message = queue_manager.wait_for_message_from_queue(HANTQueue.CAMERA)
 init_payload = init_message.payload
 
+camera_id = 0
+user_id = init_payload["username"]
+capturing = Capturing(user_id, camera_id)
+
+
 while True:
     message = queue_manager.wait_for_message_from_queue(HANTQueue.CAMERA)
 
+    _recording = False
+
+    def stop_recording_callback(ch, method, properties, message):
+        if message.payload["action"] == "stop_recording":
+            global _recording
+            _recording = False
+            capturing.close()
+            print("RECORD STOPPED...")
+
+
     if message.payload["action"] == "start_recording":
-        faces = []
-        counter = 0
         print("RECORD STARTING...")
-        while True:
+
+        counter = 0
+        faces = []
+        _recording = True
+
+        queue_manager.non_blocking_message_from_queue(HANTQueue.CAMERA, stop_recording_callback)
+
+        while _recording:
             face = get_face(counter)
             counter += 1
 
@@ -46,8 +65,5 @@ while True:
 
             faces.append(face)
 
-            message = queue_manager.get_message_from_queue(HANTQueue.CAMERA)
-
-            if message is not None and message.payload["action"] == "stop_recording":
-                print("RECORD STOPPING...")
-                break
+        message = CameraMessage("CAMERA", {"action": "stop_recording"}, "faces")
+        queue_manager.send_message(message)

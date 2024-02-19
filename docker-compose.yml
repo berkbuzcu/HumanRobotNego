@@ -69,7 +69,7 @@ services:
     volumes:
       - ./human_robot_negotiation/robot_server/nao:/nao
 
-  emotionmodule:
+  emotionmodule2:
     privileged: true
     build:
       context: ./human_robot_negotiation/
@@ -79,6 +79,7 @@ services:
     volumes:
       - ./human_robot_negotiation/emotion_analysis:/emotion_analysis
       - ./human_robot_negotiation/libs:/hant_libs
+      - ./human_robot_negotiation/device_manager/camera/saved_images:/saved_images
 
     deploy:
       resources:

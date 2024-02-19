@@ -103,7 +103,6 @@ class SpeechStreamingRecognizerBeta:
         self.domain_keywords = domain_keywords
         self.set_stream_config()
         self.finished = False
-        self.queue_manager = MultiQueueHandler([HANTQueue.MICROPHONE])
 
     def set_stream_config(self):
         language_code = "en-US"
@@ -181,7 +180,6 @@ class SpeechStreamingRecognizerBeta:
                     self.streaming_config, requests, timeout=999
                 )
                 # Now, put the transcription responses to use.
-                self.queue_manager.send_message(HANTQueue.MICROPHONE.value, {"responses": "responses"})
                 return listen_print_loop(responses)
 
             except exceptions.DeadlineExceeded as e:
