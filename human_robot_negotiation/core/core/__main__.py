@@ -11,7 +11,16 @@ queue_handler = MultiQueueHandler(queue_list, correlation_id="CORE")
 
 ### First get the config from the config manager ###
 core_config = queue_handler.wait_for_message_from_queue(HANTQueue.CONFIG)
+
 hant_core = Core(core_config.payload)
+
+### Get the utility spaces from the GUI ###
+domain_info_message = GUIMessage("CORE", hant_core.domain_info, "domain_info")
+queue_handler.send_message(domain_info_message)
+
+utility_spaces = queue_handler.wait_for_message_from_queue(HANTQueue.CONFIG)
+
+hant_core.set_utility_spaces(utility_spaces.payload)
 
 
 def is_validation_done():

@@ -21,17 +21,6 @@ export const SetPreferences = (issues, issueValues) => {
 };
 
 
-export const Login = (userName) => {
-  return {
-      type: types.LOGIN,
-      payload: {
-          "userName": userName
-      }
-  };
-};
-
-
-
 export const IncreaseTime = () => {
     return {
         type: types.SESSION_UPDATE_TIME,

@@ -1,9 +1,9 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import InfoModal, {MODAL_ERROR} from "./modals/InfoModal";
-import {useDispatch} from "react-redux";
+import axios from "axios";
+import {CLIENT_ADDRESS, SERVER_ADDRESS} from "../config";
 
-
-const ConfigPage = ({setPage}) => {
+const ConfigPage = ({setUUID, setPage}) => {
   const [fields, setFields] = useState({
     userName: "Berk Buzcu",
     sessionType: "Session 1",
@@ -14,22 +14,34 @@ const ConfigPage = ({setPage}) => {
     humanInput: "Speech",
     domainFile: "C:/Users/Lenovo/Documents/PythonProjects/HumanRobotNego/domains/Holiday_A/Holiday_A.xml"
   });
-  const [disabled, setDisabled] = useState(true);
-  const [disabledText, setDisabledText] = useState(false);
+
+
 
   const [errorModal, setErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  const dispatch = useDispatch();
+  const submitConfig = async (body) => {
+    try {
+      const response = await axios.post(SERVER_ADDRESS + "/initiate/",
+        JSON.stringify(body), {
+          headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
+        });
+
+      if (!response.error)
+        return {"error": false};
+      else {
+        setUUID(response.uuid)
+        return {"error": true};
+      }
+
+    } catch (e) {
+      return {"error": true};
+    }
+  }
 
   const handleSubmit = async () => {
-    if (disabled || disabledText) {
-      return;
-    }
-
+    const response = await submitConfig(fields);
+    setUUID(response.uuid);
     setPage("PREFERENCES");
-
-    setDisabledText(false);
   };
 
   const updateField = (key, value) => {
@@ -99,7 +111,7 @@ const ConfigPage = ({setPage}) => {
           </div>
         </div>
 
-        {errorModal && <InfoModal modalType={MODAL_ERROR} setModal={setErrorModal} message={errorMessage}/>}
+        {errorModal && <InfoModal modalType={MODAL_ERROR} setModal={setErrorModal} message={"errorMessage"}/>}
       </>);
 };
 

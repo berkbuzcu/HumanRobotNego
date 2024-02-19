@@ -1,10 +1,8 @@
-
-
 export const SESSION_START = "SESSION_START";
 
 export const UPDATE_PREFERENCES = "PREFERENCES_UPDATE";
 
-export const LOGIN = "LOGIN";
+export const UUID = "UUID";
 
 export const SESSION_UPDATE_TIME = "SESSION_UPDATE_TIME";
 

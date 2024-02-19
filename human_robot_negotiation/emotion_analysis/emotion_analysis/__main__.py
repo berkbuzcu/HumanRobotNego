@@ -1,4 +1,4 @@
-from .SessionManager.Session import SessionCamera
+from .SessionManager.Session import Session
 from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from queuelib.enums import HANTQueue
 from queuelib.message import CameraMessage, EmotionMessage
@@ -7,13 +7,13 @@ participant_name = "Berk"
 session_number = "Session 1"
 session_type = "FaceChannel"
 
-queue_manager = MultiQueueHandler([HANTQueue.EMOTION.value])
+queue_manager = MultiQueueHandler([HANTQueue.EMOTION])
 
 queue_manager.send_message(prep_init_message("emotion_controller", HANTQueue.EMOTION))
 
 config = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
-session_controller = SessionCamera(participant_name, session_number, session_type, camera_id=0)
+session_controller = Session(participant_name, session_number, session_type)
 
 while True:
     msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
@@ -37,7 +37,7 @@ while True:
                                "Max_V": 0.5, "Min_V": 0.5, "Max_A": 0.5, "Min_A": 0.5}
                 normalized_predictions = predictions
 
-            queue_manager.send_message(HANTQueue.EMOTION.value, {
+            queue_manager.send_message(EmotionMessage("emotion_controller", {
                 "predictions": predictions,
                 "normalized_predictions": normalized_predictions
-            })
+            }, "emotion_output"))

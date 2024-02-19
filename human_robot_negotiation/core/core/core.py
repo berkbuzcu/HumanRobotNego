@@ -2,6 +2,7 @@ import time
 import warnings
 
 from corelib.nego_action import Accept
+from corelib.utility_space import UtilitySpace
 from queuelib.queue_manager import MultiQueueHandler
 from .managers.agent_manager import AgentManager
 from .managers.emotion_manager import EmotionManager
@@ -23,6 +24,8 @@ def nego_over():
 
 class Core:
     def __init__(self, parameters):
+        self.human_preferences = None
+        self.agent_preferences = None
         self.queue_handler = MultiQueueHandler()
         self.agent_utility_space = None
         self.human_utility_space = None
@@ -33,8 +36,7 @@ class Core:
         self.participant_name = parameters["participant_name"]
         self.session_number = parameters["session_type"].replace(" ", "_")
         self.session_type = parameters["facial_expression_model"]
-        self.agent_preferences = parameters["agent_preferences"]
-        self.human_preferences = parameters["human_preferences"]
+
         self.domain_info = parameters["domain_info"]
         self.deadline = parameters["deadline"]
         self.robot_name = parameters["robot_name"]
@@ -48,6 +50,10 @@ class Core:
         self.human_interaction_manager = HumanInteractionManager()
         self.logger_manager = LoggerManager()
         self.time_manager = TimeManager(self.deadline, self.timeout_negotiation)
+
+    def set_utility_spaces(self, parameters):
+        self.agent_preferences = UtilitySpace(parameters["agent_preferences"])
+        self.human_preferences = UtilitySpace(parameters["human_preferences"])
 
     def end_negotiation(self, termination_type: str):
         agent_num_of_emotions = self.agent.receive_negotiation_over(self.participant_name, self.session_number,

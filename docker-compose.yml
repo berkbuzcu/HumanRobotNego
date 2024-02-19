@@ -48,6 +48,7 @@ services:
     volumes:
       - ./human_robot_negotiation/gui/webserver/backend:/backend
       - ./human_robot_negotiation/libs:/hant_libs
+      - ./domains:/domains
 
   frontend:
     build:
@@ -59,6 +60,7 @@ services:
       - hantnet
     volumes:
       - ./human_robot_negotiation/gui/webserver/frontend:/frontend
+      - ./domains:/domains
 
   naoserver:
     build:

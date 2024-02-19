@@ -18,6 +18,7 @@ def prep_init_message(name: str, module_type: HANTQueue, error: bool = None):
         "sender": name,
         "status": "true",
         "payload": {"error": error},
+        "context": "init",
         "queue_type": module_type.value
     })
     return AbstractMessage.from_json(message_dict)

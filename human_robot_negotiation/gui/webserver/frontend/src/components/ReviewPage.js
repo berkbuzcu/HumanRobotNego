@@ -7,9 +7,9 @@ import InfoModal, {MODAL_ERROR} from "./modals/InfoModal";
 import {useDispatch, useSelector} from "react-redux";
 
 
-const initiateSession = async (userName) => {
+const initiateSession = async () => {
     try {
-       const response = await axios.post( SERVER_ADDRESS + "/initiate/" + userName,
+       const response = await axios.post( SERVER_ADDRESS + "/initiate/",
            JSON.stringify({}), {
            headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
        });

@@ -8,9 +8,9 @@ import SortableList from "./preferencesComponents/SortableList";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 
 
-const submitPreferences = async (userName, issues, issueValues) => {
+const submitPreferences = async (issues, issueValues) => {
     try {
-       const response = await axios.post( SERVER_ADDRESS + "/create/",
+       const response = await axios.post( SERVER_ADDRESS + "/create_preferences/",
            JSON.stringify({"preferences": {issues: issues, issue_values: issueValues}}), {
            headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
        });
@@ -26,10 +26,10 @@ const submitPreferences = async (userName, issues, issueValues) => {
 };
 
 
-const fetchPreferences = async () => {
+const fetchPreferences = async (uuid) => {
     try {
        const response = await axios.post( SERVER_ADDRESS + "/preferences_info",
-           JSON.stringify({}), {
+           JSON.stringify({uuid}), {
            headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
        });
 
@@ -44,8 +44,7 @@ const fetchPreferences = async () => {
 };
 
 
-const PreferencesPage = ({setPage}) => {
-    const userName = useSelector(state => state.user.userName);
+const PreferencesPage = ({uuid, setPage}) => {
     const preferences = useSelector(state => state.session.preferences);
 
     const [issues, setIssues] = useState([]);
@@ -61,7 +60,7 @@ const PreferencesPage = ({setPage}) => {
     useEffect(() => {
         if (issues.length === 0) {
             if (JSON.stringify(preferences) === JSON.stringify({})) {
-                fetchPreferences().then((response) => {
+                fetchPreferences(uuid).then((response) => {
                     if (response.error) {
                         setErrorMessage(response.errorMessage);
                         setErrorModal(response.error);
@@ -79,7 +78,7 @@ const PreferencesPage = ({setPage}) => {
 
     const handleSubmit = async () => {
         setDisabled(true);
-        submitPreferences(userName, issues, issueValues).then((submitResponse) => {
+        submitPreferences(issues, issueValues).then((submitResponse) => {
             if (submitResponse.error) {
                 setErrorMessage(submitResponse.errorMessage);
                 setErrorModal(submitResponse.error);
