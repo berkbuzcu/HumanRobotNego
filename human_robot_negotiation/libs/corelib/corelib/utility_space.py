@@ -19,7 +19,6 @@ class UtilitySpace:
         # Call the role weight function for complete the weight dictionary.
         # SUB-SUB dictionary. ie: {"Apple": {"0": 0, "1", 0.25...}, "accomodation": {"hotel": 1, "tent": 0.75...}}
 
-
         # Generate all possible offers.
         self.__generate_all_possible_offers()
         self.grid = [[(str(key).title(), "black") for key in value_dict.keys()] for value_dict in
@@ -39,9 +38,12 @@ class UtilitySpace:
                                     itertools.product(*self.issue_values_list.values())]
         self.__all_possible_offers_utilities = [self.get_offer_utility(offer) for offer in self.all_possible_offers]
 
-
     def get_ordered_issues(self):
-        return list(self.issue_weights.keys()), [list(self.issue_value_evaluation[issue].keys()) for issue in self.issue_weights.keys()]
+        issues = list(self.issue_value_evaluation.keys())
+        issue_values = {issue: list(self.issue_value_evaluation[issue].keys())
+                        for issue in self.issue_value_evaluation.keys()}
+
+        return issues, issue_values
 
     def get_all_possible_offers_utilities(self):
         return self.__all_possible_offers_utilities

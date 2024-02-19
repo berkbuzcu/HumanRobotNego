@@ -9,6 +9,8 @@ from queuelib.message import ConfigMessage
 from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from .utils import *
 
+import logging
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secret!'
@@ -92,15 +94,19 @@ def start_negotiation():
     uuid = request.json["uuid"]
     queue_handler = MultiQueueHandler([HANTQueue.GUI], correlation_id=uuid)
     init_message = queue_handler.wait_for_message_from_queue(HANTQueue.GUI)
+    queue_handler.send_message(prep_init_message(name="gui", module_type=HANTQueue.GUI))
+
+    print("init message ", init_message.payload)
 
     return jsonify({"error": False, **init_message.payload})
 
 
 @app.route("/receive/", methods=["GET", "POST"])
 def receive():
-    queue_handler = MultiQueueHandler(HANTQueue.GUI)
-    queue_handler.send_message(prep_init_message(name="gui", module_type=HANTQueue.GUI))
+    queue_handler = MultiQueueHandler([HANTQueue.GUI])
 
-    message = queue_handler.wait_for_message_from_queue(HANTQueue.GUI)
+    message = queue_handler.get_message_from_queue(HANTQueue.GUI)
+    if message.payload:
+        return jsonify(json.dumps(message.payload))
 
-    return jsonify(json.dumps(message.payload))
+    return jsonify({"error": True, "errorMessage": "nodata"})

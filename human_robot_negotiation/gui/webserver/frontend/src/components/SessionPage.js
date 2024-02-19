@@ -9,10 +9,10 @@ import InfoModal, {MODAL_ERROR} from "./modals/InfoModal";
 import HistoryComponent from "./sessionComponents/HistoryComponent";
 
 
-const receiveSessionInfo = async (userName) => {
+const receiveSessionInfo = async (uuid) => {
     try {
-       const response = await axios.post( SERVER_ADDRESS + "/receive/" + userName,
-           JSON.stringify({}), {
+       const response = await axios.post( SERVER_ADDRESS + "/receive/",
+           JSON.stringify({uuid}), {
            headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
        });
 
@@ -36,7 +36,6 @@ const receiveSessionInfo = async (userName) => {
 
 
 const SessionPage = (uuid, setPage) => {
-    const userName = useSelector(state => state.user.userName);
     const dispatch = useDispatch();
 
     const [errorModal, setErrorModal] = useState(false);
@@ -50,10 +49,12 @@ const SessionPage = (uuid, setPage) => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            receiveSessionInfo(userName).then((response) => {
+            receiveSessionInfo(uuid).then((response) => {
                 if (response.error) {
-                    setErrorMessage(response.error.errorMessage);
-                    setErrorModal(true);
+                    if (response.error !== "nodata") {
+                        setErrorMessage(response.error.errorMessage);
+                        setErrorModal(true);
+                    }
                 } else {
                     dispatch(ReceiveUpdate(response));
                 }

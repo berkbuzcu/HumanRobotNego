@@ -94,10 +94,6 @@ class Core:
         if self.running:
             self.running = False
 
-    def negotiate(self):
-        self.robot_manager.send_start_negotiation()
-        self.do_normal_nego()
-
     def send_agent_offer_to_human(self, agent_offer_to_human, mood):
         # Send the mood to robot
         if mood is not None:
@@ -129,12 +125,14 @@ class Core:
             self.gui_manager.update_status(f"{self.robot_name} is listening")
 
             while self.running:
+                print("WAITING USER OFFER")
                 human_action, offer_done, total_user_input = self.human_interaction_manager.get_human_action()
 
                 if isinstance(human_action, Accept):
                     self.end_negotiation("human")
                     return
 
+                print("UPDATING GUI")
                 self.gui_manager.reset_offer_grid()
                 self.gui_manager.update_offer_grid(human_action.get_bid("Human"), "blue")
                 self.gui_manager.update_offer_message("Human", total_user_input)

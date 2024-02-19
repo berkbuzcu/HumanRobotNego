@@ -10,4 +10,4 @@ RUN pip install -e /hant_libs/queuelib
 
 EXPOSE 5000
 
-CMD ["python", "-m", "backend"]
+CMD ["python", "-u", "-m", "backend"]

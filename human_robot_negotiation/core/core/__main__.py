@@ -10,6 +10,7 @@ validation_modules = [HANTQueue.GUI, HANTQueue.AGENT, HANTQueue.EMOTION, HANTQue
 validation_done = set()
 
 queue_handler = MultiQueueHandler(queue_list, correlation_id="CORE")
+queue_handler.flush_queues()
 
 ### First get the config from the config manager ###
 core_config = queue_handler.wait_for_message_from_queue(HANTQueue.CONFIG)
@@ -26,11 +27,6 @@ utility_spaces = queue_handler.wait_for_message_from_queue(HANTQueue.CONFIG)
 
 print("Received utility spaces: ", utility_spaces)
 hant_core.set_utility_spaces(utility_spaces.payload)
-
-## Send the nego start message to the GUI
-gui_messsage = GUIMessage("CORE", {"deadline": hant_core.deadline,
-                                   "preferences": hant_core.human_preferences.get_ordered_issues()}, "gui_grid")
-queue_handler.send_message(gui_messsage)
 
 ## VALIDATION IS IGNORED FOR NOW
 """
@@ -67,11 +63,18 @@ while not is_validation_done():
     time.sleep(2)
 """
 
-
 queue_handler.flush_queues()
 
+## Send the nego start message to the GUI
+
+issues, issue_values = hant_core.human_preferences.get_ordered_issues()
+gui_messsage = GUIMessage("CORE", {"deadline": hant_core.deadline,
+                                   "preferences": {"issues": issues,
+                                                   "issue_values": issue_values}}, "gui_grid")
+
+time.sleep(1)
 ### INIT MODULES ###
-init_agent_message = AgentMessage("CORE", {"utility_space": hant_core.agent_utility_space.to_dict(),
+init_agent_message = AgentMessage("CORE", {"utility_space": hant_core.agent_preferences.to_dict(),
                                            "domain_info": hant_core.domain_info}, context="init_negotiation")
 
 init_emotion_message = EmotionMessage("CORE", {"participant_name": hant_core.participant_name,
@@ -82,13 +85,14 @@ init_human_interaction_message = HumanMessage("CORE", {"domain_info": hant_core.
 
 init_camera_message = CameraMessage("CORE", {"username": hant_core.participant_name}, context="init")
 
-hant_core.robot_manager.send_start_negotiation()
-
 queue_handler.send_message(init_agent_message)
 queue_handler.send_message(init_emotion_message)
 queue_handler.send_message(init_human_interaction_message)
+queue_handler.send_message(gui_messsage)
+
+hant_core.robot_manager.send_start_negotiation()
 
 print("--- SUB-SYSTEMS COMPLETE ---")
 print("STARTING NEGOTIATION...")
 
-hant_core.negotiate()
+hant_core.do_normal_nego()
