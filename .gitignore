@@ -30,3 +30,5 @@ domains/*
 *.json
 *.sqlite3*
 *logger/log_file/
+
+device_managers/camera/saved_images/
