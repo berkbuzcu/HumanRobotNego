@@ -31,4 +31,7 @@ domains/*
 *.sqlite3*
 *logger/log_file/
 
-device_managers/camera/saved_images/
+*dist/
+*build/
+*.egg-info/
+human_robot_negotiation/device_managers/camera/saved_images/

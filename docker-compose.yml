@@ -69,7 +69,7 @@ services:
     volumes:
       - ./human_robot_negotiation/robot_server/nao:/nao
 
-  emotionmodule2:
+  emotionmodule:
     privileged: true
     build:
       context: ./human_robot_negotiation/
