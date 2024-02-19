@@ -58,6 +58,7 @@ class NaoRobot:
         self.rest_index = 0
         # Keywords.
         self.keywords = ["apple", "orange", "banana", "watermelon"]
+        return {"status":"success"}
 
     def receive_bid(self, bid):
         return self.tell_offer(ast.literal_eval(bid))
@@ -65,9 +66,11 @@ class NaoRobot:
     def receive_mood(self, mood):
         gesture_to_run = self.robot_gestures.get_gesture(mood)
         self.play_gesture_file(gesture_to_run)
+        return {"status": "success"}
 
     def receive_start_nego(self):
         self.greet()
+        return {"status": "success"}
 
     def receive_nego_over(self, termination_type):
         if termination_type == "human":
@@ -76,6 +79,7 @@ class NaoRobot:
             self.accept()
         else:
             self.leave_negotiation()
+        return {"status": "success"}
 
     def say(self, message):
         self.tts.say(message)

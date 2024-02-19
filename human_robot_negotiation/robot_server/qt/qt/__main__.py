@@ -34,12 +34,12 @@ class RobotServer:
                 reply = {
                     "context": payload_context,
                     "body": {},
-                    "status": "success",
+                    "status": "true",
                 }
                 if(message_payload['body']['message']==""):
-                    reply.body = func()
+                    reply["body"]  = func()
                 else:
-                    reply.body = func(message_payload['body']['message'])
+                    reply["body"]  = func(message_payload['body']['message'])
 
                 reply_message= RobotMessage("qt", reply)
                 self.queue_manager.send_message(reply_message)
@@ -47,8 +47,8 @@ class RobotServer:
             except Exception as e:
                 reply = {
                     "context": payload_context,
-                    "body": {"error" : e},
-                    "status": "success",
+                    "body": {"error" : str(e)},
+                    "status": "false",
                 }
                 reply_message = RobotMessage("qt",reply)
                 self.queue_manager.send_message(reply_message)
