@@ -167,6 +167,7 @@ class SpeechStreamingRecognizerBeta:
         self.stream.closed = True
 
     def listen_and_convert_to_text(self):
+        print("Starting stream...")
         with MicrophoneStream(rate=44100, chunk=int(44100 / 10)) as self.stream:
             try:
                 audio_generator = self.stream.generator()
@@ -177,7 +178,7 @@ class SpeechStreamingRecognizerBeta:
                 )
                 
                 responses = self.client.streaming_recognize(
-                    self.streaming_config, requests, timeout=999
+                    self.streaming_config, requests, timeout=420
                 )
                 # Now, put the transcription responses to use.
                 return listen_print_loop(responses)
