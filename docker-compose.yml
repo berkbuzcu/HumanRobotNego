@@ -111,7 +111,7 @@ services:
     volumes:
       - ./human_robot_negotiation/emotion_analysis:/emotion_analysis
       - ./human_robot_negotiation/libs:/hant_libs
-      - ./human_robot_negotiation/device_manager/camera/saved_images:/saved_images
+      - ./human_robot_negotiation/device_managers/camera/saved_images:/saved_images
 
     deploy:
       resources:
