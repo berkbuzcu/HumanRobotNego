@@ -22,8 +22,9 @@ class GUIManager(AbstractManager):
         }
 
     def update_status(self, text):
+        if text == "AGENT_LISTENING":
+            self.message_payload["round"] += 1
         self.message_payload["status"] = text
-        self.message_payload["round"] += 1
 
     def reset_offer_grid(self):
         self.message_payload["offer_content"] = {}

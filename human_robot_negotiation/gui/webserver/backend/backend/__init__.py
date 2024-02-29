@@ -94,7 +94,7 @@ def start_negotiation():
     uuid = request.json["uuid"]
     queue_handler = MultiQueueHandler([HANTQueue.GUI], correlation_id=uuid)
     init_message = queue_handler.wait_for_message_from_queue(HANTQueue.GUI)
-    queue_handler.send_message(prep_init_message(name="gui", module_type=HANTQueue.GUI))
+    #queue_handler.send_message(prep_init_message(name="gui", module_type=HANTQueue.GUI))
 
     print("init message ", init_message.payload)
 
