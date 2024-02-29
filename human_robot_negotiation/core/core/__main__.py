@@ -68,7 +68,7 @@ queue_handler.flush_queues()
 ## Send the nego start message to the GUI
 
 issues, issue_values = hant_core.human_preferences.get_ordered_issues()
-gui_messsage = GUIMessage("CORE", {"deadline": hant_core.deadline,
+init_gui_messsage = GUIMessage("CORE", {"deadline": hant_core.deadline,
                                    "preferences": {"issues": issues,
                                                    "issue_values": issue_values}}, "gui_grid")
 
@@ -81,14 +81,16 @@ init_emotion_message = EmotionMessage("CORE", {"participant_name": hant_core.par
                                                "session_number": hant_core.session_number,
                                                "session_type": hant_core.session_type}, context="init")
 
-init_human_interaction_message = HumanMessage("CORE", {"domain_info": hant_core.domain_info}, context="init")
+init_human_interaction_message = HumanMessage("CORE", {"domain_info": hant_core.domain_info,
+                                                       "human_preferences": hant_core.human_preferences.to_dict()},
+                                              context="init")
 
 init_camera_message = CameraMessage("CORE", {"username": hant_core.participant_name}, context="init")
 
 queue_handler.send_message(init_agent_message)
 queue_handler.send_message(init_emotion_message)
 queue_handler.send_message(init_human_interaction_message)
-queue_handler.send_message(gui_messsage)
+queue_handler.send_message(init_gui_messsage)
 
 hant_core.robot_manager.send_start_negotiation()
 

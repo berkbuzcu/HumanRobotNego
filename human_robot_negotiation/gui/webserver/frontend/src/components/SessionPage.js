@@ -16,7 +16,9 @@ const receiveSessionInfo = async (uuid) => {
            headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': CLIENT_ADDRESS}
        });
 
-       if (!response.data.error)
+
+       if (!response.data.error) {
+           response.data = JSON.parse(response.data)
            return {"error": false,
                "message": response.data["message"],
                "offerContent": response.data["offer_content"],
@@ -25,8 +27,8 @@ const receiveSessionInfo = async (uuid) => {
                "utility": response.data["utility"],
                "is_completed": response.data["is_completed"],
                "who": response.data["who"],
-           };
-       else
+           }
+       } else
            return {"error": true, "errorMessage": response.data.errorMessage};
 
     } catch (e) {
@@ -50,6 +52,7 @@ const SessionPage = (uuid, setPage) => {
     useEffect(() => {
         const interval = setInterval(() => {
             receiveSessionInfo(uuid).then((response) => {
+                console.log("real resp: ", response)
                 if (response.error) {
                     if (response.errorMessage !== "nodata") {
                         setErrorMessage(response.error.errorMessage);
@@ -59,7 +62,7 @@ const SessionPage = (uuid, setPage) => {
                     dispatch(ReceiveUpdate(response));
                 }
             });
-        }, 1000);
+        }, 300);
 
         return () => clearInterval(interval);
     });

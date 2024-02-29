@@ -12,6 +12,16 @@ class AbstractAction(object):
     def get_bid(self, perspective: t.Union[str, None] = None) -> t.Dict[str, str]:
         ...
 
+    @classmethod
+    def from_json(cls, bid_json):
+        offer_dict = json.loads(bid_json)
+        if offer_dict.get("acceptor", None):
+            return Accept(offer_dict["acceptor"])
+
+        bidder = offer_dict["bidder"]
+        bid = offer_dict["bid"]
+        reverse_swap = {"Agent": "Human", "Human": "Agent"}
+        return Offer(bid[bidder], bid[reverse_swap[bidder]], offer_dict["bidder"])
 
 class Accept(AbstractAction):
     def __init__(self, acceptor="Agent"):
@@ -27,6 +37,11 @@ class Accept(AbstractAction):
 
     def get_bid(self, perspective: t.Union[str, None] = None):
         return self.__bid
+
+    def to_json_str(self):
+        return json.dumps({
+            "acceptor": self.__acceptor
+        })
 
 
 class Offer(AbstractAction):
@@ -55,13 +70,7 @@ class Offer(AbstractAction):
             "bid": self.__bid_perspectives
         })
 
-    @classmethod
-    def from_json(cls, bid_json):
-        offer_dict = json.loads(bid_json)
-        bidder = offer_dict["bidder"]
-        bid = offer_dict["bid"]
-        reverse_swap = {"Agent": "Human", "Human": "Agent"}
-        return cls(bid[bidder], bid[reverse_swap[bidder]], offer_dict["bidder"])
+
 
 
     def __str__(self):

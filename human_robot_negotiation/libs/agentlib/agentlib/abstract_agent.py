@@ -28,9 +28,10 @@ class AbstractAgent(ABC):
     def _receive_offer(self,
                        human_offer: t.Union[Offer, None],
                        predictions: t.Dict[str, float],
-                       normalized_predictions: t.Dict[str, float]
+                       normalized_predictions: t.Dict[str, float],
+                       current_time: float = 0.15,
                        ):
-        return self.receive_offer(human_offer, predictions, normalized_predictions)
+        return self.receive_offer(human_offer, predictions, normalized_predictions, current_time)
 
     def _negotiation_over(self, participant_name: str, session_number: str, termination_type: str):
         return self.negotiation_over(participant_name, session_number, termination_type)
@@ -41,7 +42,7 @@ class AbstractAgent(ABC):
 
     @abstractmethod
     def receive_offer(self, human_offer: t.Union[Offer, None], predictions: t.Dict[str, float],
-                      normalized_predictions: t.Dict[str, float]) -> t.Tuple[Offer, str]:
+                      normalized_predictions: t.Dict[str, float], current_time: float) -> t.Tuple[Offer, str]:
         ...
 
     @abstractmethod

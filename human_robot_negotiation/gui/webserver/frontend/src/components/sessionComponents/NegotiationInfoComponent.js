@@ -1,8 +1,6 @@
 import {useSelector} from "react-redux";
 import {useEffect, useState} from "react";
 
-
-
 const twoDecimal = (v) => {
   let twoDecimalStr = "" + v;
 

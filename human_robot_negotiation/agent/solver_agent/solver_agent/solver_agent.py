@@ -1,22 +1,17 @@
-import typing as t
-import math
 import copy
-import numpy as np
 import json
+import math
+import typing as t
 
+import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.utils._openmp_helpers import _openmp_effective_n_threads
 
-from corelib.nego_action import Offer, Accept, AbstractActionFactory
-from corelib.utility_space import UtilitySpace
 from agentlib.abstract_agent import AbstractAgent
-
+from corelib.nego_action import Offer, Accept
+from corelib.utility_space import UtilitySpace
 from .mood_controller import MoodController
 from .uncertainty_module import UncertaintyModule
-
-
-# from human_robot_negotiation.logger import LoggerNew
-# from human_robot_negotiation import CONFIG_DIR
 
 
 class EstimatedSensitivityCalculator:
@@ -149,7 +144,7 @@ class SolverAgent(AbstractAgent):
         self.estimated_opponent_preference: UtilitySpace = copy.deepcopy(self.utility_space)
         # self.time_controller = time_controller
         self.estimated_sensitivity_calculator = EstimatedSensitivityCalculator()
-        self.uncertainty_module: UncertaintyModule = UncertaintyModule(utility_space)
+        self.uncertainty_module: UncertaintyModule = UncertaintyModule(self.estimated_opponent_preference)
 
         self.agent_history = []
         self.opponent_history = []
@@ -183,9 +178,7 @@ class SolverAgent(AbstractAgent):
         self.previous_valance = 0
 
         # Initialize mood controller.
-        self.mood_controller = MoodController(
-            self.utility_space, 0.8
-        )
+        self.mood_controller = MoodController(self.utility_space)
         # Initialize previous sensitivity class as none.
         self.previous_sensitivity_class = None
 
@@ -205,7 +198,7 @@ class SolverAgent(AbstractAgent):
         self.delta_multiplier = 1
 
     def negotiation_over(self, participant_name: str, session_number: str, termination_type: str) -> None:
-        ...
+        print("nego terminated")
 
     def name(self):
         return "SolverAgent"
@@ -213,9 +206,7 @@ class SolverAgent(AbstractAgent):
     def time_based(self, t):
         return (1 - t) * (1 - t) * self.p0 + 2 * (1 - t) * t * self.p1 + t * t * self.p2
 
-    def behaviour_based(self):
-        t = 0.8  # self.time_controller.get_remaining_time()
-
+    def behaviour_based(self, t):
         diff = [
             self.utility_space.get_offer_utility(self.opponent_history[i + 1]) - self.utility_space.get_offer_utility(
                 self.opponent_history[i])
@@ -245,7 +236,7 @@ class SolverAgent(AbstractAgent):
         return False, ()
 
     def receive_offer(self, human_offer: Offer, predictions: t.Dict[str, float],
-                      normalized_predictions: t.Dict[str, float]) -> t.Tuple[Offer, str]:
+                      normalized_predictions: t.Dict[str, float], current_time: float) -> t.Tuple[Offer, str]:
         """
 		This function is called when the agent receives offer with ***mood_recording=True and also uses sensitivity class.
 		"""
@@ -255,7 +246,6 @@ class SolverAgent(AbstractAgent):
 
         self.opponent_history.append(human_offer)
 
-        current_time = 0.8
         time_based_target_utility = self.time_based(current_time)
 
         behavior_based_target_utility = 0
@@ -273,7 +263,7 @@ class SolverAgent(AbstractAgent):
             emotion_value = math.copysign(
                 math.sqrt((arousal - self.previous_arousal) ** 2 + (valance - self.previous_valance) ** 2), max_delta)
 
-            behavior_based_utility = self.behaviour_based()
+            behavior_based_utility = self.behaviour_based(current_time)
             behavior_based_target_utility = behavior_based_utility + ((self.human_awareness ** 2) * emotion_value)
             behavior_based_target_utility = behavior_based_target_utility if behavior_based_target_utility <= 1.0 else 1.0
             final_target_utility = (1 - current_time ** 2) * behavior_based_target_utility + (
@@ -320,9 +310,10 @@ class SolverAgent(AbstractAgent):
             self.agent_history.append(Accept())
 
         else:
-            mood = self.mood_controller.get_mood(human_offer.get_bid(perspective="Agent"))
+            mood = self.mood_controller.get_mood(human_offer.get_bid(perspective="Agent"), current_time)
             self.agent_history.append(generated_offer)
 
+        '''
         LoggerNew.log_solver({
             "logger": "Human",
             "offer": human_offer.get_bid(perspective="Agent"),
@@ -354,7 +345,7 @@ class SolverAgent(AbstractAgent):
             "normalized_predictions": normalized_predictions,
             "sensitivity_class": sensitivity_class
         })
-
+        '''
         print("T: ", current_time)
         print("Final: ", final_target_utility, " Behavior Based: ", behavior_based_target_utility, " Time Based: ",
               time_based_target_utility)

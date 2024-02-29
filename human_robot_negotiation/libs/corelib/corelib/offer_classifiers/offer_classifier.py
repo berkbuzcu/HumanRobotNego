@@ -1,8 +1,10 @@
+import copy
+import re
+
 import nltk
 from nltk.tokenize import word_tokenize
-import re
-import copy
-from corelib.nego_action import AbstractAction, AbstractActionFactory, Accept, Offer, ResourceAllocationActionFactory
+
+from corelib.nego_action import AbstractActionFactory
 from corelib.utility_space import UtilitySpace
 
 

@@ -18,10 +18,11 @@ class Capturing:
     face_model: imageProcessingUtil
     cap: cv2.VideoCapture
 
-    def __init__(self, user_id: str, camera_id: int = 0):
+    def __init__(self, user_id: str, session_type: str, camera_id: int = 0):
         self.round = 0
         self.user_id = user_id
 
+        self.session_type = session_type
         self.camera_id = camera_id
         self.face_model = imageProcessingUtil()
         self.cap = cv2.VideoCapture(self.camera_id)
@@ -33,7 +34,7 @@ class Capturing:
 
 
     def create_user_dir(self, round):
-        user_dir = IMAGE_PATH / self.user_id
+        user_dir = IMAGE_PATH / f"{self.user_id}_{self.session_type}"
         round_dir = user_dir / str(round)
         self.faces_dir = round_dir / "faces"
         self.faces_cut_dir = round_dir / "faces_cut"

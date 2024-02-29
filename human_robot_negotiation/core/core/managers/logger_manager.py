@@ -4,7 +4,7 @@ from .abstract_manager import AbstractManager
 
 
 class LoggerManager(AbstractManager):
-    queue_handler: MultiQueueHandler
+    queue_manager: MultiQueueHandler
 
     def log_session_init(self, participant_id, agent_type, interaction_type, session_location, domain):
         message_context = "session_init"
@@ -17,7 +17,7 @@ class LoggerManager(AbstractManager):
         }
 
         message = LoggerMessage("CORE", message_payload, message_context)
-        self.queue_handler.send_message(message)
+        self.queue_manager.send_message(message)
 
     def log_round(self, bidder, offer, agent_utility, human_utility,
                   scaled_time, move, agent_mood, predictions, sentences):
@@ -35,7 +35,7 @@ class LoggerManager(AbstractManager):
         }
 
         message = LoggerMessage("CORE", message_payload, message_context)
-        self.queue_handler.send_message(message)
+        self.queue_manager.send_message(message)
 
     def log_session_end(self, is_agreement, final_scaled_time, final_agent_score, final_user_score, total_offers,
                         human_awareness, sensitivity_analysis, robot_moods):
@@ -52,4 +52,4 @@ class LoggerManager(AbstractManager):
         }
 
         message = LoggerMessage("CORE", message_payload, message_context)
-        self.queue_handler.send_message(message)
+        self.queue_manager.send_message(message)

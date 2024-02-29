@@ -6,12 +6,15 @@ class UtilitySpace:
     def __init__(self, profile: dict):
         # Role weights of the agent. {issuename: issueweight, ....} etc.
 
-        self.issue_weights = {key: value.pop("weight") for key, value in profile.items()}
+        self.issue_weights = {str(key).lower(): value.pop("weight") for key, value in profile.items()}
         # Issue's value evaluations.  { "Apple": {0: 0.3, 1: 0.2}, "Banana": {0: 0.2, 1: 0.7} } etc.
-        self.issue_value_evaluation = profile
+        self.issue_value_evaluation = {str(key).lower(): {str(subkey).lower(): subvalue for subkey, subvalue
+                                                          in value.items()} for key, value in profile.items()}
+
         # Keep every issue's values in a dictionary.
         # {"Apple": ["0", "1", "2"...], "accomodation": ["Camp", "Tent"]}
-        self.issue_values_list = {}
+        self.issue_values_list = {str(key).lower(): list(val.keys()) for key, val in
+                                  self.issue_value_evaluation.items()}
         # Issue name list.
         self.issue_names = []
         # Issues max count list for each issue.
@@ -29,6 +32,9 @@ class UtilitySpace:
             for value_idx, value in enumerate(values):
                 issue_value_key = f"{issue}_{value}"
                 self.indices[issue_value_key] = (issue_idx, value_idx)
+        print("util space:")
+        print(self.issue_value_evaluation)
+        print(self.issue_weights)
 
     def __generate_all_possible_offers(self):
         """
@@ -70,6 +76,8 @@ class UtilitySpace:
         return self.indices[str(value)]
 
     def to_dict(self):
+        print(self.issue_value_evaluation)
+        print(self.issue_weights)
         return {issue_name: {"weight": weight, **self.issue_value_evaluation[issue_name]}
                 for issue_name, weight in self.issue_weights.items()}
 

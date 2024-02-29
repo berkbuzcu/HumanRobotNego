@@ -1,6 +1,7 @@
 import json
 
 from .abstract_agent import AbstractAgent
+from corelib.nego_action import Offer
 from queuelib.queue_manager import MultiQueueHandler, prep_init_message
 from queuelib.enums import HANTQueue
 from queuelib.message import AgentMessage
@@ -31,7 +32,8 @@ class AgentManager:
         self.agent.name = agent_name
 
         self.queue_handler = MultiQueueHandler([HANTQueue.AGENT, HANTQueue.LOGGER], correlation_id=self.agent.name)
-        self.queue_handler.send_message(prep_init_message(agent_name, HANTQueue.AGENT))
+        self.queue_handler.flush_queues()
+        # self.queue_handler.send_message(prep_init_message(agent_name, HANTQueue.AGENT))
 
         self.start_agent()
 
@@ -50,24 +52,23 @@ class AgentManager:
 
             if payload_context == "init_negotiation":
                 self.agent._init_negotiation(message_payload["utility_space"], message_payload["domain_info"])
-                reply = {
-                    "body": {"value": "success"},
-                    "status": "success",
-                }
-                reply_message = AgentMessage(self.agent.name, reply, "init")
-                self.queue_handler.send_message(reply_message)
+                #reply = {
+                #    "body": {"value": "success"},
+                #    "status": "success",
+                #}
+                #reply_message = AgentMessage(self.agent.name, reply, "init")
+                #self.queue_handler.send_message(reply_message)
 
             ###
             if payload_context == "receive_bid":
-                offer, agent_mood = self.agent._receive_offer(message_payload["offer"],
+                offer, agent_mood = self.agent._receive_offer(Offer.from_json(message_payload["offer"]),
                                                               message_payload["predictions"],
-                                                              message_payload["normalized_predictions"])
-                reply = {
-                    "context": "offer",
-                    "body": {"offer": offer, "agent_mood": agent_mood},
-                    "status": "success",
-                }
-                reply_message = AgentMessage(self.agent.name, reply)
+                                                              message_payload["normalized_predictions"],
+                                                              message_payload["current_time"])
+
+                reply_message = AgentMessage(self.agent.name,
+                                             {"offer": offer.to_json_str(), "agent_mood": agent_mood},
+                                             "offer")
                 self.queue_handler.send_message(reply_message)
 
             if payload_context == "termination":
@@ -81,6 +82,6 @@ class AgentManager:
                     "status": "success",
                 }
 
-                reply_message = AgentMessage(self.agent.name, reply)
-                self.queue_handler.send_message(reply_message)
+                #reply_message = AgentMessage(self.agent.name, reply)
+                #self.queue_handler.send_message(reply_message)
                 break

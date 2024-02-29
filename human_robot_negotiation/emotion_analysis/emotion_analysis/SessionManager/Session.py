@@ -1,19 +1,21 @@
+import copy
 import json
 import os
+import pathlib
 import shutil
 import time
-import copy
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-from abc import abstractmethod
 from threading import Thread
 
-from ..FaceChannel.FaceChannel.FaceChannelV1.FaceChannelV1 import FaceChannelV1
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+
 from .. import PROJECT_DIR
+from ..FaceChannel.FaceChannel.FaceChannelV1.FaceChannelV1 import FaceChannelV1
 
 SESSIONS_DIR = str(PROJECT_DIR / "sessions")
 SAVED_GWRS_DIR = str(PROJECT_DIR / "saved_gwrs")
+SAVED_IMAGES_DIR = pathlib.Path("/saved_images")
 
 # Global Tensorflow Graph and Session for multi-thread operations.
 global graph
@@ -27,8 +29,8 @@ class Session:
     participant_name: str
     session_id: str
     round: int
-    log_dir: str
-    round_dir: str
+    log_dir: pathlib.Path
+    round_dir: pathlib.Path
     gwr_dir: str
     log_face_channel: pd.DataFrame
     log_face_channel_path: str
@@ -95,8 +97,7 @@ class Session:
                 self.min_v = arousal_valance_log["min_v"]
 
         # Generate Paths
-        self.log_dir = os.path.join(SESSIONS_DIR, self.session_name + "/")
-        self.round_dir = os.path.join(self.log_dir, "round_%d/")
+        self.log_dir = SAVED_IMAGES_DIR / self.session_name
 
         self.gwr_dir = os.path.join(SAVED_GWRS_DIR, "exp_%s/" % participant_name)
 
@@ -127,10 +128,6 @@ class Session:
             shutil.rmtree(self.log_dir)
 
         os.mkdir(self.log_dir)
-
-        self.generate_round_folders()
-
-        self._faces = []
 
         # Create LOG files
         self.log_face_channel.to_csv(self.log_face_channel_path)
@@ -181,16 +178,16 @@ class Session:
                 continue
 
             # Add the path of corresponding image
-            valid_faces.append(self.capturing.save_path_format % i)
+            valid_faces.append(self.round_dir / "faces" / f"{i}.jpg")
 
         # The models cannot work if the number of images is less than 2
         while len(valid_faces) < 2:
-            valid_faces.append(self.capturing.save_path_format % 0)
+            valid_faces.append(self.round_dir / "faces" / f"{0}.jpg")
 
         return valid_faces
 
     def run_models(self, faces: list) -> (dict, dict):
-        round_dir = self.round_dir % self.round
+        self.round_dir = self.log_dir / f"{self.round}"
 
         #  Training and Prediction Phrase
         global sess
@@ -209,7 +206,7 @@ class Session:
                 print("Cleaning (s): ", time.time() - start_time, "Number of valid faces:", len(valid_faces), " / ",
                       len(predictions))
 
-                self.training_manager.enqueue(round_dir, self.gwr_dir, self.round, valid_faces)
+                self.training_manager.enqueue(str(self.round_dir), self.gwr_dir, self.round, valid_faces)
             elif self.session_type == "continual_learning":
                 start_time = time.time()
                 face_channel_predictions = self.predict_face_channel(np.array(faces, dtype=np.float32), False)
@@ -217,7 +214,7 @@ class Session:
                 print("FC_PRED_TIME: ", time.time() - start_time)
 
                 start_time = time.time()
-                predictions = self.predict_cl(round_dir)
+                predictions = self.predict_cl(str(self.round_dir))
                 print("CL_PRED_TIME: ", time.time() - start_time)
 
                 start_time = time.time()
@@ -226,13 +223,8 @@ class Session:
                       len(predictions))
 
                 start_time = time.time()
-                self.training_manager.enqueue(round_dir, self.gwr_dir, self.round, valid_faces)
+                self.training_manager.enqueue(str(self.round_dir), self.gwr_dir, self.round, valid_faces)
                 print("QUEUE_PRED_TIME: ", time.time() - start_time)
-
-            elif self.session_type == "seven_emotions":
-                predictions = self.predict_cl(round_dir)
-
-                self.training_manager.enqueue(round_dir, self.gwr_dir, self.round)
 
             else:
                 print("Running Test Emotions")
@@ -304,24 +296,6 @@ class Session:
             return predictions
 
         return [0., 0.]
-
-    def generate_round_folders(self):
-        """
-            Generates round folders.
-        :return: None
-        """
-        faces_dir = os.path.join(self.round_dir % self.round, "faces/")
-        faces_cut_dir = os.path.join(self.round_dir % self.round, "faces_cut/")
-        imagined_dir = os.path.join(self.round_dir % self.round, "imagined/")
-        frames_dir = os.path.join(self.round_dir % self.round, "frames/")
-
-        # Generate folders
-
-        os.mkdir(self.round_dir % self.round)
-        os.mkdir(faces_dir)
-        os.mkdir(faces_cut_dir)
-        os.mkdir(imagined_dir)
-        os.mkdir(frames_dir)
 
     def _log_face_channel(self, predictions: list, update_min_max: bool = False):
         """

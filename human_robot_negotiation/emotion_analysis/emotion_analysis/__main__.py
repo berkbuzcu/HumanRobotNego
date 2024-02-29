@@ -14,7 +14,7 @@ queue_manager = MultiQueueHandler([HANTQueue.EMOTION])
 config = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
 session_controller = Session(participant_name, session_number, session_type)
-
+print("INIT COMPLETE, WAITING FOR CORE...")
 while True:
     msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
@@ -25,6 +25,7 @@ while True:
             camera_message = CameraMessage("emotion_controller", {"action": "start_recording"}, "recording")
             queue_manager.send_message(camera_message)
 
+            print("CAMERA RUNNING...")
             msg = queue_manager.wait_for_message_from_queue(HANTQueue.EMOTION)
 
             if msg.payload["action"] == "stop_recording":
@@ -34,7 +35,7 @@ while True:
                 faces = faces_message.payload["faces"]
 
                 if session_controller:
-                    predictions, normalized_predictions = session_controller.stop(faces)
+                    predictions, normalized_predictions = session_controller.run_models(faces)
                 else:
                     predictions = {"Valance": 0.5, "Arousal": 0.5,
                                    "Max_V": 0.5, "Min_V": 0.5, "Max_A": 0.5, "Min_A": 0.5}

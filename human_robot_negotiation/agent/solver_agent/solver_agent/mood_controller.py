@@ -1,11 +1,9 @@
 import typing as t
 
 class MoodController:
-    def __init__(self, utility_space, time_controller):
+    def __init__(self, utility_space):
         # Set utility space.
         self.utility_space = utility_space
-        # Set time controller.
-        self.time_controller = time_controller
         # Keep human's previous offers to compare with current offer.
         self.opponent_previous_offers = []
         # Human's previous offer utility.
@@ -28,7 +26,7 @@ class MoodController:
             "Worried": 0,
         }
 
-    def get_mood(self, human_offer: t.Dict[str, str]) -> str:
+    def get_mood(self, human_offer: t.Dict[str, str], current_time: float) -> str:
         """
         This function gets offer of the opponent's and lower threshold of the current tactic as input.
         Return robot mood and mood method to call and updates mood counts.
@@ -37,21 +35,21 @@ class MoodController:
         mood = None
 
         # If 6 minutes remaining.
-        if self.time_controller.get_current_time() > 0.6 and not self.did_first_warn:
+        if current_time > 0.6 and not self.did_first_warn:
             self.did_first_warn = True
             mood = "Worried"
         # If 4 minutes remaining.
         elif (
-            self.time_controller.get_current_time() > 0.73 and not self.did_second_warn
+            current_time > 0.73 and not self.did_second_warn
         ):
             self.did_second_warn = True
             mood = "Worried"
         # If 2 minutes remaining.
-        elif self.time_controller.get_current_time() > 0.86 and not self.did_third_warn:
+        elif current_time > 0.86 and not self.did_third_warn:
             self.did_third_warn = True
             mood = "Worried"
         # If offer utility below reservation value or time is too close and utility is below 0.5
-        elif (self.utility_space.get_offer_utility(human_offer) < 0.4) or (self.utility_space.get_offer_utility(human_offer) < 0.5 and self.time_controller.get_current_time() > 0.73):
+        elif (self.utility_space.get_offer_utility(human_offer) < 0.4) or (self.utility_space.get_offer_utility(human_offer) < 0.5 and current_time > 0.73):
             mood = "Frustrated"
         # Check whether we have previous utility or not, so that we can compare with previous offers & utilities.
         elif not self.opponent_previous_offer_utility == None:

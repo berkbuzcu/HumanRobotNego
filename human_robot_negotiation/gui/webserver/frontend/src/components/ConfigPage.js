@@ -9,7 +9,7 @@ const ConfigPage = ({setUUID, setPage}) => {
     sessionType: "Session 1",
     agentType: "Solver",
     robotType: "Nao",
-    deadline: 600,
+    deadline: 10,
     facialExpressionModel: "Face Channel",
     humanInput: "Speech",
     domainFile: "C:/Users/Lenovo/Documents/PythonProjects/HumanRobotNego/domains/Holiday_A/Holiday_A.xml"

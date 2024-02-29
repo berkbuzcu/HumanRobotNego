@@ -1,11 +1,11 @@
-from os import read
-import nltk
-from nltk.tokenize import word_tokenize
+import itertools
 import re
 from collections import ChainMap
-import itertools
 
-from corelib.nego_action import AbstractActionFactory, NormalActionFactory
+import nltk
+from nltk.tokenize import word_tokenize
+
+from corelib.nego_action import AbstractActionFactory
 from corelib.utility_space import UtilitySpace
 
 
@@ -28,13 +28,9 @@ class HolidayOfferClassifier:
                            "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't",
                            "could", "the"}
 
-        # self.keywords = human_utility_space.issue_names[:]
-
         self.action_factory: AbstractActionFactory = action_factory
 
         self.value_issue_dict = {}  # Keep value as key that keeps issue.
-
-        # [list(zip([[x] * len(dicts[x]) for x in dicts.keys()], list(item.keys()))) for item in dicts.values()]
 
         self.issue_values_list = human_utility_space.issue_values_list
 
@@ -44,9 +40,6 @@ class HolidayOfferClassifier:
         self.value_issue_dict = dict(
             ChainMap(*[dict(zip(*i)) for i in zip(self.issue_values_list.values(), issues_list)]))
         self.keywords = self.value_issue_dict.keys()
-
-        # for idx, keyword in enumerate(self.keywords):
-        # 	self.issue_values_dict[keyword] = human_utility_space.issue_values_list[idx]
 
         self.OFFER_SENTENCES = {}
         self.ARGUMENT_SENTENCES = []
@@ -83,7 +76,6 @@ class HolidayOfferClassifier:
 
         is_complete = len(self.OFFER_SENTENCES.keys()) == len(self.issue_values_list.keys())
 
-        print("OFFER SENTS: ", self.OFFER_SENTENCES)
         offer = self.action_factory.create_offer(self.OFFER_SENTENCES)
 
         if is_complete:

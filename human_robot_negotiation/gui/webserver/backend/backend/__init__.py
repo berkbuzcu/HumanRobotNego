@@ -43,7 +43,7 @@ def initiate():
         "agent_type": resp["agent_type"],
         "robot_name": resp["robot_type"],
         "domain_info": domain_info,
-        "deadline": resp["deadline"],
+        "deadline": int(resp["deadline"]) * 60,
         "camera_id": "1",
     }
 
@@ -79,8 +79,8 @@ def create_preferences():
                                                            ordered_preferences["issue_values"])
 
     queue_handler.send_message(ConfigMessage("CONFIG",
-                                             {"human_preferences": agent_preferences,
-                                              "agent_preferences": human_preferences},
+                                             {"human_preferences": human_preferences,
+                                              "agent_preferences": agent_preferences},
                                              "preferences"))
 
     create_preference_xml(domain_info, uuid, "Human", human_preferences)
@@ -107,6 +107,7 @@ def receive():
 
     message = queue_handler.get_message_from_queue(HANTQueue.GUI)
     if message:
+        print("Message: ", message.payload)
         return jsonify(json.dumps(message.payload))
 
     return jsonify({"error": True, "errorMessage": "nodata"})

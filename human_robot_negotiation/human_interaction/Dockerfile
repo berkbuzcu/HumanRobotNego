@@ -12,5 +12,7 @@ RUN pip install -r requirements.txt
 
 RUN python -m nltk.downloader punkt
 RUN python -m nltk.downloader averaged_perceptron_tagger
+RUN python -m nltk.downloader wordnet
+RUN python -m nltk.downloader universal_tagset
 
 CMD ["python", "-u", "-m", "speech"]

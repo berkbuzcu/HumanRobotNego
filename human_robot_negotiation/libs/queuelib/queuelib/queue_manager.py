@@ -111,20 +111,19 @@ class MultiQueueHandler:
         elif queue_name not in HANTQueue and type(queue_name) is not str:
             raise ValueError("Queue name must be of type HANTQueue or str")
 
+        print("Waiting for message from queue: ", queue_name)
         method_frame, header_frame, body = self.channel.basic_get(queue_name.value)
 
         while True:
             if method_frame:
                 if header_frame.correlation_id == self.correlation_id:
-                    print("Message is from myself, ignoring.")
-                    print(body)
+                    self.channel.basic_nack(delivery_tag=method_frame.delivery_tag)
                 else:
                     break
 
-            time.sleep(1)
             method_frame, header_frame, body = self.channel.basic_get(queue_name.value)
 
-        print("Received Message Body: ", body)
+        print("queuelib: Received Message Body: ", body)
         self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         return self.__wrap_message(body)
 

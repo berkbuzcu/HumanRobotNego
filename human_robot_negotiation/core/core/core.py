@@ -10,16 +10,13 @@ from .managers.human_interaction_manager import HumanInteractionManager
 from .managers.robot_manager import RobotManager
 from .managers.logger_manager import LoggerManager
 from .managers.time_manager import TimeManager
-from .nego_timer import NegotiationTimer
 
 
 class Core:
     def __init__(self, parameters):
-        self.human_preferences = None
-        self.agent_preferences = None
+        self.human_preferences: UtilitySpace | None = None
+        self.agent_preferences: UtilitySpace | None = None
         self.queue_handler = MultiQueueHandler()
-        self.agent_utility_space: UtilitySpace = None
-        self.human_utility_space: UtilitySpace = None
 
         self.running = False
         self.is_first_turn = True
@@ -46,13 +43,12 @@ class Core:
         self.agent_preferences = UtilitySpace(parameters["agent_preferences"])
         self.human_preferences = UtilitySpace(parameters["human_preferences"])
 
-
-
     def end_negotiation(self, termination_type: str):
-        agent_num_of_emotions = self.agent.receive_negotiation_over(self.participant_name, self.session_number,
-                                                                    termination_type)
+        self.agent_manager.send_negotiation_over(termination_type)
         self.robot_manager.send_nego_over(termination_type)
+        print("Logging complete")
 
+        '''        
         if self.nego_history.get_offer_count() > 2:
             print("Enough bids to log")
             self.update_nego_history()
@@ -73,8 +69,7 @@ class Core:
             #    final_agent_score=agent_score,
             #    final_user_score=user_score,
             #    is_agreement=agreement)
-
-        print("Logging complete")
+        '''
 
     def timeout_negotiation(self):
         if self.running:
@@ -117,7 +112,9 @@ class Core:
 
                 predictions, normalized_predictions = self.emotion_manager.stop_camera()
 
-            self.gui_manager.update_status(f"{self.robot_name} is listening")
+            self.gui_manager.update_status("AGENT_LISTENING")
+            self.gui_manager.reset_offer_grid()
+            self.gui_manager.send_gui_message()
 
             while self.running:
                 print("WAITING USER OFFER")
@@ -128,21 +125,20 @@ class Core:
                     return
 
                 print("UPDATING GUI")
-                self.gui_manager.reset_offer_grid()
-                self.gui_manager.update_offer_grid(human_action.get_bid("Human"), "blue")
-                self.gui_manager.update_offer_message("Human", total_user_input)
-                self.gui_manager.update_offer_utility("Human", str(int(self.human_utility_space.get_offer_utility(
+                self.gui_manager.update_offer_grid("HUMAN", human_action.get_bid("Human"))
+                self.gui_manager.update_offer_message("HUMAN", total_user_input)
+                self.gui_manager.update_offer_utility("HUMAN", str(int(self.human_preferences.get_offer_utility(
                     human_action.get_bid("Human")) * 100)))
-
+                self.gui_manager.send_gui_message()
                 if offer_done:
                     self.logger_manager.log_round(
                         bidder=human_action.get_bidder(),
-                        offer=human_action,
+                        offer=human_action.to_json_str(),
                         scaled_time=self.time_manager.get_remaining_time(),
                         agent_mood="",
                         predictions=predictions,
-                        agent_utility=self.agent_utility_space.get_offer_utility(human_action.get_bid("Agent")),
-                        human_utility=self.human_utility_space.get_offer_utility(human_action.get_bid("Human")),
+                        agent_utility=self.agent_preferences.get_offer_utility(human_action.get_bid("Agent")),
+                        human_utility=self.human_preferences.get_offer_utility(human_action.get_bid("Human")),
                         sentences=[],
                         move="offer",
 
@@ -153,11 +149,12 @@ class Core:
                 # self.end_negotiation("timeout")
                 return
 
-            self.gui_manager.update_offer_message(self.robot_name, "")
-            self.gui_manager.update_status(f"{self.robot_name}'s turn")
+            self.gui_manager.update_offer_message("AGENT", "")
+            self.gui_manager.update_status("AGENT_SPEAKING")
 
             # Agent's generated offer for itself.
-            self.agent_manager.send_offer(human_action, predictions, normalized_predictions)
+            self.agent_manager.send_offer(human_action, predictions, normalized_predictions,
+                                          self.time_manager.get_remaining_time())
             agent_action, agent_mood = self.agent_manager.receive_offer()
 
             # Check if agent accepts the offer.
@@ -173,7 +170,7 @@ class Core:
             self.send_agent_offer_to_human(agent_offer, agent_mood)
 
             # Set negotiation gui according to agent's offer.
-            self.gui_manager.update_offer_grid("Agent", agent_offer)
+            self.gui_manager.update_offer_grid("AGENT", agent_offer)
 
             self.logger_manager.log_round(
                 bidder=agent_action.get_bidder(),
@@ -181,17 +178,17 @@ class Core:
                 scaled_time=self.time_manager.get_remaining_time(),
                 agent_mood=agent_mood,
                 predictions=predictions,
-                agent_utility=self.agent_utility_space.get_offer_utility(agent_offer),
-                human_utility=self.human_utility_space.get_offer_utility(human_action.get_bid("Human")),
+                agent_utility=self.agent_preferences.get_offer_utility(agent_offer),
+                human_utility=self.human_preferences.get_offer_utility(human_action.get_bid("Human")),
                 sentences=[],
                 move="offer",
             )
 
             self.gui_manager.update_offer_utility(
-                "Agent",
+                "AGENT",
                 str(
                     int(
-                        self.human_utility_space.get_offer_utility(agent_offer) * 100
+                        self.human_preferences.get_offer_utility(agent_offer) * 100
                     )
                 )
             )

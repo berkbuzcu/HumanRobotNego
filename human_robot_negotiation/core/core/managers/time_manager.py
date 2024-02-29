@@ -19,7 +19,7 @@ class TimeManager:
     def get_remaining_time(self):
         if not self._running:
             return 0
-        return max(0, self.duration - (time.time() - self._start_time))
+        return max(self.duration, (time.time() - self._start_time)) / self.duration
 
     def _countdown(self):
         self._start_time = time.time()
