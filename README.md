@@ -1,7 +1,5 @@
 # The Negotiator
 
-:warning: ** The repository documentation is currently under maintenance ** :warning:
-
 ## Description
 
 Explore and develop human-robot negotiation scenarios with the Negotiator. Experiment with various agent algorithms, customize scenarios per your setting, or use the modules available by default. Whether you're an AI researcher, curious about AI advancements, or simply interested in how robots can negotiate, The Negotiator is your gateway.
